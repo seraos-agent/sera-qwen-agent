@@ -1,0 +1,9 @@
+qwen-agent[gui]
+dashscope
+fastapi
+uvicorn
+httpx
+python-dotenv
+openai
+mcp
+motor
