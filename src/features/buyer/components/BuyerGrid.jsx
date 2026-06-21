@@ -12,11 +12,18 @@ export const BuyerGrid = () => {
   } = useBuyerContext();
 
   return (
-    <div style={{ padding: '0 48px', width: '100%', margin: '0 auto' }}>
+    <div className="buyer-content-wrapper" style={{ padding: '0 48px', width: '100%', margin: '0 auto' }}>
 
       {/* Category Filter Tabs */}
       <div style={{ display: 'flex', gap: 12, marginBottom: 40, overflowX: 'auto', paddingBottom: 12, WebkitOverflowScrolling: 'touch' }}>
-        {['all', 'Modern Lifestyle', 'Artisanal Coffee', 'Creator Gadgets', 'Organic Skincare'].map(cat => (
+        {['all', 'Modern Lifestyle', 'Artisanal Coffee', 'Creator Gadgets', 'Organic Skincare'].map(cat => {
+          const displayCat = cat === 'all' ? 'All' 
+            : cat === 'Modern Lifestyle' ? 'Lifestyle'
+            : cat === 'Artisanal Coffee' ? 'Coffee'
+            : cat === 'Creator Gadgets' ? 'Electronics'
+            : cat === 'Organic Skincare' ? 'Skincare' : cat;
+            
+          return (
           <button
             key={cat}
             onClick={() => setSelectedCategoryFilter(cat)}
@@ -24,30 +31,30 @@ export const BuyerGrid = () => {
               background: selectedCategoryFilter === cat ? (isDarkMode ? '#c8b89a' : '#8b7355') : (isDarkMode ? '#1a1a1e' : '#f3f4f6'),
               color: selectedCategoryFilter === cat ? (isDarkMode ? '#0f0f10' : '#ffffff') : (isDarkMode ? '#ffffff' : '#111827'),
               border: `1px solid ${selectedCategoryFilter === cat ? 'transparent' : (isDarkMode ? '#2a2a2e' : '#e5e7eb')}`,
-              borderRadius: 100, padding: '10px 24px', fontSize: 14,
+              borderRadius: 100, padding: '6px 16px', fontSize: 12,
               fontWeight: selectedCategoryFilter === cat ? 700 : 500,
               cursor: 'pointer', whiteSpace: 'nowrap'
             }}
             onMouseEnter={e => { if (selectedCategoryFilter !== cat) e.currentTarget.style.background = isDarkMode ? '#2a2a2e' : '#e5e7eb'; }}
             onMouseLeave={e => { if (selectedCategoryFilter !== cat) e.currentTarget.style.background = isDarkMode ? '#1a1a1e' : '#f3f4f6'; }}
           >
-            {cat === 'all' ? 'All Curated Ecosystems' : cat}
+            {displayCat}
           </button>
-        ))}
+        )})}
       </div>
 
       {/* Top Curated Stores */}
       <div style={{ marginBottom: 56 }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
-          <div>
-            <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 26, fontWeight: 700, color: t.text, marginBottom: 4 }}>Top Curated Stores</h2>
-            <p style={{ color: t.subtext, fontSize: 13 }}>Discover autonomous AI-powered brands backed by verified reputation and trust indicators.</p>
+        <div style={{ marginBottom: 24 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 4, flexWrap: 'wrap' }}>
+            <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 26, fontWeight: 700, color: t.text, margin: 0 }}>Top Curated Stores</h2>
+            <span style={{ fontSize: 10, color: '#c8b89a', fontWeight: 700, background: isDarkMode ? '#1a1a1e' : '#f3f4f6', padding: '2px 8px', borderRadius: 12, border: `1px solid ${t.border}`, whiteSpace: 'nowrap' }}>
+              AI Verified
+            </span>
           </div>
-          <span style={{ fontSize: 12, color: '#c8b89a', fontWeight: 600, background: isDarkMode ? '#1a1a1e' : '#f3f4f6', padding: '4px 12px', borderRadius: 20, border: `1px solid ${t.border}` }}>
-            AI Verified Ecosystem
-          </span>
+          <p style={{ color: t.subtext, fontSize: 13, margin: 0 }}>Discover autonomous AI-powered brands backed by verified reputation and trust indicators.</p>
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 24 }}>
+        <div className="buyer-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 24 }}>
           {filteredStores.map(store => {
             const isFollowing = followedStores instanceof Set ? followedStores.has(store.id) : false;
             return (
@@ -65,23 +72,23 @@ export const BuyerGrid = () => {
                 )}
                 {/* Trust Badge */}
                 <div style={{ position: 'absolute', top: 16, right: 16, zIndex: 3 }}>
-                  <div style={{ background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(12px)', padding: '6px 12px', borderRadius: 20, display: 'flex', alignItems: 'center', gap: 6, border: '1px solid rgba(255,255,255,0.1)' }}>
+                  <div style={{ background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(12px)', padding: '4px 10px', borderRadius: 20, display: 'flex', alignItems: 'center', gap: 4, border: '1px solid rgba(255,255,255,0.1)' }}>
                     <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#4ade80', boxShadow: '0 0 8px #4ade80' }} />
-                    <span style={{ color: '#fff', fontSize: 11, fontWeight: 700, letterSpacing: 0.5 }}>{store.trustScore}</span>
+                    <span style={{ color: '#fff', fontSize: 9, fontWeight: 700, letterSpacing: 0.5 }}>{(store.trustScore || '').replace(/ Trust/i, '')}</span>
                   </div>
                 </div>
                 {/* Gradient Overlay */}
                 <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.6) 40%, transparent 100%)', zIndex: 1 }} />
                 {/* Content */}
-                <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: 24, zIndex: 2, display: 'flex', flexDirection: 'column' }}>
-                  <span style={{ fontSize: 11, fontWeight: 800, color: '#c8b89a', letterSpacing: 1, textTransform: 'uppercase', marginBottom: 6 }}>{store.category}</span>
-                  <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: 28, fontWeight: 700, color: '#fff', marginBottom: 8, lineHeight: 1.1 }}>{store.name}</h3>
-                  <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: 13, lineHeight: 1.5, marginBottom: 24, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{store.desc}</p>
+                <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: 20, zIndex: 2, display: 'flex', flexDirection: 'column' }}>
+                  <span style={{ fontSize: 10, fontWeight: 800, color: '#c8b89a', letterSpacing: 1, textTransform: 'uppercase', marginBottom: 6 }}>{store.category}</span>
+                  <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: 24, fontWeight: 700, color: '#fff', marginBottom: 8, lineHeight: 1.1 }}>{store.name}</h3>
+                  <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: 12, lineHeight: 1.5, marginBottom: 20, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{store.desc}</p>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: 12 }}>👥 {store.followers}</span>
+                    <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: 11 }}>👥 {store.followers}</span>
                     <button
                       onClick={e => { e.stopPropagation(); toggleFollowStore(store.id); }}
-                      style={{ background: isFollowing ? 'rgba(255,255,255,0.1)' : '#c8b89a', color: isFollowing ? '#fff' : '#0f0f10', border: isFollowing ? '1px solid rgba(255,255,255,0.2)' : 'none', backdropFilter: isFollowing ? 'blur(8px)' : 'none', borderRadius: 100, padding: '8px 20px', fontSize: 12, fontWeight: 700, cursor: 'pointer', transition: 'all 0.2s ease' }}
+                      style={{ background: isFollowing ? 'rgba(255,255,255,0.1)' : '#c8b89a', color: isFollowing ? '#fff' : '#0f0f10', border: isFollowing ? '1px solid rgba(255,255,255,0.2)' : 'none', backdropFilter: isFollowing ? 'blur(8px)' : 'none', borderRadius: 100, padding: '6px 14px', fontSize: 11, fontWeight: 700, cursor: 'pointer', transition: 'all 0.2s ease' }}
                     >
                       {isFollowing ? 'Following' : 'Follow'}
                     </button>
@@ -96,7 +103,7 @@ export const BuyerGrid = () => {
       {/* Featured Video Campaigns */}
       {(() => {
         const allCampaigns = [];
-        [...CURATED_STORES, ...(userStores || [])].forEach(s => {
+        Array.from(new Map([...CURATED_STORES, ...(userStores || [])].map(s => [s.id || s._id || s.store_id, s])).values()).forEach(s => {
           const sData = s.storeData || s.customSchema?.storeData || s.schema?.storeData || {};
           const videos = sData.promoVideos?.length > 0 ? sData.promoVideos
             : sData.promoVideo ? [sData.promoVideo]
@@ -116,30 +123,24 @@ export const BuyerGrid = () => {
         return (
           <div style={{ marginBottom: 40 }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
-              <div>
-                <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 26, fontWeight: 700, color: t.text, marginBottom: 4 }}>Featured Video Campaigns</h2>
-                <p style={{ color: t.subtext, fontSize: 13 }}>Exclusive promotions and flash sales powered by Tongyi AI.</p>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 26, fontWeight: 700, color: t.text, margin: 0 }}>Featured Video Campaigns</h2>
+                <span style={{ background: "rgba(239, 68, 68, 0.9)", color: "#fff", fontSize: 10, fontWeight: 800, padding: "4px 10px", borderRadius: 100, textTransform: "uppercase", letterSpacing: 0.5 }}>Flash Sale</span>
               </div>
-              <span style={{ fontSize: 11, fontWeight: 800, background: '#ef4444', color: '#fff', padding: '4px 12px', borderRadius: 100, textTransform: 'uppercase', letterSpacing: 1 }}>Live Now</span>
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 24 }}>
               {allCampaigns.map(camp => (
-                <div
-                  key={camp.id}
-                  onClick={e => { e.stopPropagation(); window.dispatchEvent(new CustomEvent('sera:openStore', { detail: { storeId: camp.store.id || camp.store.store_id || camp.store._id } })); }}
-                  style={{ cursor: 'pointer', background: t.card, border: `1px solid ${t.border}`, borderRadius: 16, overflow: 'hidden', position: 'relative', aspectRatio: '9/16' }}
-                >
-                  <video src={camp.videoUrl} autoPlay loop muted playsInline preload="auto"
-                    onCanPlay={e => { e.currentTarget.style.opacity = '1'; }}
-                    style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0, transition: 'opacity 0.4s ease' }}
-                  />
-                  <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.9) 0%, transparent 40%)' }} />
-                  <div style={{ position: 'absolute', bottom: 20, left: 20, right: 20, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
-                    <div>
-                      <h3 style={{ color: '#fff', fontSize: 20, fontWeight: 700, marginBottom: 4 }}>{getDisplayBrandName(camp.store)}</h3>
-                      <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: 13 }}>Special Campaign</p>
+                <div key={camp.id} style={{ width: "100%", cursor: 'pointer' }} onClick={e => { e.stopPropagation(); window.dispatchEvent(new CustomEvent('sera:openStore', { detail: { storeId: camp.store.id || camp.store.store_id || camp.store._id } })); }}>
+                  <div style={{ borderRadius: 16, overflow: 'hidden', position: 'relative', aspectRatio: '9/16', background: t.card, border: `1px solid ${t.border}` }}>
+                    <video src={camp.videoUrl} autoPlay loop muted playsInline preload="auto"
+                      onCanPlay={e => { e.currentTarget.style.opacity = '1'; }}
+                      style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0, transition: 'opacity 0.4s ease' }}
+                    />
+                    <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: "40%", background: "linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 100%)", pointerEvents: "none" }} />
+                    <div style={{ position: "absolute", bottom: "8px", left: "8px", right: "8px", display: "flex", justifyContent: "space-between", alignItems: "flex-end", gap: 12 }}>
+                      <p style={{ color: "#fff", fontSize: 11, fontWeight: 500, margin: 0, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden", textShadow: "0 1px 2px rgba(0,0,0,0.8)", lineHeight: 1.3 }}>{camp.store?.storeData?.description || "Curated specifically for you. Tap to view the full catalog."}</p>
+                      <span style={{ background: "rgba(239, 68, 68, 0.9)", backdropFilter: "blur(4px)", color: "#fff", fontSize: 8, fontWeight: 800, padding: "3px 8px", borderRadius: 100, textTransform: "uppercase", letterSpacing: 0.5, flexShrink: 0 }}>View Store</span>
                     </div>
-                    <span style={{ color: '#ffffff', fontSize: 11, fontWeight: 700, background: '#ef4444', padding: '4px 10px', borderRadius: 6 }}>View Store</span>
                   </div>
                 </div>
               ))}
@@ -158,7 +159,7 @@ export const BuyerGrid = () => {
           <span style={{ fontSize: 12, color: t.subtext }}>Updated in real-time</span>
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 20 }}>
-          {[...CURATED_STORES, ...(userStores || [])]
+          {Array.from(new Map([...CURATED_STORES, ...(userStores || [])].map(s => [s.id || s._id || s.store_id, s])).values())
             .flatMap(s =>
               (s.storeData?.products || s.products || (s.customSchema || s.schema)?.layout?.find(l => l.type === 'featured_products')?.props?.products || [])
                 .filter(p => p.name && p.price && !p.name.toLowerCase().includes('generating') && !p.name.includes('...'))

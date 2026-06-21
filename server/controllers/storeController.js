@@ -135,7 +135,12 @@ export const publishStore = async (req, res) => {
   // Update customSchema with permanent GCS URLs so MongoDB saves the permanent URLs
   let finalCustomSchema = req.body.customSchema || null;
   if (finalCustomSchema && finalCustomSchema.layout) {
-    finalCustomSchema.layout = finalCustomSchema.layout.map(s => {
+    finalCustomSchema.layout = await Promise.all(finalCustomSchema.layout.map(async s => {
+      // Upload any standalone section video
+      if (s.props && s.props.videoUrl) {
+        s.props.videoUrl = await uploadToGcs(s.props.videoUrl, req);
+      }
+      
       if (s.type === "hero" && processedBranding) {
         return { ...s, props: { ...s.props, ...processedBranding } };
       }
@@ -146,7 +151,7 @@ export const publishStore = async (req, res) => {
         return { ...s, props: { ...s.props, products: processedProducts } };
       }
       return s;
-    });
+    }));
   }
 
   // Step 1 & 2: Create store document
@@ -567,6 +572,8 @@ export const getAnalytics = async (req, res) => {
   }
 };
 
+import { localFind } from '../dbHelper.js';
+
 export const getStores = async (req, res) => {
   const { session_id } = req.query;
   if (!session_id) {
@@ -577,9 +584,6 @@ export const getStores = async (req, res) => {
     const filter = session_id === 'all' ? { status: 'active' } : { session_id };
     const query = session_id === 'all' ? { status: 'active' } : { session_id };
 
-    console.log("SESSION ID:", session_id);
-    console.log("MARKETPLACE MODE:", session_id === 'all');
-
     const response = await callFlexibleMcpTool(['find_documents', 'find', 'findDocuments'], {
       collection: 'stores',
       filter: filter,
@@ -587,12 +591,52 @@ export const getStores = async (req, res) => {
       limit: 1000
     });
 
-    const storesList = response?.documents || response?.result || response?.data || [];
-    console.log("STORE COUNT:", storesList.length);
+    let storesList = response?.documents || response?.result || response?.data || [];
+    
+    // Force merge from local stores.json to prevent data loss
+    try {
+      const localStoresRes = localFind('stores', filter);
+      const localStores = localStoresRes?.documents || localStoresRes?.result || [];
+      const map = new Map();
+      storesList.forEach(s => map.set(s.store_id || s.id || s._id, s));
+      localStores.forEach(s => {
+        const id = s.store_id || s.id || s._id;
+        if (!map.has(id)) {
+          map.set(id, s);
+          storesList.push(s);
+        }
+      });
+    } catch (e) {
+      console.log("Local merge error (stores):", e.message);
+    }
 
-    const productsResponse = await callFlexibleMcpTool(['find_documents', 'find', 'findDocuments'], { collection: 'products', limit: 10000 }); const allProducts = productsResponse?.documents || productsResponse?.result || productsResponse?.data || []; const storesWithProducts = storesList.map(store => { const storeProds = allProducts.filter(p => String(p.store_id) === String(store.store_id) || String(p.store_id) === String(store.id) || String(p.store_id) === String(store._id)); return { ...store, products: storeProds }; }); return res.json({ success: true, stores: storesWithProducts });
+    const productsResponse = await callFlexibleMcpTool(['find_documents', 'find', 'findDocuments'], { collection: 'products', limit: 10000 });
+    let allProducts = productsResponse?.documents || productsResponse?.result || productsResponse?.data || [];
+    
+    try {
+      const localProdsRes = localFind('products');
+      const localProds = localProdsRes?.documents || localProdsRes?.result || [];
+      const pMap = new Map();
+      allProducts.forEach(p => pMap.set(p.product_id || p.id || p._id, p));
+      localProds.forEach(p => {
+        const id = p.product_id || p.id || p._id;
+        if (!pMap.has(id)) {
+          pMap.set(id, p);
+          allProducts.push(p);
+        }
+      });
+    } catch (e) {
+      console.log("Local merge error (products):", e.message);
+    }
+
+    const storesWithProducts = storesList.map(store => {
+      const storeProds = allProducts.filter(p => String(p.store_id) === String(store.store_id) || String(p.store_id) === String(store.id) || String(p.store_id) === String(store._id));
+      return { ...store, products: storeProds };
+    });
+    
+    return res.json({ success: true, stores: storesWithProducts });
   } catch (err) {
-    console.error("Ã¢ÂÅ’ GET /api/stores error:", err.message);
+    console.error("❌ GET /api/stores error:", err.message);
     return res.status(500).json({ success: false, error: err.message });
   }
 };
@@ -610,13 +654,30 @@ export const getProducts = async (req, res) => {
       limit: 1000
     });
 
-    const productsList = response?.documents || response?.result || response?.data || [];
+    let productsList = response?.documents || response?.result || response?.data || [];
+    
+    try {
+      const localProdsRes = localFind('products', filter);
+      const localProds = localProdsRes?.documents || localProdsRes?.result || [];
+      const pMap = new Map();
+      productsList.forEach(p => pMap.set(p.product_id || p.id || p._id, p));
+      localProds.forEach(p => {
+        const id = p.product_id || p.id || p._id;
+        if (!pMap.has(id)) {
+          pMap.set(id, p);
+          productsList.push(p);
+        }
+      });
+    } catch (e) {
+      console.log("Local merge error (products api):", e.message);
+    }
+
     return res.json({
       success: true,
       products: productsList
     });
   } catch (err) {
-    console.error(" GET /api/products error:", err.message);
+    console.error("❌ GET /api/products error:", err.message);
     return res.status(500).json({ success: false, error: err.message });
   }
 };

@@ -107,7 +107,7 @@ export const BuyerApp = ({ isDarkMode, setIsDarkMode, t, DynamicRenderer }) => {
           );
           if (match) setSelectedStorefront(match);
         })
-        .catch(() => {});
+        .catch(() => { });
     };
     window.addEventListener('sera:openStore', handleOpenStore);
 
@@ -147,10 +147,10 @@ export const BuyerApp = ({ isDarkMode, setIsDarkMode, t, DynamicRenderer }) => {
           .then(data => {
             const match = (data.results || []).find(p => String(p.id || p.product_id) === String(productId));
             if (match) {
-               setSelectedProductDetail({ ...match, storeId: match.store_id || 'unknown', storeName: match.store_name || 'Store' });
+              setSelectedProductDetail({ ...match, storeId: match.store_id || 'unknown', storeName: match.store_name || 'Store' });
             } else {
-               setToastMessage('Product not found.');
-               setTimeout(() => setToastMessage(''), 3000);
+              setToastMessage('Product not found.');
+              setTimeout(() => setToastMessage(''), 3000);
             }
           })
           .catch(() => {
@@ -168,7 +168,7 @@ export const BuyerApp = ({ isDarkMode, setIsDarkMode, t, DynamicRenderer }) => {
   }, [userStores, setSelectedStorefront, setSelectedProductDetail, setToastMessage]);
 
   // ── Derived state ─────────────────────────────────────────────────────────
-  const filteredStores = [...(userStores || []), ...CURATED_STORES].filter(s => {
+  const filteredStores = Array.from(new Map([...CURATED_STORES, ...(userStores || [])].map(s => [s.id || s._id || s.store_id, s])).values()).filter(s => {
     if (selectedCategoryFilter !== 'all' && s.category !== selectedCategoryFilter) return false;
     return true;
   });
@@ -236,12 +236,18 @@ export const BuyerApp = ({ isDarkMode, setIsDarkMode, t, DynamicRenderer }) => {
     setSelectedStorefront
   });
 
+  // ── Local UI State ────────────────────────────────────────────────────────
+  const [buyerActiveNav, setBuyerActiveNav] = useState('explore');
+
   // ── Context value (shared across all child components) ────────────────────
   const contextValue = {
     // theme
     t,
     isDarkMode,
     setIsDarkMode,
+    // navigation
+    buyerActiveNav,
+    setBuyerActiveNav,
     // chat panel
     chatOpen: chat.chatOpen,
     setChatOpen: chat.setChatOpen,
@@ -275,18 +281,140 @@ export const BuyerApp = ({ isDarkMode, setIsDarkMode, t, DynamicRenderer }) => {
 
   return (
     <BuyerProvider value={contextValue}>
-      <div style={{ flex: 1, display: 'flex', overflow: 'hidden', position: 'relative', background: t.bg }}>
+      <style>{`
+        /* --- DESKTOP SPECIFIC STYLES --- */
+        @media (min-width: 769px) {
+          .buyer-bottom-nav {
+            display: none !important;
+          }
+          
+          /* Shopping Cart Desktop Styling */
+          .cart-item-image {
+            width: 200px !important;
+            height: 200px !important;
+            border-radius: 20px !important;
+          }
+          .cart-item-info {
+            min-height: 200px !important;
+          }
+          .cart-item-title {
+            font-size: 24px !important;
+            margin-bottom: 12px !important;
+          }
+          .cart-item-price {
+            font-size: 28px !important;
+          }
+        }
+        
+        /* --- BUYER MOBILE RESPONSIVENESS --- */
+        @media (max-width: 768px) {
+          .desktop-nav {
+            display: none !important;
+          }
+          
+          .buyer-app-container {
+            flex-direction: column !important;
+          }
+          
+          /* Chat Panel as Full-Screen Overlay */
+          .buyer-chat-panel {
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            bottom: 66px !important;
+            width: auto !important;
+            height: auto !important;
+            border-radius: 0 !important;
+            z-index: 9998 !important;
+            border: none !important;
+            background: ${isDarkMode ? '#111113' : '#ffffff'} !important;
+          }
+          
+          /* Headers & Layouts */
+          .buyer-header {
+            padding: 0 16px !important;
+          }
+          .buyer-content-wrapper {
+            padding: 0 16px !important;
+          }
+          
+          /* Typography Shrinks */
+          h2 {
+            font-size: 18px !important;
+          }
+          p {
+            font-size: 11px !important;
+          }
+          
+          /* Grid Overrides */
+          .buyer-grid {
+            grid-template-columns: 1fr !important;
+            gap: 16px !important;
+          }
+          div[style*="grid-template-columns: repeat(auto-fill, minmax(280px"] {
+            grid-template-columns: 1fr 1fr !important;
+            gap: 12px !important;
+          }
+          div[style*="grid-template-columns: repeat(auto-fit, minmax(260px"] {
+            grid-template-columns: 1fr 1fr !important;
+            gap: 12px !important;
+          }
+          
+          /* Typography inside cards */
+          h3 { font-size: 16px !important; }
+          h4 { font-size: 13px !important; line-height: 1.2 !important; }
+          
+          /* Bottom Navigation */
+          .buyer-bottom-nav {
+            bottom: 0 !important;
+            left: 0 !important;
+            transform: none !important;
+            width: 100% !important;
+            border-radius: 0 !important;
+            border: none !important;
+            border-top: 1px solid ${t.border} !important;
+            padding: 12px 24px !important;
+            padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px)) !important;
+            justify-content: space-between !important;
+            gap: 0 !important;
+            background: ${isDarkMode ? '#0f0f10' : '#ffffff'} !important;
+            box-shadow: none !important;
+            box-sizing: border-box !important;
+            backdrop-filter: none !important;
+            z-index: 9999 !important;
+          }
+        }
+      `}</style>
+      <div className="buyer-app-container" style={{ flex: 1, display: 'flex', overflow: 'hidden', position: 'relative', background: t.bg }}>
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflowY: 'auto', height: '100vh', position: 'relative' }}>
           <BuyerHeader />
-          <BuyerHero />
-          <BuyerGrid />
+
+          <div style={{ display: buyerActiveNav === 'explore' ? 'block' : 'none' }}>
+            <BuyerHero />
+            <BuyerGrid />
+          </div>
+
+          <div style={{ display: buyerActiveNav === 'saved' ? 'block' : 'none', padding: '60px 48px', color: t.text }}>
+            <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 32, fontWeight: 700, marginBottom: 12 }}>Saved Items</h2>
+            <p style={{ color: t.subtext }}>You haven't saved any products or stores yet.</p>
+          </div>
+
+          <div style={{ display: buyerActiveNav === 'profile' ? 'block' : 'none', padding: '60px 48px', color: t.text }}>
+            <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 32, fontWeight: 700, marginBottom: 12 }}>Buyer Profile</h2>
+            <p style={{ color: t.subtext }}>Manage your shipping addresses and payment methods here.</p>
+          </div>
+
+          <div style={{ display: buyerActiveNav === 'cart' ? 'block' : 'none' }}>
+            <BuyerCart />
+          </div>
+
           <BuyerFooterNav />
         </div>
 
         <BuyerChatPanel />
         <SelectedStorefront />
         <BuyerModals />
-        <BuyerCart />
 
         {/* Toast Notification */}
         {toastMessage && (

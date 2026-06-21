@@ -1,0 +1,70 @@
+/* Premium Mobile Flex Inventory Layout */
+@media (max-width: 768px) {
+  .inventory-header-row {
+    display: none !important;
+  }
+  .inventory-card {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    position: relative !important;
+    padding: 24px !important;
+    border-radius: 12px !important;
+    margin: 16px !important;
+    border: 1px solid var(--card-border) !important;
+    background: var(--card-bg) !important;
+  }
+  .inventory-card .inv-checkbox {
+    position: absolute !important;
+    top: 24px !important;
+    right: 24px !important;
+    width: auto !important;
+    z-index: 10 !important;
+  }
+  .inventory-card .inv-main-info {
+    flex-direction: column !important;
+    gap: 16px !important;
+  }
+  .inventory-card .inv-main-info > div:first-child {
+    width: 100% !important;
+    height: 240px !important;
+    border-radius: 12px !important;
+  }
+  .inventory-card .inv-meta {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 12px !important;
+    margin-top: 20px !important;
+    padding-top: 20px !important;
+    border-top: 1px solid rgba(128,128,128,0.1) !important;
+  }
+  .inventory-card .inv-meta > div {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+  }
+  .inventory-card .mobile-label {
+    display: block !important;
+    font-size: 13px !important;
+    color: rgba(128,128,128,0.7) !important;
+    font-weight: 500 !important;
+  }
+  .inventory-card .inv-actions {
+    position: absolute !important;
+    bottom: 24px !important;
+    right: 24px !important;
+    width: auto !important;
+  }
+  .inventory-card .inv-status span {
+    padding: 3px 8px !important;
+    font-size: 10px !important;
+  }
+  .inventory-card .inv-actions button {
+    background: transparent !important;
+    border: none !important;
+    padding: 4px !important;
+  }
+  .inventory-card .inv-actions button svg {
+    width: 16px !important;
+    height: 16px !important;
+  }
+}

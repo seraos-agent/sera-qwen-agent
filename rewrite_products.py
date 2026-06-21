@@ -1,144 +1,16 @@
-import './InventoryMobile.css';
-import React from 'react';
-import { useSeller } from '../../SellerContext';
+import re
 
-export const ProductsTab = () => {
-  const {
-    activeNav, isDarkMode, t, products, setProducts,
-    selectedProducts, setSelectedProducts, openActionMenuId, setOpenActionMenuId, themeColor,
-    productImageInputRef, handleProductImageUpdate, setUploadingForProduct, sendMessage,
-    userStores, setStoreSchema, storeSchema,
-    activePromoTab, setActivePromoTab, videoFormat, setVideoFormat, storeData, setStoreData
-  } = useSeller();
+with open("src/features/seller/components/panels/ProductsTab.jsx", "r", encoding="utf-8") as f:
+    content = f.read()
 
-  const [activeCategory, setActiveCategory] = React.useState("All");
-  const [isAddingCategory, setIsAddingCategory] = React.useState(false);
-  const [newCategoryName, setNewCategoryName] = React.useState("");
-  
-  const categories = React.useMemo(() => {
-    const defaultCats = ["All"];
-    const schemaCats = storeSchema?.categories || [];
-    const prodCats = products.map(p => p.category).filter(Boolean);
-    return [...new Set([...defaultCats, ...schemaCats, ...prodCats])];
-  }, [storeSchema, products]);
+# 1. Remove the old InventoryMobile.css import
+content = content.replace("import './InventoryMobile.css';\n", "")
 
-  const submitNewCategory = () => {
-    if (newCategoryName && newCategoryName.trim()) {
-      const name = newCategoryName.trim();
-      setStoreSchema(prev => ({ ...prev, categories: [...(prev.categories || []), name] }));
-      setActiveCategory(name);
-    }
-    setIsAddingCategory(false);
-    setNewCategoryName("");
-  };
+# 2. Extract the table block
+start_table = content.find("<table className=\"inventory-table\"")
+end_table = content.find("</table>") + len("</table>")
 
-  const filteredProducts = activeCategory === "All" 
-    ? products 
-    : products.filter(p => p.category === activeCategory);
-
-  return (
-    <>
-      {/* Products content */}
-      <div style={{ display: activeNav === "products" ? "block" : "none", padding: "40px 28px", paddingBottom: "100px" }}>
-        <div className="inventory-header-container" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
-          <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 28, color: t.text }}>Inventory</h2>
-          <div className="inventory-controls" style={{ display: "flex", gap: 12 }}>
-            <div style={{ position: "relative" }}>
-              <svg style={{ position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)", color: t.subtext }} width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>
-              <input id="product-search" name="product-search" type="text" placeholder="Search products..." style={{ background: isDarkMode ? "#161618" : "#ffffff", border: `1px solid ${isDarkMode ? "#2a2a2e" : "#e5e7eb"}`, padding: "8px 12px 8px 32px", borderRadius: 6, color: t.text, fontSize: 13, outline: "none", width: 200 }} />
-            </div>
-            <button style={{ background: isDarkMode ? "#161618" : "#ffffff", color: t.text, border: `1px solid ${isDarkMode ? "#2a2a2e" : "#e5e7eb"}`, padding: "8px 12px", borderRadius: 6, cursor: "pointer", fontSize: 13, display: "flex", alignItems: "center", gap: 6 }}>
-              <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" /></svg>
-              Filter
-            </button>
-            <button style={{ background: isDarkMode ? "#1e3a5f" : "#e0f2fe", color: isDarkMode ? "#93c5fd" : "#0284c7", border: "none", padding: "8px 16px", borderRadius: 6, cursor: "pointer", fontSize: 12, fontWeight: 600 }}>+ Add Product</button>
-          </div>
-        </div>
-
-        {/* Category Tabs */}
-        <div style={{ display: "flex", gap: 12, marginBottom: 20, overflowX: "auto", paddingBottom: 8, scrollbarWidth: "none" }}>
-          {categories.map(cat => (
-            <button
-              key={cat}
-              onClick={() => setActiveCategory(cat)}
-              style={{
-                padding: "8px 16px",
-                borderRadius: 100,
-                fontSize: 13,
-                fontWeight: 600,
-                cursor: "pointer",
-                whiteSpace: "nowrap",
-                border: activeCategory === cat ? `1px solid ${isDarkMode ? "#c8b89a" : "#8b7355"}` : `1px solid ${t.border}`,
-                background: activeCategory === cat ? (isDarkMode ? "rgba(200, 184, 154, 0.1)" : "#fdfbf7") : "transparent",
-                color: activeCategory === cat ? (isDarkMode ? "#c8b89a" : "#8b7355") : t.subtext,
-                transition: "all 0.2s"
-              }}
-            >
-              {cat}
-            </button>
-          ))}
-          {isAddingCategory ? (
-            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-              <input 
-                autoFocus
-                type="text" 
-                value={newCategoryName} 
-                onChange={e => setNewCategoryName(e.target.value)}
-                onKeyDown={e => { if(e.key === 'Enter') submitNewCategory(); if(e.key === 'Escape') setIsAddingCategory(false); }}
-                onBlur={() => { if(!newCategoryName) setIsAddingCategory(false); }}
-                placeholder="Name..."
-                style={{
-                  padding: "6px 12px", borderRadius: 100, fontSize: 13, border: `1px solid ${t.border}`, background: isDarkMode ? "#1a1a1e" : "#ffffff", color: t.text, outline: "none", width: 120
-                }}
-              />
-              <button onClick={submitNewCategory} style={{ background: "#c8b89a", color: "#000", border: "none", borderRadius: 100, padding: "6px 12px", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>Save</button>
-            </div>
-          ) : (
-            <button
-              onClick={() => setIsAddingCategory(true)}
-              style={{
-                padding: "8px 16px",
-                borderRadius: 100,
-                fontSize: 13,
-                fontWeight: 600,
-                cursor: "pointer",
-                whiteSpace: "nowrap",
-                border: `1px dashed ${t.border}`,
-                background: "transparent",
-                color: t.subtext,
-                transition: "all 0.2s"
-              }}
-              onMouseEnter={e => e.currentTarget.style.color = t.text}
-              onMouseLeave={e => e.currentTarget.style.color = t.subtext}
-            >
-              + Add Category
-            </button>
-          )}
-        </div>
-        <div className="table-container" style={{ background: isDarkMode ? "#161618" : "#ffffff", border: `1px solid ${isDarkMode ? "#2a2a2e" : "#e5e7eb"}`, borderRadius: 12, overflowX: "auto" }}>
-          <input
-            id="product-image-upload"
-            name="product-image-upload"
-            type="file"
-            accept="image/*"
-            ref={productImageInputRef}
-            onChange={handleProductImageUpdate}
-            style={{ display: "none" }}
-          />
-          {selectedProducts.length > 0 && (
-            <div style={{ padding: "12px 16px", background: isDarkMode ? "rgba(200, 184, 154, 0.1)" : "rgba(200, 184, 154, 0.2)", borderBottom: `1px solid ${t.border}`, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-              <span style={{ fontSize: 12, color: isDarkMode ? "#c8b89a" : "#9ca3af", fontWeight: 600 }}>{selectedProducts.length} products selected</span>
-              <button
-                onClick={() => {
-                  const prompt = `Generate new high-quality images for these products: ${selectedProducts.join(", ")}`;
-                  sendMessage(prompt);
-                  setSelectedProducts([]);
-                }}
-                style={{ background: "#c8b89a", color: "#0f0f10", border: "none", padding: "6px 12px", borderRadius: 4, cursor: "pointer", fontSize: 11, fontWeight: 700 }}
-              > Generate Images for Selected</button>
-            </div>
-          )}
-                    <div className="inventory-list-container">
+new_list_code = """          <div className="inventory-list-container">
             {/* Header Row (Desktop only) */}
             <div className="inventory-header-row" style={{ display: "flex", padding: "16px 20px", borderBottom: `1px solid ${t.border}`, color: t.subtext, fontSize: 13, fontWeight: 500, background: isDarkMode ? "#0f0f10" : "#ffffff", borderTopLeftRadius: 12, borderTopRightRadius: 12 }}>
               <div style={{ width: 40, textAlign: "center" }}>
@@ -155,19 +27,18 @@ export const ProductsTab = () => {
               <div style={{ flex: "2 1 0" }}>Product</div>
               <div style={{ flex: "1 1 0" }}>Price</div>
               <div style={{ flex: "1 1 0" }}>Stock</div>
-              <div style={{ flex: "1 1 0" }}>Category</div>
               <div style={{ flex: "1 1 0" }}>Status</div>
               <div style={{ width: 60, textAlign: "right" }}>Actions</div>
             </div>
 
             {/* Product Cards */}
             <div style={{ display: "flex", flexDirection: "column" }}>
-              {filteredProducts.length === 0 ? (
+              {products.length === 0 ? (
                 <div style={{ padding: "60px 20px", textAlign: "center", color: t.subtext }}>
                   <p style={{ fontWeight: 600, color: t.text, fontSize: 16 }}>No Products Yet</p>
                 </div>
               ) : (
-                filteredProducts.map((p, i) => (
+                products.map((p, i) => (
                   <div key={i} className="inventory-card" style={{ display: "flex", padding: "24px 20px", borderBottom: `1px solid ${t.border}`, background: selectedProducts.includes(p.name) ? (isDarkMode ? "rgba(200, 184, 154, 0.05)" : "rgba(200, 184, 154, 0.1)") : "transparent", alignItems: "center", gap: 16, transition: "background 0.2s" }}>
                     
                     {/* Checkbox */}
@@ -223,33 +94,6 @@ export const ProductsTab = () => {
                       <div className="inv-stock" style={{ flex: "1 1 0", color: t.text, fontSize: 14, fontWeight: 500 }}>
                         <span className="mobile-label" style={{ display: "none" }}>Stock: </span>{45 + (i * 7 % 13)} in stock
                       </div>
-
-                      <div className="inv-category" style={{ flex: "1 1 0" }}>
-                        <select
-                          value={p.category || "All"}
-                          onChange={(e) => {
-                            const newCat = e.target.value === "All" ? "" : e.target.value;
-                            setProducts(prev => prev.map(prod => prod.name === p.name ? { ...prod, category: newCat } : prod));
-                          }}
-                          style={{
-                            padding: "4px 8px",
-                            borderRadius: 6,
-                            border: `1px solid ${t.border}`,
-                            background: isDarkMode ? "#1e1e22" : "#f9fafb",
-                            color: t.text,
-                            fontSize: 11,
-                            outline: "none",
-                            cursor: "pointer",
-                            width: "100%",
-                            maxWidth: 120
-                          }}
-                          onClick={e => e.stopPropagation()}
-                        >
-                          {categories.map(c => (
-                            <option key={c} value={c}>{c}</option>
-                          ))}
-                        </select>
-                      </div>
                       <div className="inv-status" style={{ flex: "1 1 0" }}>
                         <span style={{ padding: "6px 12px", background: "rgba(74, 222, 128, 0.1)", border: "1px solid rgba(74, 222, 128, 0.2)", color: "#4ade80", borderRadius: 100, fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: 0.5 }}>Active</span>
                       </div>
@@ -287,18 +131,76 @@ export const ProductsTab = () => {
                 ))
               )}
             </div>
-          </div>
-          {/* Pagination */}
-          <div className="inventory-pagination" style={{ padding: "16px", display: "flex", alignItems: "center", justifyContent: "space-between", borderTop: `1px solid ${t.border}`, background: isDarkMode ? "#111113" : "#f9fafb" }}>
-            <p style={{ fontSize: 12, color: t.subtext }}>Showing {products.length > 0 ? 1 : 0}-{products.length} of {products.length} products</p>
-            <div style={{ display: "flex", gap: 8 }}>
-              <button style={{ background: isDarkMode ? "#1a1a1e" : "#f3f4f6", border: `1px solid ${isDarkMode ? "#2a2a2e" : "#e5e7eb"}`, color: t.subtext, padding: "6px 10px", borderRadius: 4, cursor: "not-allowed", fontSize: 12 }}>Previous</button>
-              <button style={{ background: "#c8b89a", border: "none", color: "#0f0f10", padding: "6px 12px", borderRadius: 4, cursor: "pointer", fontSize: 12, fontWeight: 600 }}>1</button>
-              <button style={{ background: isDarkMode ? "#1a1a1e" : "#fff", border: `1px solid ${isDarkMode ? "#2a2a2e" : "#e5e7eb"}`, color: t.text, padding: "6px 10px", borderRadius: 4, cursor: "pointer", fontSize: 12 }}>Next</button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </>
-  );
-};
+          </div>"""
+
+# add css import back because we still need InventoryMobile.css to make it responsive on mobile
+content = content[:start_table] + new_list_code + content[end_table:]
+content = "import './InventoryMobile.css';\n" + content
+
+with open("src/features/seller/components/panels/ProductsTab.jsx", "w", encoding="utf-8") as f:
+    f.write(content)
+
+# 3. Rewrite InventoryMobile.css to target the new flex classes
+new_css = """/* Premium Mobile Flex Inventory Layout */
+@media (max-width: 768px) {
+  .inventory-header-row {
+    display: none !important;
+  }
+  .inventory-card {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    position: relative !important;
+    padding: 24px !important;
+    border-radius: 12px !important;
+    margin: 16px !important;
+    border: 1px solid var(--card-border) !important;
+    background: var(--card-bg) !important;
+  }
+  .inventory-card .inv-checkbox {
+    position: absolute !important;
+    top: 24px !important;
+    right: 24px !important;
+    width: auto !important;
+    z-index: 10 !important;
+  }
+  .inventory-card .inv-main-info {
+    flex-direction: column !important;
+    gap: 16px !important;
+  }
+  .inventory-card .inv-main-info > div:first-child {
+    width: 100% !important;
+    height: 240px !important;
+    border-radius: 12px !important;
+  }
+  .inventory-card .inv-meta {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 12px !important;
+    margin-top: 20px !important;
+    padding-top: 20px !important;
+    border-top: 1px solid rgba(128,128,128,0.1) !important;
+  }
+  .inventory-card .inv-meta > div {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+  }
+  .inventory-card .mobile-label {
+    display: block !important;
+    font-size: 13px !important;
+    color: rgba(128,128,128,0.7) !important;
+    font-weight: 500 !important;
+  }
+  .inventory-card .inv-actions {
+    position: absolute !important;
+    bottom: 24px !important;
+    right: 24px !important;
+    width: auto !important;
+  }
+}
+"""
+
+with open("src/features/seller/components/panels/InventoryMobile.css", "w", encoding="utf-8") as f:
+    f.write(new_css)
+
+print("Done")

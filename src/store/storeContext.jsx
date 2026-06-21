@@ -26,7 +26,7 @@ export const StoreProvider = ({ children }) => {
         try {
           const parsed = JSON.parse(savedMsgs);
           if (parsed && parsed.length > 0) initial.buyerAiMessages = parsed;
-        } catch(e){}
+        } catch (e) { }
       }
       const stores = localStorage.getItem("sera_hackathon_user_stores");
       if (stores) {
@@ -35,7 +35,7 @@ export const StoreProvider = ({ children }) => {
     } catch (e) {
       // ignore
     }
-    
+
     return {
       ...initial,
       storeSchema: savedSchema || INITIAL_STORE_SCHEMA,
@@ -54,7 +54,30 @@ export const StoreProvider = ({ children }) => {
     }
   }, [state.storeSchema]);
 
-  
+  // Runtime Auto-Recovery: if userStores is empty but we have a storeSchema (even if unpublished), restore it immediately
+  useEffect(() => {
+    if (state.storeSchema && Array.isArray(state.userStores)) {
+      const sid = state.storeSchema.id || "recovered-store-local";
+      const exists = state.userStores.some(s => String(s.id) === String(sid));
+      
+      if (!exists && state.userStores.length === 0) { // Only recover if they have 0 stores
+        const recoveredStore = {
+          id: sid,
+          name: state.storeSchema.name || state.storeSchema.layout?.find(s => s.type === 'hero')?.props?.title || "My Brand",
+          category: state.storeSchema.category || "General",
+          desc: state.storeSchema.layout?.find(s => s.type === 'hero')?.props?.subtitle || "Autonomous Commerce Store",
+          cover: state.storeSchema.layout?.find(s => s.type === 'hero')?.props?.heroImage || "",
+          trustScore: "99.9%",
+          followers: "1.2K",
+          isUserStore: true,
+          customSchema: state.storeSchema,
+          storeData: state.storeSchema.layout?.find(s => s.type === 'hero')?.props || {}
+        };
+        dispatch({ type: 'SET_STATE', key: 'userStores', payload: [recoveredStore] });
+      }
+    }
+  }, [state.storeSchema, state.userStores, dispatch]);
+
   // Persist buyerAiMessages changes
   useEffect(() => {
     try {

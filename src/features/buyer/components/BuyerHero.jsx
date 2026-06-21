@@ -5,7 +5,7 @@ export const BuyerHero = () => {
   const { isDarkMode } = useBuyerContext();
 
   return (
-    <div style={{ width: '100%', marginBottom: 56 }}>
+    <div style={{ width: '100%', marginBottom: 24 }}>
       <div style={{
         width: '100%',
         background: isDarkMode ? '#0f0f10' : '#fff',

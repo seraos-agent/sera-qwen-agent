@@ -211,6 +211,11 @@
         "role": "assistant",
         "content": "Saat ini ada **4 store yang aktif** di marketplace kami! Biarkan saya perkenalkan satu per satu ya 😊\n\n---\n\n### 🐾 **Paw & Whisker Collective**\n*Trusted Care, Tailored to Them*, Toko spesial untuk kebutuhan hewan kesayangan Anda, dari nutrisi hingga mainan ramah lingkungan.\n\n![Store Banner](http://127.0.0.1:8000/assets/asset_1781542328632_1715.png)\n[View Store](#store_store_1781540290756)\n\n---\n\n###  **Drive the Future**\n*Experience sustainable energy without compromise*, Menampilkan jajaran kendaraan listrik, solusi tenaga surya, dan penyimpanan energi.\n\n![Store Banner](http://127.0.0.1:8000/assets/asset_1781832622519_6690.png)\n[View Store](#store_store_1781834482140)\n\n---\n\n###  **Ember & Bean**\n*Slow Roasted, Deeply Loved*, Kopi artisan dengan cita rasa single origin yang penuh cerita dan gairah.\n\n![Store Banner](http://127.0.0.1:8000/assets/asset_1781839981207_6801.png)\n[View Store](#store_store_1781841042623)\n\n---\n\n###  **Muse Atelier**\n*The Architecture of Style*, Fashion luxury dengan sentuhan artisan, potongan timeless, dan keanggunan yang tenang.\n\n![Store Banner](http://127.0.0.1:8000/assets/asset_1781841180240_2572.png)\n[View Store](#store_agent_store_zz6j727ku)\n\n---\n\nAda store yang menarik minat Anda, atau ingin saya bantu cari produk tertentu?",
         "ts": "2026-06-19 05:00:43.829952"
+      },
+      {
+        "role": "user",
+        "content": "cek store aktif",
+        "ts": "2026-06-20 01:46:57.676569"
       }
     ]
   }

@@ -4,7 +4,7 @@ import { useAgentActions } from './useAgentActions';
 import { canonicalizeAgentAction, normalizeAgentParams, isStoreMutationAction } from '../../../utils/constants';
 
 const INIT_MESSAGES = [
-  { role: "agent", text: "Hai! Saya agen desain SERA. Ceritakan detail produk yang ingin Anda jual, dan saya akan buatkan struktur website terbaik beserta saran visualnya." }
+  { role: "agent", text: "What would you like to build today?" }
 ];
 
 export const useSellerChat = ({
@@ -59,7 +59,7 @@ export const useSellerChat = ({
   }, [isResizing]);
 
   const [executionLifecycle, setExecutionLifecycle] = useState('idle');
-  const [chatOpen, setChatOpen] = useState(true);
+  const [chatOpen, setChatOpen] = useState(false);
   const [messages, setMessages] = useState(() => {
     try {
       const saved = localStorage.getItem("sera_hackathon_messages");

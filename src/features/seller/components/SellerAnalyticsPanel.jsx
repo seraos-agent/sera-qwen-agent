@@ -9,13 +9,13 @@ export const SellerAnalyticsPanel = () => {
   return (
     <>
             {/* Analytics content (Enhanced) */}
-            <div style={{ display: activeNav === "analytics" ? "block" : "none", padding: "40px 28px", paddingBottom: "100px", animation: "fadeIn 0.5s ease-out" }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 32 }}>
+            <div className="seller-panel" style={{ display: activeNav === "analytics" ? "block" : "none", padding: "40px 28px", paddingBottom: "100px", animation: "fadeIn 0.5s ease-out" }}>
+              <div className="analytics-header-container" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 32 }}>
                 <div>
                   <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 32, fontWeight: 700, color: t.text, marginBottom: 4 }}>Store Analytics</h2>
                   <p style={{ fontSize: 14, color: t.subtext }}>Monitor your real-time store performance and agent AI insights.</p>
                 </div>
-                <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
+                <div className="analytics-controls" style={{ display: "flex", gap: 12, alignItems: "center" }}>
                   <select
                     value={activeAnalyticsStoreId}
                     onChange={e => setActiveAnalyticsStoreId(e.target.value)}
@@ -33,17 +33,17 @@ export const SellerAnalyticsPanel = () => {
                 </div>
               </div>
               {/* Top KPI Cards */}
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 20, marginBottom: 32 }}>
+              <div className="analytics-kpi-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 20, marginBottom: 32 }}>
                 {[
                   { label: "Total Revenue", value: analyticsData?.summary?.total_revenue ? `$${analyticsData.summary.total_revenue.toLocaleString()}` : "$0", trend: analyticsData?.summary?.total_revenue ? "+15.3%" : "0%", up: true, icon: <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" /> },
                   { label: "Products Tracked", value: analyticsData?.summary?.total_products || "0", trend: analyticsData?.summary?.total_products ? "+8.2%" : "0%", up: true, icon: <><circle cx="9" cy="21" r="1" /><circle cx="20" cy="21" r="1" /><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" /></> },
                   { label: "Avg Conversion", value: analyticsData?.summary?.avg_conversion ? `${(analyticsData.summary.avg_conversion * 100).toFixed(1)}%` : "0%", trend: analyticsData?.summary?.avg_conversion ? "-1.1%" : "0%", up: false, icon: <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" /> },
                   { label: "Healthy Products", value: analyticsData?.summary?.healthy || "0", trend: analyticsData?.summary?.healthy ? "+45%" : "0%", up: true, icon: <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" /> },
                 ].map((kpi, i) => (
-                  <div key={i} style={{ background: isDarkMode ? "#161618" : "#ffffff", border: `1px solid ${isDarkMode ? "#2a2a2e" : "#e5e7eb"}`, borderRadius: 16, padding: "24px", position: "relative", overflow: "hidden", transition: "transform 0.2s", cursor: "pointer", opacity: isLoadingAnalytics ? 0.5 : 1 }} onMouseEnter={e => e.currentTarget.style.transform = "translateY(-4px)"} onMouseLeave={e => e.currentTarget.style.transform = "translateY(0)"}>
+                  <div key={i} style={{ background: isDarkMode ? "rgba(255,255,255,0.02)" : "#ffffff", border: "none", borderRadius: 16, padding: "24px", position: "relative", overflow: "hidden", transition: "all 0.2s", cursor: "pointer", opacity: isLoadingAnalytics ? 0.5 : 1, boxShadow: isDarkMode ? "inset 0 1px 0 rgba(255,255,255,0.05)" : "0 4px 20px rgba(0,0,0,0.03)" }} onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-4px)"; e.currentTarget.style.boxShadow = isDarkMode ? "inset 0 1px 0 rgba(255,255,255,0.1), 0 8px 30px rgba(0,0,0,0.2)" : "0 8px 30px rgba(0,0,0,0.08)"; }} onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = isDarkMode ? "inset 0 1px 0 rgba(255,255,255,0.05)" : "0 4px 20px rgba(0,0,0,0.03)"; }}>
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 16 }}>
-                      <div style={{ width: 40, height: 40, borderRadius: 12, background: isDarkMode ? "#2a2a2e" : "#f3f4f6", display: "flex", alignItems: "center", justifyContent: "center", color: themeColor }}>
-                        <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">{kpi.icon}</svg>
+                      <div style={{ color: themeColor, display: "flex", alignItems: "center", justifyContent: "center", marginTop: 2 }}>
+                        <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">{kpi.icon}</svg>
                       </div>
                       <span style={{ fontSize: 12, fontWeight: 700, padding: "4px 8px", borderRadius: 20, background: kpi.trend === "0%" ? "rgba(128,128,128,0.1)" : (kpi.up ? "rgba(74,222,128,0.1)" : "rgba(239,68,68,0.1)"), color: kpi.trend === "0%" ? t.subtext : (kpi.up ? "#4ade80" : "#ef4444"), display: "flex", alignItems: "center", gap: 4 }}>
                         {kpi.trend === "0%" ? "-" : (kpi.up ? "↑" : "↓")} {kpi.trend}
@@ -55,9 +55,9 @@ export const SellerAnalyticsPanel = () => {
                 ))}
               </div>
               {/* Charts & Details Grid */}
-              <div style={{ display: "grid", gridTemplateColumns: window.innerWidth < 1000 ? "1fr" : "2fr 1fr", gap: 24 }}>
+              <div className="analytics-layout" style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: 24 }}>
                 {/* Revenue Chart */}
-                <div style={{ background: isDarkMode ? "#161618" : "#ffffff", border: `1px solid ${isDarkMode ? "#2a2a2e" : "#e5e7eb"}`, borderRadius: 16, padding: "24px", display: "flex", flexDirection: "column" }}>
+                <div style={{ background: isDarkMode ? "rgba(255,255,255,0.02)" : "#ffffff", border: "none", borderRadius: 16, padding: "24px", display: "flex", flexDirection: "column", boxShadow: isDarkMode ? "inset 0 1px 0 rgba(255,255,255,0.05)" : "0 4px 24px rgba(0,0,0,0.04)" }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 32 }}>
                     <div>
                       <p style={{ fontSize: 16, fontWeight: 700, color: t.text }}>Revenue Overview</p>
@@ -117,11 +117,11 @@ export const SellerAnalyticsPanel = () => {
                   </div>
                 </div>
                 {/* AI Agent Insights */}
-                <div style={{ background: isDarkMode ? "#161618" : "#ffffff", border: `1px solid ${isDarkMode ? "#2a2a2e" : "#e5e7eb"}`, borderRadius: 16, padding: "24px", display: "flex", flexDirection: "column" }}>
+                <div style={{ background: isDarkMode ? "rgba(255,255,255,0.02)" : "#ffffff", border: "none", borderRadius: 16, padding: "24px", display: "flex", flexDirection: "column", boxShadow: isDarkMode ? "inset 0 1px 0 rgba(255,255,255,0.05)" : "0 4px 24px rgba(0,0,0,0.04)" }}>
                   <p style={{ fontSize: 16, fontWeight: 700, color: t.text, marginBottom: 24 }}>AI Agent Insights</p>
                   <div style={{ display: "flex", flexDirection: "column", gap: 16, flex: 1 }}>
                     <div style={{ background: "transparent", border: "none", padding: "8px 0", display: "flex", gap: 12 }}>
-                      <div style={{ color: "#38bdf8", marginTop: 2 }}>
+                      <div style={{ color: themeColor, marginTop: 2 }}>
                         <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></svg>
                       </div>
                       <div>
@@ -130,7 +130,7 @@ export const SellerAnalyticsPanel = () => {
                       </div>
                     </div>
                     <div style={{ background: "transparent", border: "none", padding: "8px 0", display: "flex", gap: 12 }}>
-                      <div style={{ color: "#a855f7", marginTop: 2 }}>
+                      <div style={{ color: themeColor, marginTop: 2 }}>
                         <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><polygon points="23 7 16 12 23 17 23 7" /><rect x="1" y="5" width="15" height="14" rx="2" ry="2" /></svg>
                       </div>
                       <div>

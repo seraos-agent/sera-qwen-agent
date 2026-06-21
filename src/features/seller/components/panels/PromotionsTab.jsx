@@ -13,9 +13,9 @@ export const PromotionsTab = () => {
   return (
     <>
             {/* Promotions content (Mock) */}
-            <div style={{ display: activeNav === "promotions" ? "block" : "none", padding: "40px 28px", paddingBottom: "100px" }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 24 }}>
+            <div className="seller-panel" style={{ display: activeNav === "promotions" ? "block" : "none", padding: "40px 28px", paddingBottom: "100px" }}>
+              <div className="marketing-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+                <div className="marketing-title-area" style={{ display: "flex", alignItems: "center", gap: 24 }}>
                   <div>
                     <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 28, color: t.text, marginBottom: 8 }}>Marketing & Promotions</h2>
                     <p style={{ fontSize: 14, color: t.subtext }}>Manage campaigns, creatives, and offers for your store</p>
@@ -50,7 +50,7 @@ export const PromotionsTab = () => {
               </div>
               <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
                 {/* Stats Row */}
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 16 }}>
+                <div className="marketing-stats-grid" style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 16 }}>
                   {(() => {
                     let h = 0;
                     const str = storeSchema?.id || "default";
@@ -62,7 +62,7 @@ export const PromotionsTab = () => {
                       { label: "REVENUE FROM PROMOS", value: `$${(5 + (h % 8)).toFixed(1)}k`, trend: `↑ ${15 + (h % 30)}% this month`, trendColor: "#4ade80" },
                     ];
                   })().map((stat, i) => (
-                    <div key={i} style={{ background: isDarkMode ? "#161618" : "#ffffff", border: `1px solid ${isDarkMode ? "#2a2a2e" : "#e5e7eb"}`, borderRadius: 12, padding: "20px" }}>
+                    <div key={i} style={{ background: isDarkMode ? "rgba(255,255,255,0.02)" : "#ffffff", border: "none", borderRadius: 16, padding: "20px", boxShadow: isDarkMode ? "inset 0 1px 0 rgba(255,255,255,0.05)" : "0 4px 20px rgba(0,0,0,0.03)" }}>
                       <p style={{ fontSize: 11, fontWeight: 700, color: t.subtext, letterSpacing: 0.5, marginBottom: 12 }}>{stat.label}</p>
                       <h3 style={{ fontSize: 24, fontWeight: 700, color: t.text, marginBottom: 8 }}>{stat.value}</h3>
                       <p style={{ fontSize: 12, color: stat.trendColor, fontWeight: 500 }}>{stat.trend}</p>
@@ -70,7 +70,7 @@ export const PromotionsTab = () => {
                   ))}
                 </div>
                 {/* Tabs Row */}
-                <div style={{ display: "flex", gap: 4, background: isDarkMode ? "#1a1a1e" : "#f3f4f6", padding: "4px", borderRadius: 10, width: "fit-content", border: `1px solid ${isDarkMode ? "#2a2a2e" : "#e5e7eb"}` }}>
+                <div className="marketing-tabs" style={{ display: "flex", gap: 12, paddingBottom: "16px", borderBottom: `1px solid ${isDarkMode ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)"}`, width: "100%" }}>
                   {[
                     { id: "banner", label: "Banner", icon: <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2" /><line x1="3" y1="9" x2="21" y2="9" /></svg> },
                     { id: "discounts", label: "Discounts", icon: <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z" /><line x1="7" y1="7" x2="7.01" y2="7" /></svg> },
@@ -82,10 +82,10 @@ export const PromotionsTab = () => {
                       key={tab.id}
                       onClick={() => setActivePromoTab(tab.id)}
                       style={{
-                        padding: "8px 16px", borderRadius: 8, fontSize: 13, cursor: "pointer", display: "flex", alignItems: "center", gap: 8,
+                        padding: "10px 20px", borderRadius: 100, fontSize: 13, cursor: "pointer", display: "flex", alignItems: "center", gap: 8, transition: "all 0.2s", flexShrink: 0,
                         ...(activePromoTab === tab.id
-                          ? { fontWeight: 600, background: isDarkMode ? "#161618" : "#ffffff", color: t.text, boxShadow: isDarkMode ? "0 2px 4px rgba(0,0,0,0.2)" : "0 2px 4px rgba(0,0,0,0.05)", border: `1px solid ${isDarkMode ? "#333338" : "#d1d5db"}` }
-                          : { fontWeight: 500, color: t.subtext, border: "1px solid transparent" })
+                          ? { fontWeight: 600, background: isDarkMode ? "#c8b89a" : "#111827", color: isDarkMode ? "#0f0f10" : "#ffffff", boxShadow: "0 4px 12px rgba(0,0,0,0.1)" }
+                          : { fontWeight: 500, color: t.subtext, background: isDarkMode ? "rgba(255,255,255,0.03)" : "#f3f4f6" })
                       }}
                     >
                       {tab.icon}
@@ -95,7 +95,7 @@ export const PromotionsTab = () => {
                 </div>
                 {/* Video Campaigns Section */}
                 {activePromoTab === "video" && (
-                  <div style={{ background: isDarkMode ? "#161618" : "#ffffff", border: `1px solid ${isDarkMode ? "#2a2a2e" : "#e5e7eb"}`, borderRadius: 12, padding: "24px", animation: "fadeIn 0.3s ease-out" }}>
+                  <div style={{ animation: "fadeIn 0.3s ease-out" }}>
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
                       <div>
                         <h3 style={{ fontSize: 16, fontWeight: 600, color: t.text, marginBottom: 4 }}>Video Campaigns</h3>
@@ -113,12 +113,12 @@ export const PromotionsTab = () => {
                         >Vertical (9:16)</div>
                       </div>
                     </div>
-                    <div style={{ display: "flex", gap: 40, alignItems: "center" }}>
+                    <div className="video-campaign-split" style={{ display: "flex", gap: 40, alignItems: "center" }}>
                       {/* LEFT SIDE: Preview */}
                       <div style={{ flex: "1", background: "transparent", display: "flex", alignItems: "center", justifyContent: "center", minHeight: 280, position: "relative" }}>
                         {videoFormat === "landscape" ? (
                           // Landscape Preview
-                          <div style={{ width: "100%", aspectRatio: "16/9", background: isDarkMode ? "#1a1a1e" : "#f3f4f6", borderRadius: 12, overflow: "hidden", position: "relative", border: `1px solid ${isDarkMode ? "#2a2a2e" : "#e5e7eb"}` }}>
+                          <div style={{ width: "100%", minHeight: 160, aspectRatio: "16/9", background: isDarkMode ? "#1a1a1e" : "#f3f4f6", borderRadius: 12, overflow: "hidden", position: "relative", border: `1px solid ${isDarkMode ? "#2a2a2e" : "#e5e7eb"}` }}>
                             {storeData.storeVideo ? (
                               <video
                                 src={storeData.storeVideo}
@@ -129,9 +129,10 @@ export const PromotionsTab = () => {
                                 style={{ width: "100%", height: "100%", objectFit: "cover", opacity: 0, transition: "opacity 0.4s ease" }}
                               />
                             ) : (
-                              <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", color: t.subtext }}>
-                                <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24" style={{ marginBottom: 8 }}><rect x="2" y="6" width="20" height="12" rx="2" ry="2" /><path d="M10 10l5 2-5 2v-4z" /></svg>
-                                <span style={{ fontSize: 12, letterSpacing: 1, textTransform: "uppercase", fontWeight: 600 }}>No Video</span>
+                              <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", color: t.subtext, background: isDarkMode ? "#1a1a1e" : "#e5e7eb", padding: "16px", textAlign: "center" }}>
+                                <svg width="32" height="32" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24" style={{ marginBottom: 10, opacity: 0.5 }}><rect x="2" y="6" width="20" height="12" rx="2" ry="2" /><path d="M10 10l5 2-5 2v-4z" /></svg>
+                                <span style={{ fontSize: 12, letterSpacing: 1, textTransform: "uppercase", fontWeight: 700, opacity: 0.5 }}>No Video</span>
+                                <span style={{ fontSize: 11, color: t.subtext, marginTop: 6, opacity: 0.4, maxWidth: "100%", whiteSpace: "normal" }}>Upload or generate a 16:9 video</span>
                               </div>
                             )}
                           </div>
@@ -181,7 +182,7 @@ export const PromotionsTab = () => {
                       <div style={{ flex: "1", display: "flex", flexDirection: "column", justifyContent: "center" }}>
                         {videoFormat === "landscape" ? (
                           // Landscape Tools
-                          <div style={{ border: `1px solid ${t.border}`, borderRadius: 16, padding: 24, background: isDarkMode ? "rgba(255,255,255,0.02)" : "#ffffff" }}>
+                          <div style={{ border: "none", borderRadius: 20, padding: 24, background: isDarkMode ? "rgba(255,255,255,0.03)" : "#ffffff", boxShadow: isDarkMode ? "inset 0 1px 0 rgba(255,255,255,0.05)" : "0 4px 24px rgba(0,0,0,0.04)" }}>
                             <div style={{ display: "inline-flex", alignItems: "center", gap: 6, background: storeData.storeVideo ? "rgba(200, 184, 154, 0.1)" : "transparent", padding: "4px 10px", borderRadius: 100, border: storeData.storeVideo ? `1px solid #c8b89a` : `1px solid ${t.border}`, marginBottom: 16 }}>
                               <div style={{ width: 6, height: 6, borderRadius: "50%", background: storeData.storeVideo ? "#c8b89a" : t.subtext }} />
                               <span style={{ fontSize: 11, fontWeight: 700, color: storeData.storeVideo ? "#c8b89a" : t.subtext, textTransform: "uppercase", letterSpacing: 1 }}>{storeData.storeVideo ? "Active Banner" : "Inactive"}</span>
@@ -248,7 +249,7 @@ export const PromotionsTab = () => {
                           </div>
                         ) : (
                           // Vertical Tools
-                          <div style={{ border: `1px solid ${t.border}`, borderRadius: 16, padding: 24, background: isDarkMode ? "rgba(255,255,255,0.02)" : "#ffffff" }}>
+                          <div style={{ border: "none", borderRadius: 20, padding: 24, background: isDarkMode ? "rgba(255,255,255,0.03)" : "#ffffff", boxShadow: isDarkMode ? "inset 0 1px 0 rgba(255,255,255,0.05)" : "0 4px 24px rgba(0,0,0,0.04)" }}>
                             <div style={{ display: "inline-flex", alignItems: "center", gap: 6, background: storeData.promoVideo ? "rgba(200, 184, 154, 0.1)" : "transparent", padding: "4px 10px", borderRadius: 100, border: storeData.promoVideo ? `1px solid #c8b89a` : `1px solid ${t.border}`, marginBottom: 16 }}>
                               <div style={{ width: 6, height: 6, borderRadius: "50%", background: storeData.promoVideo ? "#c8b89a" : t.subtext }} />
                               <span style={{ fontSize: 11, fontWeight: 700, color: storeData.promoVideo ? "#c8b89a" : t.subtext, textTransform: "uppercase", letterSpacing: 1 }}>{storeData.promoVideo ? "Active Promo" : "Inactive"}</span>
@@ -257,6 +258,17 @@ export const PromotionsTab = () => {
                             <p style={{ fontSize: 14, color: t.subtext, lineHeight: 1.6, marginBottom: 24 }}>
                               A modern 9:16 vertical video designed for high engagement. Appears in the Buyer Feed and the "Trending Now" section of your store.
                             </p>
+                            <div style={{ marginBottom: 24 }}>
+                              <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: t.subtext, marginBottom: 8 }}>Video Caption (Max 75 chars)</label>
+                              <textarea
+                                maxLength={75}
+                                rows={2}
+                                placeholder="e.g., Limited edition!"
+                                value={storeData.description || ""}
+                                onChange={e => setStoreData({ ...storeData, description: e.target.value })}
+                                style={{ width: "100%", padding: "10px 14px", borderRadius: 8, border: `1px solid ${t.border}`, background: isDarkMode ? "#1a1a1e" : "#f9fafb", color: t.text, fontSize: 13, outline: "none", resize: "vertical", minHeight: "60px", fontFamily: "inherit" }}
+                              />
+                            </div>
                             <div style={{ display: "flex", gap: 12, marginBottom: 24 }}>
                               <label style={{ flex: 1, background: t.text, color: t.bg, border: "none", padding: "12px", borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, transition: "opacity 0.2s" }} onMouseEnter={e => e.target.style.opacity = 0.8} onMouseLeave={e => e.target.style.opacity = 1}>
                                 <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="17 8 12 3 7 8" /><line x1="12" y1="3" x2="12" y2="15" /></svg>
@@ -325,7 +337,7 @@ export const PromotionsTab = () => {
                 )}
                 {/* Image Campaigns Section */}
                 {activePromoTab === "image" && (
-                  <div style={{ background: isDarkMode ? "#161618" : "#ffffff", border: `1px solid ${isDarkMode ? "#2a2a2e" : "#e5e7eb"}`, borderRadius: 12, padding: "24px", animation: "fadeIn 0.3s ease-out" }}>
+                  <div style={{ animation: "fadeIn 0.3s ease-out" }}>
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
                       <div>
                         <h3 style={{ fontSize: 16, fontWeight: 600, color: t.text, marginBottom: 4 }}>Image Campaigns</h3>
@@ -333,7 +345,7 @@ export const PromotionsTab = () => {
                       </div>
                       <button style={{ background: "none", color: "#c8b89a", border: "none", cursor: "pointer", fontSize: 12, fontWeight: 600 }}>+ Upload Image</button>
                     </div>
-                    <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16 }}>
+                    <div className="image-campaigns-grid" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16 }}>
                       {[1, 2, 3].map(i => (
                         <div key={i} style={{ background: isDarkMode ? "#1a1a1e" : "#f9fafb", borderRadius: 12, overflow: "hidden", border: `1px solid ${isDarkMode ? "#2a2a2e" : "#e5e7eb"}`, height: 200, display: "flex", alignItems: "center", justifyContent: "center", position: "relative" }}>
                           <svg width="32" height="32" fill="none" stroke={t.subtext} strokeWidth="2" viewBox="0 0 24 24" style={{ opacity: 0.5 }}><rect x="3" y="3" width="18" height="18" rx="2" ry="2" /><circle cx="8.5" cy="8.5" r="1.5" /><polyline points="21 15 16 10 5 21" /></svg>
@@ -344,7 +356,7 @@ export const PromotionsTab = () => {
                 )}
                 {/* Active Banner Control */}
                 {activePromoTab === "banner" && (
-                  <div style={{ background: isDarkMode ? "#161618" : "#ffffff", border: `1px solid ${isDarkMode ? "#2a2a2e" : "#e5e7eb"}`, borderRadius: 12, padding: "24px", animation: "fadeIn 0.3s ease-out" }}>
+                  <div style={{ animation: "fadeIn 0.3s ease-out" }}>
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 16 }}>
                       <div>
                         <h3 style={{ fontSize: 16, fontWeight: 600, color: t.text, marginBottom: 4 }}>Top Banner Announcement</h3>
@@ -367,7 +379,7 @@ export const PromotionsTab = () => {
                 )}
                 {/* Discount Codes */}
                 {activePromoTab === "discounts" && (
-                  <div style={{ background: isDarkMode ? "#161618" : "#ffffff", border: `1px solid ${isDarkMode ? "#2a2a2e" : "#e5e7eb"}`, borderRadius: 12, padding: "24px", animation: "fadeIn 0.3s ease-out" }}>
+                  <div style={{ animation: "fadeIn 0.3s ease-out" }}>
                     <h3 style={{ fontSize: 16, fontWeight: 600, color: t.text, marginBottom: 16 }}>Discount Codes</h3>
                     <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(250px, 1fr))", gap: 16 }}>
                       {[
@@ -375,7 +387,7 @@ export const PromotionsTab = () => {
                         { code: "WELCOME10", discount: "10% OFF", uses: "89 / ∞", status: "Active" },
                         { code: "FREESHIP", discount: "Free Shipping", uses: "312 / ∞", status: "Active" },
                       ].map((promo, i) => (
-                        <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "16px", background: isDarkMode ? "#0f0f10" : "#ffffff", borderRadius: 8, border: `1px dashed ${t.border}` }}>
+                        <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "16px 20px", background: isDarkMode ? "rgba(255,255,255,0.03)" : "#ffffff", borderRadius: 16, border: "none", boxShadow: isDarkMode ? "inset 0 1px 0 rgba(255,255,255,0.05)" : "0 2px 10px rgba(0,0,0,0.03)" }}>
                           <div>
                             <p style={{ fontSize: 14, fontWeight: 700, color: "#c8b89a", letterSpacing: 1, marginBottom: 4 }}>{promo.code}</p>
                             <p style={{ fontSize: 11, color: t.subtext }}>{promo.discount} • {promo.uses} uses</p>
@@ -388,14 +400,14 @@ export const PromotionsTab = () => {
                 )}
                 {/* Product Specific Offers */}
                 {activePromoTab === "offers" && (
-                  <div style={{ background: isDarkMode ? "#161618" : "#ffffff", border: `1px solid ${isDarkMode ? "#2a2a2e" : "#e5e7eb"}`, borderRadius: 12, padding: "24px", animation: "fadeIn 0.3s ease-out" }}>
+                  <div style={{ animation: "fadeIn 0.3s ease-out" }}>
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
                       <h3 style={{ fontSize: 16, fontWeight: 600, color: t.text }}>Product Offers</h3>
                       <button style={{ background: "none", color: "#c8b89a", border: "none", cursor: "pointer", fontSize: 12, fontWeight: 600 }}>+ Add Offer</button>
                     </div>
                     <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
                       {products.filter(p => p.promo).map((p, i) => (
-                        <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "0 16px 0 0", background: isDarkMode ? "#0f0f10" : "#ffffff", borderRadius: 8, border: `1px solid ${isDarkMode ? "#2a2a2e" : "#e5e7eb"}`, overflow: "hidden" }}>
+                        <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "0 16px 0 0", background: isDarkMode ? "rgba(255,255,255,0.02)" : "#ffffff", borderRadius: 16, border: "none", boxShadow: isDarkMode ? "inset 0 1px 0 rgba(255,255,255,0.05)" : "0 2px 10px rgba(0,0,0,0.03)", overflow: "hidden" }}>
                           <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
                             {(() => {
                               const imgUrl = p.verifiedUrl || p.imageUrl || p.image;

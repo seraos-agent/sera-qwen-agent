@@ -1,0 +1,7 @@
+node_modules
+server/
+sera-agent-python/
+.env
+.git
+.gitignore
+README.md

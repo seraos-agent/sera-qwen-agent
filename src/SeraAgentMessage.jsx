@@ -9,16 +9,16 @@ const mdComponents = {
 
     if (isProduct) {
       return (
-        <div style={{ marginTop: 12, marginBottom: 12, borderRadius: 12, overflow: 'hidden', boxShadow: '0 4px 12px rgba(0,0,0,0.15)', maxWidth: '240px' }}>
+        <span style={{ display: 'block', marginTop: 12, marginBottom: 12, borderRadius: 12, overflow: 'hidden', boxShadow: '0 4px 12px rgba(0,0,0,0.15)', maxWidth: '240px' }}>
           <img {...props} style={{ width: '100%', aspectRatio: '1/1', display: 'block', objectFit: 'cover' }} />
-        </div>
+        </span>
       );
     }
 
     return (
-      <div style={{ marginTop: 12, marginBottom: 12, borderRadius: 12, overflow: 'hidden', boxShadow: '0 4px 12px rgba(0,0,0,0.15)' }}>
+      <span style={{ display: 'block', marginTop: 12, marginBottom: 12, borderRadius: 12, overflow: 'hidden', boxShadow: '0 4px 12px rgba(0,0,0,0.15)' }}>
         <img {...props} style={{ width: '100%', height: 'auto', display: 'block', objectFit: 'cover', maxHeight: 220 }} />
-      </div>
+      </span>
     );
   },
   a: ({ node, ...props }) => {

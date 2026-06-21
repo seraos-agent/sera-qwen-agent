@@ -17,7 +17,7 @@ export const BuyerChatPanel = () => {
   if (!chatOpen || appMode !== 'buyer') return null;
 
   return (
-    <div style={{
+    <div className="buyer-chat-panel" style={{
       width: chatWidth,
       position: 'relative',
       height: '100vh',
@@ -48,7 +48,6 @@ export const BuyerChatPanel = () => {
       {/* Header */}
       <div style={{ padding: '20px', borderBottom: 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: isDarkMode ? '#111113' : '#fff' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <span style={{ width: 10, height: 10, borderRadius: '50%', background: '#c8b89a', animation: 'pulse 2s infinite' }} />
           <div>
             <p style={{ fontSize: 12, fontWeight: 700, color: isDarkMode ? '#c8b89a' : '#8b7355' }}>SERA</p>
             <p style={{ fontSize: 10, color: isDarkMode ? '#6b6b75' : '#9ca3af' }}>Discovery AI Concierge</p>

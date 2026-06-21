@@ -37,7 +37,7 @@ export const SellerChatPanel = () => {
 
   return (
     <>
-      <div style={{
+      <div className="seller-chat-panel" style={{
         width: chatWidth,
         position: "relative",
         height: "100vh",

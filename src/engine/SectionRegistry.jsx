@@ -5,41 +5,7 @@ import { ImageLoadingPlaceholder } from '../components/ImageLoadingPlaceholder';
 export const SECTION_REGISTRY = {
   header: {
     variants: {
-      default: (props) => {
-        const t = props.isDarkMode ? storeThemeDark : storeThemeLight;
-        return (
-          <header style={{
-            position: "sticky",
-            top: 0,
-            zIndex: 40,
-            background: props.isDarkMode ? "rgba(17, 17, 19, 0.85)" : "rgba(255, 255, 255, 0.85)",
-            backdropFilter: "blur(12px)",
-            borderBottom: `1px solid ${t.border.subtle}`,
-            padding: "16px 40px",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            fontFamily: "'DM Sans', sans-serif",
-            transition: "all 0.3s ease"
-          }}>
-            <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, fontWeight: 700, color: t.text.primary, letterSpacing: 0.5 }}>
-              {props.title || "My Store"}
-            </div>
-            <div style={{ display: "flex", gap: 24 }}>
-              <a href="#featured_products" onClick={(e) => { e.preventDefault(); document.querySelector('.section-wrapper-featured_products')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }} style={{ color: t.text.primary, textDecoration: "none", fontSize: 14, fontWeight: 500, transition: "color 0.2s", cursor: "pointer" }}>Shop</a>
-              <a href="#philosophy" onClick={(e) => { e.preventDefault(); document.querySelector('.section-wrapper-philosophy')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }} style={{ color: t.text.primary, textDecoration: "none", fontSize: 14, fontWeight: 500, transition: "color 0.2s", cursor: "pointer" }}>Our Story</a>
-              <a href="#footer" onClick={(e) => { e.preventDefault(); document.querySelector('.section-wrapper-footer')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }} style={{ color: t.text.primary, textDecoration: "none", fontSize: 14, fontWeight: 500, transition: "color 0.2s", cursor: "pointer" }}>FAQ</a>
-            </div>
-            <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-              <div style={{ position: "relative", cursor: "pointer", color: t.text.primary }}>
-                <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                  <path d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-                </svg>
-              </div>
-            </div>
-          </header>
-        );
-      }
+      default: (props) => null
     }
   },
   hero: {
@@ -51,21 +17,24 @@ export const SECTION_REGISTRY = {
         const overlayOpacity = props.heroImage ? (props.isDarkMode ? 0.6 : 0.3) : 0;
         return (
           <div style={{
-            minHeight: props.height || 500,
+            width: '100%',
+            aspectRatio: '21 / 9',
+            minHeight: 350,
+            maxHeight: '80vh',
             backgroundImage: resolvedBg,
             backgroundSize: "cover", backgroundPosition: "center", position: "relative",
             display: "flex", alignItems: "center", justifyContent: "center", textAlign: "center",
-            padding: "0 20px", transition: "background 0.3s ease"
+            padding: "clamp(20px, 4vw, 80px) 20px", transition: "background 0.3s ease"
           }}>
             <div style={{ position: "absolute", inset: 0, background: `rgba(0,0,0,${overlayOpacity})`, zIndex: 0, transition: "background 0.3s ease" }}></div>
             <div style={{ position: "relative", zIndex: 2, maxWidth: 700 }}>
               <span style={{ fontSize: 11, fontWeight: 800, color: props.themeColor, letterSpacing: 4, textTransform: "uppercase", display: "block", marginBottom: 16 }}>{props.collection}</span>
-              <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 52, fontWeight: 600, lineHeight: 1.1, marginBottom: 20, color: props.heroImage ? "#fff" : t.text.primary, transition: "color 0.3s ease" }}>{props.title}</h1>
-              <p style={{ fontSize: 16, color: props.heroImage ? "#ccc" : t.text.secondary, maxWidth: 500, margin: "0 auto", lineHeight: 1.6, transition: "color 0.3s ease" }}>{props.subtitle}</p>
+              <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 'clamp(20px, 5vw, 52px)', fontWeight: 600, lineHeight: 1.1, marginBottom: 16, color: props.heroImage ? "#fff" : t.text.primary, transition: "color 0.3s ease" }}>{props.title}</h1>
+              <p style={{ fontSize: 'clamp(11px, 3vw, 16px)', color: props.heroImage ? "#ccc" : t.text.secondary, maxWidth: 500, margin: "0 auto", lineHeight: 1.6, transition: "color 0.3s ease" }}>{props.subtitle}</p>
               <button style={{
-                marginTop: 32, background: props.themeColor, color: "#0f0f10",
-                border: "none", padding: "14px 40px", borderRadius: 6,
-                fontSize: 13, fontWeight: 700, cursor: "pointer", letterSpacing: 1, transition: "all 0.3s ease"
+                marginTop: 20, background: props.themeColor, color: "#0f0f10",
+                border: "none", padding: "clamp(8px, 2vw, 14px) clamp(16px, 5vw, 40px)", borderRadius: 6,
+                fontSize: 'clamp(11px, 2vw, 13px)', fontWeight: 700, cursor: "pointer", letterSpacing: 1, transition: "all 0.3s ease"
               }}>{props.buttonText}</button>
             </div>
           </div>
@@ -78,21 +47,24 @@ export const SECTION_REGISTRY = {
         const overlayOpacity = props.heroImage ? (props.isDarkMode ? 0.6 : 0.3) : 0;
         return (
           <div style={{
-            minHeight: props.height || 600,
+            width: '100%',
+            aspectRatio: '21 / 9',
+            minHeight: 400,
+            maxHeight: '85vh',
             backgroundImage: resolvedBg,
             backgroundSize: "cover", backgroundPosition: "center", position: "relative",
             display: "flex", alignItems: "center", justifyContent: "flex-start", textAlign: "left",
-            padding: "0 60px", transition: "background 0.3s ease"
+            padding: "clamp(20px, 4vw, 60px) clamp(16px, 5vw, 60px)", transition: "background 0.3s ease"
           }}>
             <div style={{ position: "absolute", inset: 0, background: `rgba(0,0,0,${overlayOpacity})`, zIndex: 0, transition: "background 0.3s ease" }}></div>
             <div style={{ position: "relative", zIndex: 2, maxWidth: 500 }}>
               <span style={{ fontSize: 11, fontWeight: 800, color: props.themeColor, letterSpacing: 4, textTransform: "uppercase", display: "block", marginBottom: 16 }}>{props.collection}</span>
-              <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 56, fontWeight: 600, lineHeight: 1.1, marginBottom: 20, color: props.heroImage ? "#fff" : t.text.primary, transition: "color 0.3s ease" }}>{props.title}</h1>
-              <p style={{ fontSize: 16, color: props.heroImage ? "#ccc" : t.text.secondary, lineHeight: 1.6, transition: "color 0.3s ease" }}>{props.subtitle}</p>
+              <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 'clamp(20px, 5vw, 56px)', fontWeight: 600, lineHeight: 1.1, marginBottom: 16, color: props.heroImage ? "#fff" : t.text.primary, transition: "color 0.3s ease" }}>{props.title}</h1>
+              <p style={{ fontSize: 'clamp(11px, 3vw, 16px)', color: props.heroImage ? "#ccc" : t.text.secondary, lineHeight: 1.6, transition: "color 0.3s ease" }}>{props.subtitle}</p>
               <button style={{
-                marginTop: 32, background: props.themeColor, color: "#0f0f10",
-                border: "none", padding: "14px 40px", borderRadius: 6,
-                fontSize: 13, fontWeight: 700, cursor: "pointer", letterSpacing: 1, transition: "all 0.3s ease"
+                marginTop: 20, background: props.themeColor, color: "#0f0f10",
+                border: "none", padding: "clamp(8px, 2vw, 14px) clamp(16px, 5vw, 40px)", borderRadius: 6,
+                fontSize: 'clamp(11px, 2vw, 13px)', fontWeight: 700, cursor: "pointer", letterSpacing: 1, transition: "all 0.3s ease"
               }}>{props.buttonText}</button>
             </div>
             {!props.heroImage && (
@@ -114,7 +86,10 @@ export const SECTION_REGISTRY = {
         const overlayColor = props.isDarkMode ? "rgba(0,0,0,0.2), rgba(0,0,0,0.8)" : "rgba(255,255,255,0.1), rgba(255,255,255,0.6)";
         return (
           <div style={{
-            height: "100vh",
+            width: '100%',
+            aspectRatio: '16 / 9',
+            minHeight: 500,
+            maxHeight: '100vh',
             backgroundImage: resolvedBg,
             backgroundSize: "cover", backgroundPosition: "center", position: "relative",
             display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center",
@@ -123,15 +98,15 @@ export const SECTION_REGISTRY = {
             <div style={{ position: "absolute", inset: 0, background: props.heroImage ? (props.isDarkMode ? "linear-gradient(to bottom, rgba(0,0,0,0.2), rgba(0,0,0,0.8))" : "linear-gradient(to bottom, rgba(0,0,0,0.1), rgba(0,0,0,0.5))") : `linear-gradient(to bottom, ${overlayColor})`, zIndex: 0, transition: "background 0.3s ease" }}></div>
             <div style={{ position: "relative", zIndex: 2, maxWidth: 900 }}>
               <h1 style={{
-                fontFamily: "'Playfair Display', serif", fontSize: 84, fontWeight: 300,
-                lineHeight: 1, marginBottom: 24, letterSpacing: "-0.02em",
+                fontFamily: "'Playfair Display', serif", fontSize: 'clamp(24px, 6vw, 84px)', fontWeight: 300,
+                lineHeight: 1, marginBottom: 16, letterSpacing: "-0.02em",
                 textShadow: props.heroImage || props.isDarkMode ? "0 10px 30px rgba(0,0,0,0.5)" : "none",
                 color: props.heroImage ? "#fff" : t.text.primary, transition: "color 0.3s ease"
               }}>{props.title}</h1>
-              <p style={{ fontSize: 20, opacity: 0.8, maxWidth: 600, margin: "0 auto 40px", fontWeight: 300, letterSpacing: 1, color: props.heroImage ? "#fff" : t.text.secondary, transition: "color 0.3s ease" }}>{props.subtitle}</p>
+              <p style={{ fontSize: 'clamp(12px, 3.5vw, 20px)', opacity: 0.8, maxWidth: 600, margin: "0 auto 24px", fontWeight: 300, letterSpacing: 1, color: props.heroImage ? "#fff" : t.text.secondary, transition: "color 0.3s ease" }}>{props.subtitle}</p>
               <button style={{
-                background: props.heroImage || props.isDarkMode ? "#fff" : "#111", color: props.heroImage || props.isDarkMode ? "#000" : "#fff", border: "none", padding: "18px 48px", borderRadius: 100,
-                fontSize: 14, fontWeight: 600, cursor: "pointer", transition: "all 0.3s ease",
+                background: props.heroImage || props.isDarkMode ? "#fff" : "#111", color: props.heroImage || props.isDarkMode ? "#000" : "#fff", border: "none", padding: "clamp(10px, 2vw, 18px) clamp(20px, 5vw, 48px)", borderRadius: 100,
+                fontSize: 'clamp(11px, 2vw, 14px)', fontWeight: 600, cursor: "pointer", transition: "all 0.3s ease",
                 boxShadow: "0 20px 40px rgba(0,0,0,0.3)"
               }}>{props.buttonText}</button>
             </div>
@@ -153,13 +128,13 @@ export const SECTION_REGISTRY = {
           animation: "shimmer 1.8s infinite linear"
         };
         return (
-          <div style={{ padding: "60px 40px", transition: "background 0.3s ease" }}>
+          <div style={{ padding: "clamp(30px, 5vw, 60px) clamp(16px, 4vw, 40px)", transition: "background 0.3s ease" }}>
             <style>{`@keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}`}</style>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 40 }}>
-              <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 32, color: t.text.primary, transition: "color 0.3s ease" }}>{props.sectionTitle || "Curated Selection"}</h2>
-              <span style={{ fontSize: 12, color: props.isDarkMode ? props.themeColor : t.text.primary, cursor: "pointer", fontWeight: 600, letterSpacing: 1, transition: "color 0.3s ease" }}>EXPLORE ALL</span>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 30 }}>
+              <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 'clamp(24px, 5vw, 32px)', color: t.text.primary, transition: "color 0.3s ease" }}>{props.sectionTitle || "Curated Selection"}</h2>
+              <span style={{ fontSize: 11, color: props.isDarkMode ? props.themeColor : t.text.primary, cursor: "pointer", fontWeight: 600, letterSpacing: 1, transition: "color 0.3s ease" }}>EXPLORE ALL</span>
             </div>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))", gap: 30 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(clamp(140px, 20vw, 240px), 1fr))", gap: 'clamp(12px, 3vw, 24px)' }}>
               {((props.products && props.products.length > 0) ? props.products : (props.isBuilding ? Array(4).fill({ name: "Generating Product...", price: "...", desc: "Curating product details and imagery..." }) : [])).map((p, i) => (
                 <div
                   key={i}
@@ -203,18 +178,17 @@ export const SECTION_REGISTRY = {
                         onError={e => { e.currentTarget.style.display = "none"; }}
                       />
                     )}
-                    {p.promo && <div style={{ position: "absolute", top: 12, left: 12, background: props.themeColor || "rgba(200,184,154,0.9)", color: "#000", fontSize: 10, fontWeight: 800, padding: "4px 10px", borderRadius: 10, zIndex: 2, backdropFilter: "blur(4px)" }}>{p.promo}</div>}
+                    {p.promo && <div style={{ position: "absolute", top: 8, left: 8, background: props.themeColor || "rgba(200,184,154,0.9)", color: "#000", fontSize: 9, fontWeight: 800, padding: "3px 8px", borderRadius: 8, zIndex: 2, backdropFilter: "blur(4px)" }}>{p.promo}</div>}
                   </div>
                   {/* Text Container */}
-                  <div style={{ padding: "16px", display: "flex", flexDirection: "column", flex: 1 }}>
-                    <h3 style={{ fontSize: 15, fontWeight: 700, color: t.text.primary, transition: "color 0.3s ease", marginBottom: 4, lineHeight: 1.3 }}>{p.name}</h3>
-                    <p style={{ fontSize: 12, color: t.text.secondary, marginBottom: 12, lineHeight: 1.4, flex: 1, overflow: "hidden", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", transition: "color 0.3s ease" }}>{p.desc || p.description || "An exclusive, high-quality product carefully curated for our collection."}</p>
-                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", paddingTop: 12 }}>
-                      <span style={{ fontSize: 15, fontWeight: 800, color: props.themeColor || "#c8b89a" }}>{p.price}</span>
-                      <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11, color: t.text.secondary }}>
+                  <div style={{ padding: "clamp(12px, 2vw, 16px)", display: "flex", flexDirection: "column", flex: 1 }}>
+                    <h3 style={{ fontSize: 'clamp(12px, 3vw, 15px)', fontWeight: 700, color: t.text.primary, transition: "color 0.3s ease", marginBottom: 4, lineHeight: 1.3 }}>{p.name}</h3>
+                    <p style={{ fontSize: 'clamp(10px, 2.5vw, 12px)', color: t.text.secondary, marginBottom: 8, lineHeight: 1.4, flex: 1, overflow: "hidden", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", transition: "color 0.3s ease" }}>{p.desc || p.description || "An exclusive, high-quality product carefully curated for our collection."}</p>
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", paddingTop: 8, flexWrap: "wrap", gap: 4 }}>
+                      <span style={{ fontSize: 'clamp(13px, 3.5vw, 15px)', fontWeight: 800, color: props.themeColor || "#c8b89a" }}>{p.price}</span>
+                      <div style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 10, color: t.text.secondary }}>
                         <span>⭐ 4.9</span>
-                        <span>•</span>
-                        <span>Hot</span>
+                        <span style={{ display: 'none' }}>•</span>
                       </div>
                     </div>
                   </div>
@@ -255,9 +229,9 @@ export const SECTION_REGISTRY = {
         const items = props.items || [];
         const doubledItems = [...items, ...items]; // For infinite scroll effect
         return (
-          <div style={{ padding: "80px 0", background: "transparent", overflow: "hidden", transition: "background 0.3s ease" }}>
-            <div style={{ padding: "0 40px", marginBottom: 40 }}>
-              <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 32, color: t.text.primary, transition: "color 0.3s ease" }}>Our Ethos</h2>
+          <div style={{ padding: "clamp(30px, 5vw, 80px) 0", background: "transparent", overflow: "hidden", transition: "background 0.3s ease" }}>
+            <div style={{ padding: "0 clamp(16px, 4vw, 40px)", marginBottom: "clamp(20px, 4vw, 40px)" }}>
+              <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 'clamp(24px, 5vw, 32px)', color: t.text.primary, transition: "color 0.3s ease" }}>Our Ethos</h2>
             </div>
             <div className="hide-scrollbar" style={{ overflowX: "hidden" }}>
               <style>{`
@@ -277,12 +251,12 @@ export const SECTION_REGISTRY = {
               `}</style>
               <div className="philosophy-scroller">
                 {doubledItems.map((v, i) => (
-                  <div key={i} className="philosophy-card" onClick={() => props.onSelectPhilosophy && props.onSelectPhilosophy(v)} style={{ flex: "0 0 350px", height: 450, position: "relative", borderRadius: 24, overflow: "hidden", cursor: "pointer", ...((v.verifiedUrl || v.imageUrl) ? { backgroundColor: t.surface.secondary } : { backgroundImage: t.surface.skeleton, backgroundSize: "200% 100%", animation: "shimmer 1.8s infinite linear" }) }}>
+                  <div key={i} className="philosophy-card" onClick={() => props.onSelectPhilosophy && props.onSelectPhilosophy(v)} style={{ flex: "0 0 clamp(200px, 60vw, 350px)", height: "clamp(280px, 60vh, 450px)", position: "relative", borderRadius: 24, overflow: "hidden", cursor: "pointer", ...((v.verifiedUrl || v.imageUrl) ? { backgroundColor: t.surface.secondary } : { backgroundImage: t.surface.skeleton, backgroundSize: "200% 100%", animation: "shimmer 1.8s infinite linear" }) }}>
                     {!(v.verifiedUrl || v.imageUrl) && <ImageLoadingPlaceholder />}
                     {v.imageUrl && <img key={`${v.imageUrl}-${v.verifiedUrl ? 'verified' : 'pending'}`} src={v.imageUrl} style={{ width: "100%", height: "100%", objectFit: "cover", position: "absolute", inset: 0, opacity: (v.verifiedUrl || v.imageUrl) ? 1 : 0, transition: "opacity 0.5s ease-in" }} onLoad={e => { e.currentTarget.style.opacity = 1; e.currentTarget.style.display = "block"; }} onError={e => { e.currentTarget.style.display = "none"; }} />}
-                    <div style={{ position: "absolute", inset: 0, padding: 40, display: "flex", flexDirection: "column", justifyContent: "flex-end", background: "linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 60%)" }}>
-                      <h4 style={{ fontSize: 12, fontWeight: 800, color: props.themeColor || "#fff", letterSpacing: 4, textTransform: "uppercase", marginBottom: 12 }}>{v.label || v.title}</h4>
-                      <p style={{ fontSize: 15, color: "rgba(255,255,255,0.9)", lineHeight: 1.6, fontWeight: 300, display: "-webkit-box", WebkitLineClamp: 4, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{v.sub || v.body}</p>
+                    <div style={{ position: "absolute", inset: 0, padding: "clamp(20px, 4vw, 40px)", display: "flex", flexDirection: "column", justifyContent: "flex-end", background: "linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 60%)" }}>
+                      <h4 style={{ fontSize: 'clamp(10px, 2.5vw, 12px)', fontWeight: 800, color: props.themeColor || "#fff", letterSpacing: 4, textTransform: "uppercase", marginBottom: 12 }}>{v.label || v.title}</h4>
+                      <p style={{ fontSize: 'clamp(12px, 3.5vw, 15px)', color: "rgba(255,255,255,0.9)", lineHeight: 1.5, fontWeight: 300, display: "-webkit-box", WebkitLineClamp: 4, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{v.sub || v.body}</p>
                     </div>
                   </div>
                 ))}
@@ -451,21 +425,27 @@ export const SECTION_REGISTRY = {
         if (!props.videoUrl) return null;
         return (
           <section style={{ padding: "60px 40px", background: props.isDarkMode ? "#0f0f10" : "#ffffff" }}>
-            <div style={{ maxWidth: 1100, margin: "0 auto", borderRadius: 24, overflow: "hidden", position: "relative", aspectRatio: "21/9", background: props.isDarkMode ? "#1a1a1e" : "#f3f4f6", border: `1px solid ${props.isDarkMode ? "#2a2a2e" : "#e5e7eb"}`, width: "100%" }}>
-              <video
-                src={props.videoUrl}
-                autoPlay loop muted playsInline preload="auto"
-                onCanPlay={e => { e.currentTarget.style.opacity = '0.8'; }}
-                style={{ width: "100%", height: "100%", objectFit: "cover", opacity: 0, transition: "opacity 0.4s ease" }}
-              />
-              <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(0,0,0,0.9) 0%, transparent 60%)", display: "flex", flexDirection: "column", justifyContent: "flex-end", padding: "40px 60px" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
-                  <span style={{ background: "#ef4444", color: "#fff", fontSize: 11, fontWeight: 800, padding: "4px 12px", borderRadius: 100, textTransform: "uppercase", letterSpacing: 1 }}>Flash Sale</span>
-                  <span style={{ color: "#fff", fontSize: 13, fontWeight: 600, display: "flex", alignItems: "center", gap: 6 }}><div style={{ width: 8, height: 8, borderRadius: "50%", background: "#4ade80" }} /> Live Now</span>
+            <div style={{ maxWidth: 1100, margin: "0 auto", width: "100%" }}>
+              <div style={{ position: "relative", width: "100%", aspectRatio: "16/9", borderRadius: "clamp(12px, 3vw, 24px)", overflow: "hidden", background: "#1a1a1e", border: `1px solid ${props.isDarkMode ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)"}` }}>
+                <video
+                  src={props.videoUrl}
+                  autoPlay loop muted playsInline preload="auto"
+                  onCanPlay={e => { e.currentTarget.style.opacity = '1'; }}
+                  style={{ width: "100%", height: "100%", objectFit: "cover", opacity: 0, transition: "opacity 0.4s ease" }}
+                />
+                <div style={{ position: "absolute", top: "8px", right: "8px" }}>
+                  <span style={{ background: "rgba(0,0,0,0.5)", backdropFilter: "blur(4px)", color: "#fff", fontSize: 9, fontWeight: 600, padding: "2px 8px", borderRadius: 100, display: "flex", alignItems: "center", gap: 4 }}><div style={{ width: 4, height: 4, borderRadius: "50%", background: "#4ade80", animation: "pulse 1.5s infinite" }} /> Live Now</span>
                 </div>
-                <h2 style={{ fontSize: 42, color: "#fff", fontFamily: "'Playfair Display', serif", fontWeight: 700, marginBottom: 12, lineHeight: 1.1 }}>{props.title || "Exclusive Collection"}</h2>
-                <p style={{ color: "rgba(255,255,255,0.8)", fontSize: 16, maxWidth: 500, lineHeight: 1.5, marginBottom: 24 }}>{props.subtitle || "Explore our cinematic product showcases directly inside the storefront."}</p>
-                <button style={{ background: "#fff", color: "#000", border: "none", borderRadius: 8, padding: "12px 32px", fontSize: 14, fontWeight: 700, cursor: "pointer", width: "fit-content", transition: "transform 0.2s" }}>Shop Featured</button>
+              </div>
+              <div style={{ paddingTop: "clamp(20px, 4vw, 32px)", paddingLeft: "clamp(4px, 2vw, 16px)", paddingRight: "clamp(4px, 2vw, 16px)", display: "flex", flexDirection: "column", alignItems: "flex-start" }}>
+                <div style={{ marginBottom: "12px" }}>
+                  <span style={{ background: "rgba(239, 68, 68, 0.9)", color: "#fff", fontSize: 10, fontWeight: 800, padding: "4px 10px", borderRadius: 100, textTransform: "uppercase", letterSpacing: 0.5 }}>Flash Sale</span>
+                </div>
+                <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: "clamp(24px, 5vw, 40px)", fontWeight: 700, color: props.isDarkMode ? "#fff" : "#111", margin: "0 0 12px 0", lineHeight: 1.1 }}>
+                  {props.title || "Exclusive Collection"}
+                </h2>
+                <p style={{ color: props.isDarkMode ? "rgba(255,255,255,0.7)" : "rgba(0,0,0,0.6)", fontSize: "clamp(14px, 3vw, 16px)", maxWidth: 600, lineHeight: 1.6, marginBottom: "24px" }}>{props.subtitle || "Explore our cinematic product showcases directly inside the storefront."}</p>
+                <button style={{ background: props.isDarkMode ? "#fff" : "#111", color: props.isDarkMode ? "#000" : "#fff", border: "none", borderRadius: 8, padding: "12px 32px", fontSize: "14px", fontWeight: 700, cursor: "pointer", width: "fit-content", transition: "transform 0.2s" }}>Shop Featured</button>
               </div>
             </div>
           </section>
@@ -481,33 +461,27 @@ export const SECTION_REGISTRY = {
           <section style={{ padding: "80px 40px", background: props.isDarkMode ? "rgba(255,255,255,0.02)" : "rgba(0,0,0,0.02)", borderTop: `1px solid ${props.isDarkMode ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)"}` }}>
             <div style={{ maxWidth: 1200, margin: "0 auto" }}>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 40 }}>
-                <div>
-                  <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 32, fontWeight: 700, color: props.isDarkMode ? "#fff" : "#111", marginBottom: 8 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                  <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 32, fontWeight: 700, color: props.isDarkMode ? "#fff" : "#111", margin: 0 }}>
                     {props.title || "Featured Promo Campaigns"}
                   </h2>
-                  <p style={{ color: props.isDarkMode ? "rgba(255,255,255,0.6)" : "rgba(0,0,0,0.6)", fontSize: 16 }}>
-                    Exclusive promotions and flash sales powered by Tongyi AI.
-                  </p>
+                  <span style={{ background: "rgba(239, 68, 68, 0.9)", color: "#fff", fontSize: 10, fontWeight: 800, padding: "4px 10px", borderRadius: 100, textTransform: "uppercase", letterSpacing: 0.5 }}>Flash Sale</span>
                 </div>
-                <span style={{ fontSize: 12, fontWeight: 800, background: "#ef4444", color: "#fff", padding: "6px 16px", borderRadius: 100, textTransform: "uppercase", letterSpacing: 1 }}>Live Now</span>
               </div>
               <div style={{ display: "flex", justifyContent: "center" }}>
-                <div style={{ maxWidth: 300, width: "100%", borderRadius: 16, overflow: "hidden", position: "relative", aspectRatio: "9/16", background: props.isDarkMode ? "#1a1a1e" : "#f3f4f6", border: `1px solid ${props.isDarkMode ? "#2a2a2e" : "#e5e7eb"}` }}>
-                  <video
-                    src={props.videoUrl}
-                    autoPlay loop muted playsInline preload="auto"
-                    onCanPlay={e => { e.currentTarget.style.opacity = '1'; }}
-                    style={{ width: "100%", height: "100%", objectFit: "cover", opacity: 0, transition: "opacity 0.4s ease" }}
-                  />
-                  <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(0,0,0,0.9) 0%, transparent 40%)" }} />
-                  <div style={{ position: "absolute", bottom: 20, left: 20, right: 20, display: "flex", justifyContent: "space-between", alignItems: "flex-end" }}>
-                    <div>
-                      <h3 style={{ color: "#fff", fontSize: 22, fontWeight: 700, marginBottom: 4, fontFamily: "'Playfair Display', serif" }}>{props.storeTitle || "My Store"}</h3>
-                      <p style={{ color: "rgba(255,255,255,0.7)", fontSize: 14 }}>Special Campaign</p>
+                <div style={{ maxWidth: 300, width: "100%" }}>
+                  <div style={{ borderRadius: 16, overflow: "hidden", position: "relative", aspectRatio: "9/16", background: props.isDarkMode ? "#1a1a1e" : "#f3f4f6", border: `1px solid ${props.isDarkMode ? "#2a2a2e" : "#e5e7eb"}` }}>
+                    <video
+                      src={props.videoUrl}
+                      autoPlay loop muted playsInline preload="auto"
+                      onCanPlay={e => { e.currentTarget.style.opacity = '1'; }}
+                      style={{ width: "100%", height: "100%", objectFit: "cover", opacity: 0, transition: "opacity 0.4s ease" }}
+                    />
+                    <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: "40%", background: "linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 100%)", pointerEvents: "none" }} />
+                    <div style={{ position: "absolute", bottom: "8px", left: "8px", right: "8px", display: "flex", justifyContent: "space-between", alignItems: "flex-end", gap: 12 }}>
+                      <p style={{ color: "#fff", fontSize: 11, fontWeight: 500, margin: 0, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden", textShadow: "0 1px 2px rgba(0,0,0,0.8)", lineHeight: 1.3 }}>{props.description || "Limited edition collection. Grab yours before it's gone!"}</p>
+                      <span style={{ background: "rgba(239, 68, 68, 0.9)", backdropFilter: "blur(4px)", color: "#fff", fontSize: 8, fontWeight: 800, padding: "3px 8px", borderRadius: 100, textTransform: "uppercase", letterSpacing: 0.5, cursor: "pointer", whiteSpace: "nowrap", flexShrink: 0 }}>Shop Now</span>
                     </div>
-                    <span style={{ color: "#ffffff", fontSize: 13, fontWeight: 700, background: "#ef4444", padding: "8px 16px", borderRadius: 100, border: "none", whiteSpace: "nowrap", flexShrink: 0 }}>
-                      Shop Now
-                    </span>
                   </div>
                 </div>
               </div>

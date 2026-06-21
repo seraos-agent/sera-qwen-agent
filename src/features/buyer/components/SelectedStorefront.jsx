@@ -25,67 +25,52 @@ export const SelectedStorefront = () => {
       zIndex: 180, overflowY: 'auto',
       display: 'flex', flexDirection: 'column',
       animation: 'fadeIn 0.3s ease',
-      borderRight: chatOpen ? `1px solid ${t.border}` : 'none'
+      borderRight: chatOpen ? `1px solid ${t.border}` : 'none',
+      paddingBottom: 100 // Extra padding to prevent bottom nav from covering content
     }}>
-      {/* Top Bar / Back Navigation */}
-      <div style={{
-        position: 'sticky', top: 0, zIndex: 50,
-        background: isDarkMode ? 'rgba(15,15,16,0.9)' : 'rgba(255,255,255,0.9)',
-        backdropFilter: 'blur(12px)',
-        borderBottom: `1px solid ${t.border}`,
-        padding: '16px 40px',
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between'
-      }}>
-        <button
-          onClick={() => setSelectedStorefront(null)}
-          style={{ background: 'none', border: 'none', color: t.text, display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', fontSize: 14, fontWeight: 700 }}
-        >
-          <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7" /></svg>
-          Back to AI Discovery
-        </button>
+      {/* Header */}
+          <div style={{
+            position: 'sticky', top: 0, zIndex: 50,
+            background: isDarkMode ? 'rgba(17,17,19,0.85)' : 'rgba(255,255,255,0.85)',
+            backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)',
+            borderBottom: `1px solid ${t.border}`,
+            padding: '6px 24px',
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+            transition: 'all 0.3s ease'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', width: 60 }}>
+              <button 
+                onClick={() => setSelectedStorefront(null)}
+                style={{ background: 'none', border: 'none', color: t.text, cursor: 'pointer', padding: 6, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '50%', transition: 'background 0.2s' }}
+                onMouseEnter={e => e.currentTarget.style.background = isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)'}
+                onMouseLeave={e => e.currentTarget.style.background = 'none'}
+                title="Back to Explore"
+              >
+                <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7"></path></svg>
+              </button>
+            </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <span style={{ fontSize: 12, color: '#4ade80', background: 'rgba(74,222,128,0.1)', padding: '4px 12px', borderRadius: 20, border: '1px solid rgba(74,222,128,0.2)', fontWeight: 600 }}>
-            Verified AI Brand • {selectedStorefront.trustScore} Trust
-          </span>
-          <button
-            onClick={() => {
-              toggleFollowStore(selectedStorefront.id);
-              showToast(followedStores.has(selectedStorefront.id)
-                ? `Unfollowed ${selectedStorefront.name}`
-                : `Following ${selectedStorefront.name}!`
-              );
-            }}
-            style={{
-              background: followedStores.has(selectedStorefront.id) ? (isDarkMode ? '#2a2a2e' : '#e5e7eb') : '#c8b89a',
-              color: followedStores.has(selectedStorefront.id) ? t.text : '#0f0f10',
-              border: 'none', borderRadius: 12,
-              padding: '8px 18px', fontSize: 13, fontWeight: 700, cursor: 'pointer'
-            }}
-          >
-            {followedStores.has(selectedStorefront.id) ? 'Following' : 'Follow'}
-          </button>
-          {!chatOpen && (
-            <button
-              onClick={() => setChatOpen(true)}
-              style={{
-                marginLeft: 8, background: isDarkMode ? '#1a1a1e' : '#f3f4f6',
-                border: `1px solid ${isDarkMode ? '#2a2a2e' : '#e5e7eb'}`,
-                borderRadius: 6, padding: '4px 10px', cursor: 'pointer',
-                color: isDarkMode ? '#c8b89a' : '#82693f',
-                fontSize: 11, fontFamily: "'DM Sans', sans-serif",
-                display: 'flex', alignItems: 'center', gap: 6,
-                transition: 'all 0.2s', fontWeight: 600
-              }}
-            >
-              <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" />
-              </svg>
-              Open SERA
-            </button>
-          )}
-        </div>
-      </div>
+            <div style={{ display: 'flex', gap: 'clamp(12px, 3vw, 24px)', alignItems: 'center', justifyContent: 'center', flex: 1 }}>
+              <a href="#featured_products" onClick={(e) => { e.preventDefault(); document.querySelector('.section-wrapper-featured_products')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }} style={{ color: t.text, textDecoration: "none", fontSize: 'clamp(11px, 2vw, 13px)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1 }}>Shop</a>
+              <a href="#philosophy" onClick={(e) => { e.preventDefault(); document.querySelector('.section-wrapper-philosophy')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }} style={{ color: t.text, textDecoration: "none", fontSize: 'clamp(11px, 2vw, 13px)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1 }}>Our Story</a>
+              <a href="#footer" onClick={(e) => { e.preventDefault(); document.querySelector('.section-wrapper-footer')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }} style={{ color: t.text, textDecoration: "none", fontSize: 'clamp(11px, 2vw, 13px)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1 }}>FAQ</a>
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 60, justifyContent: 'flex-end' }}>
+              {!chatOpen && (
+                <button 
+                  onClick={() => setChatOpen(true)}
+                  style={{ background: '#c8b89a', color: '#0f0f10', border: 'none', borderRadius: 16, padding: '4px 10px', fontSize: 10, fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4, transition: 'transform 0.2s' }}
+                  onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.05)'}
+                  onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
+                  title="Open AI Concierge"
+                >
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                  SERA
+                </button>
+              )}
+            </div>
+          </div>
 
       {/* Legacy Store Cover Banner (no customSchema) */}
       {!selectedStorefront.customSchema && (() => {
@@ -101,15 +86,23 @@ export const SelectedStorefront = () => {
 
         return (
           <>
-            {/* Hero Banner */}
-            <div style={{
-              position: 'relative', width: '100%', minHeight: '450px', flexShrink: 0,
-              background: selectedStorefront.cover
-                ? `url('${selectedStorefront.cover}') center/cover no-repeat`
-                : (isDarkMode ? '#1a1a1e' : '#f3f4f6'),
+            <div className="section-wrapper-hero" style={{
+              position: 'relative',
+              width: '100%',
+              aspectRatio: '21 / 9',
+              minHeight: 400,
+              maxHeight: '80vh',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              padding: '80px 0', borderBottom: `1px solid ${t.border}`, overflow: 'hidden'
+              overflow: 'hidden'
             }}>
+              <div style={{
+                position: 'absolute', inset: 0,
+                backgroundImage: selectedStorefront.cover ? `url('${selectedStorefront.cover}')` : (isDarkMode ? "url('https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&q=80')" : "url('https://images.unsplash.com/photo-1441984904996-e0b6ba687e08?auto=format&fit=crop&q=80')"),
+                backgroundSize: 'cover', backgroundPosition: 'center',
+                filter: 'blur(0)',
+                transform: 'scale(1.05)',
+                transition: 'transform 0.5s ease'
+              }} />
               <div style={{
                 position: 'absolute', inset: 0,
                 background: selectedStorefront.cover
@@ -117,14 +110,14 @@ export const SelectedStorefront = () => {
                   : (isDarkMode ? 'linear-gradient(to bottom, rgba(15,15,16,0.3) 0%, rgba(15,15,16,0.85) 100%)' : 'linear-gradient(to bottom, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0.85) 100%)'),
                 zIndex: 1
               }} />
-              <div style={{ position: 'relative', zIndex: 2, textAlign: 'center', padding: '0 20px', maxWidth: 800 }}>
-                <span style={{ fontSize: 13, fontWeight: 800, color: '#c8b89a', letterSpacing: 4, textTransform: 'uppercase', display: 'block', marginBottom: 16 }}>
+              <div style={{ position: 'relative', zIndex: 2, textAlign: 'center', padding: '0 16px', maxWidth: 800 }}>
+                <span style={{ fontSize: 10, fontWeight: 800, color: '#c8b89a', letterSpacing: 4, textTransform: 'uppercase', display: 'block', marginBottom: 8 }}>
                   {selectedStorefront.category || 'Verified Brand'}
                 </span>
-                <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 64, fontWeight: 700, color: selectedStorefront.cover ? '#fff' : t.text, marginBottom: 20, lineHeight: 1.1 }}>
+                <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 'clamp(20px, 5vw, 48px)', fontWeight: 700, color: selectedStorefront.cover ? '#fff' : t.text, marginBottom: 8, lineHeight: 1.1 }}>
                   {selectedStorefront.name}
                 </h1>
-                <p style={{ fontSize: 18, color: selectedStorefront.cover ? 'rgba(255,255,255,0.8)' : t.subtext, lineHeight: 1.6, maxWidth: 600, margin: '0 auto' }}>
+                <p style={{ fontSize: 'clamp(11px, 3vw, 16px)', color: selectedStorefront.cover ? 'rgba(255,255,255,0.8)' : t.subtext, lineHeight: 1.4, maxWidth: 600, margin: '0 auto' }}>
                   {selectedStorefront.desc}
                 </p>
               </div>
@@ -141,16 +134,16 @@ export const SelectedStorefront = () => {
                         onCanPlay={e => { e.currentTarget.style.opacity = '0.8'; }}
                         style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0, transition: 'opacity 0.5s ease' }}
                       />
-                      <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.9) 0%, transparent 60%)', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', padding: '40px 60px' }}>
+                      <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.9) 0%, transparent 60%)', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', padding: 'clamp(20px, 4vw, 40px) clamp(20px, 6vw, 60px)' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
                           <span style={{ background: '#ef4444', color: '#fff', fontSize: 11, fontWeight: 800, padding: '4px 12px', borderRadius: 100, textTransform: 'uppercase', letterSpacing: 1 }}>Flash Sale</span>
                           <span style={{ color: '#fff', fontSize: 13, fontWeight: 600, display: 'flex', alignItems: 'center', gap: 6 }}>
                             <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#4ade80' }} /> Live Now
                           </span>
                         </div>
-                        <h2 style={{ fontSize: 42, color: '#fff', fontFamily: "'Playfair Display', serif", fontWeight: 700, marginBottom: 12, lineHeight: 1.1 }}>Exclusive Collection</h2>
-                        <p style={{ color: 'rgba(255,255,255,0.8)', fontSize: 16, maxWidth: 500, lineHeight: 1.5, marginBottom: 24 }}>Explore our cinematic product showcases directly inside the storefront.</p>
-                        <button style={{ background: '#fff', color: '#000', border: 'none', borderRadius: 8, padding: '12px 32px', fontSize: 14, fontWeight: 700, cursor: 'pointer', width: 'fit-content', transition: 'transform 0.2s' }}>Shop Featured</button>
+                        <h2 style={{ fontSize: 'clamp(24px, 5vw, 42px)', color: '#fff', fontFamily: "'Playfair Display', serif", fontWeight: 700, marginBottom: 12, lineHeight: 1.1 }}>Exclusive Collection</h2>
+                        <p style={{ color: 'rgba(255,255,255,0.8)', fontSize: 'clamp(14px, 3vw, 16px)', maxWidth: 500, lineHeight: 1.5, marginBottom: 24 }}>Explore our cinematic product showcases directly inside the storefront.</p>
+                        <button style={{ background: '#fff', color: '#000', border: 'none', borderRadius: 8, padding: 'clamp(8px, 2vw, 12px) clamp(20px, 4vw, 32px)', fontSize: 14, fontWeight: 700, cursor: 'pointer', width: 'fit-content', transition: 'transform 0.2s' }}>Shop Featured</button>
                       </div>
                     </div>
                   ))}

@@ -131,7 +131,7 @@ const ConnectorCard = ({ connector, connectionState, onAction, isDarkMode, t }) 
   }
 
   return (
-    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px", background: isDarkMode ? "#0f0f10" : "#ffffff", borderRadius: 10, border: `1px solid ${t.border}` }}>
+    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px 20px", background: isDarkMode ? "rgba(255,255,255,0.03)" : "#ffffff", borderRadius: 16, border: "none", boxShadow: isDarkMode ? "inset 0 1px 0 rgba(255,255,255,0.05)" : "0 2px 10px rgba(0,0,0,0.03)" }}>
       <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
         {iconRender}
         <div>
@@ -175,8 +175,8 @@ const ConnectConnectorModal = ({ connector, connectionState, onClose, onConnect,
   if (!connector) return null;
 
   return (
-    <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(0,0,0,0.6)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000 }}>
-      <div style={{ background: isDarkMode ? "#161618" : "#ffffff", width: 400, borderRadius: 12, padding: 24, border: `1px solid ${t.border}` }}>
+    <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(0,0,0,0.6)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000, padding: 20 }}>
+      <div style={{ background: isDarkMode ? "#16161a" : "#ffffff", width: "100%", maxWidth: 340, borderRadius: 24, padding: "24px 20px", border: "none", boxShadow: "0 24px 60px rgba(0,0,0,0.3)", boxSizing: "border-box" }}>
         {showDisconnectConfirm ? (
           <div style={{ textAlign: "center", padding: "16px 0 8px" }}>
             <div style={{ width: 48, height: 48, borderRadius: "50%", background: isDarkMode ? "rgba(239, 68, 68, 0.1)" : "#fee2e2", color: "#ef4444", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px" }}>
@@ -216,7 +216,7 @@ const ConnectConnectorModal = ({ connector, connectionState, onClose, onConnect,
 
             {isConnected ? (
               <div style={{ marginBottom: 32 }}>
-                <div style={{ background: isDarkMode ? "#0f0f10" : "#f8f9fa", borderRadius: 8, padding: 20, border: `1px solid ${t.border}` }}>
+                <div style={{ background: isDarkMode ? "rgba(255,255,255,0.03)" : "#f8f9fa", borderRadius: 16, padding: 20, border: "none", boxShadow: isDarkMode ? "inset 0 1px 0 rgba(255,255,255,0.05)" : "0 2px 8px rgba(0,0,0,0.02)" }}>
                   {connectionState.capabilities && (
                     <div style={{ paddingBottom: connectionState.syncStatus ? 16 : 0, marginBottom: connectionState.syncStatus ? 16 : 0, borderBottom: connectionState.syncStatus ? `1px solid ${t.border}` : "none" }}>
                       <p style={{ fontSize: 13, color: t.subtext, marginBottom: 12 }}>Capabilities</p>
@@ -346,7 +346,7 @@ export const SellerConnectorsPanel = () => {
   const categories = ["Communication", "Commerce", "Marketing"];
 
   return (
-    <div style={{ padding: "40px 28px", paddingBottom: "100px" }}>
+    <div className="seller-panel" style={{ padding: "40px 28px", paddingBottom: "100px" }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
         <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 28, color: t.text }}>Connections</h2>
       </div>
@@ -357,7 +357,7 @@ export const SellerConnectorsPanel = () => {
           if (categoryConnectors.length === 0) return null;
           
           return (
-            <div key={category} style={{ background: isDarkMode ? "#161618" : "#ffffff", border: `1px solid ${isDarkMode ? "#2a2a2e" : "#e5e7eb"}`, borderRadius: 12, padding: "24px" }}>
+            <div key={category} style={{ animation: "fadeIn 0.3s ease-out" }}>
               <h3 style={{ fontSize: 18, fontWeight: 600, color: t.text, marginBottom: 20 }}>{category}</h3>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 16 }}>
                 {categoryConnectors.map(connector => (

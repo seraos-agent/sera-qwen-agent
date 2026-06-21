@@ -20,6 +20,7 @@ import {
 } from '../../utils/constants';
 import { DynamicRenderer } from '../../engine/DynamicRenderer';
 import { useSellerChat } from './hooks/useSellerChat';
+import { Plus } from 'lucide-react';
 
 export const SellerApp = ({ isDarkMode, setIsDarkMode, t, DynamicRenderer }) => {
 
@@ -66,7 +67,7 @@ export const SellerApp = ({ isDarkMode, setIsDarkMode, t, DynamicRenderer }) => 
     `;
     document.head.appendChild(style);
   }, []);
-    const [activeNav, setActiveNav] = useState("studio");
+  const [activeNav, setActiveNav] = useState("studio");
   const [activePromoTab, setActivePromoTab] = useState("video");
   const [videoFormat, setVideoFormat] = useState("landscape");
   const [previewMode, setPreviewMode] = useState("desktop");
@@ -111,10 +112,10 @@ export const SellerApp = ({ isDarkMode, setIsDarkMode, t, DynamicRenderer }) => 
       const timer = setTimeout(() => {
         let hash = 0;
         for (let i = 0; i < activeAnalyticsStoreId.length; i++) hash += activeAnalyticsStoreId.charCodeAt(i);
-        
+
         const rev = 15000 + (hash % 25000);
         const conv = 0.03 + ((hash % 40) / 1000);
-        
+
         setAnalyticsData({
           summary: {
             total_revenue: rev,
@@ -138,32 +139,35 @@ export const SellerApp = ({ isDarkMode, setIsDarkMode, t, DynamicRenderer }) => 
   useEffect(() => {
     let isMounted = true;
     import('../../lib/agentApi').then(({ getStores }) => {
-        getStores(getSessionId()).then(res => {
-          if (res.success && res.stores && isMounted) {
-            setUserStores(prev => {
-              const merged = [...prev];
-              res.stores.forEach(dbStore => {
-                const storeId = dbStore.store_id || dbStore.id || dbStore._id;
-                const mappedStore = {
-                  id: storeId,
-                  name: dbStore.store_name || dbStore.name || "Unknown Store",
-                  category: dbStore.category || "General",
-                  logo: dbStore.branding?.logo || "",
-                  cover: dbStore.branding?.heroImage || dbStore.branding?.cover || "",
-                  trustScore: "99.9%",
-                  followers: "1.2K",
-                  desc: dbStore.description || "",
-                  isUserStore: true,
-                  createdAt: dbStore.created_at || new Date().toISOString()
-                };
-                if (!merged.find(s => s.id === storeId)) {
-                  merged.push(mappedStore);
-                }
-              });
-              return merged;
+      getStores(getSessionId()).then(res => {
+        if (res.success && res.stores && isMounted) {
+          setUserStores(prev => {
+            const merged = [...prev];
+            res.stores.forEach(dbStore => {
+              const storeId = dbStore.store_id || dbStore.id || dbStore._id;
+              const mappedStore = {
+                id: storeId,
+                name: dbStore.store_name || dbStore.name || "Unknown Store",
+                category: dbStore.category || "General",
+                logo: dbStore.branding?.logo || "",
+                cover: dbStore.branding?.heroImage || dbStore.branding?.cover || dbStore.hero_image || dbStore.cover || "https://images.unsplash.com/photo-1441984904996-e0b6ba687e08?auto=format&fit=crop&q=80",
+                trustScore: "99.9%",
+                followers: "1.2K",
+                desc: dbStore.description || dbStore.store_desc || dbStore.desc || "Brand Identity",
+                products: dbStore.products || [],
+                schema: dbStore.customSchema || dbStore.schema || null,
+                storeData: dbStore.storeData || {},
+                isUserStore: true,
+                createdAt: dbStore.created_at || new Date().toISOString()
+              };
+              if (!merged.find(s => s.id === storeId)) {
+                merged.push(mappedStore);
+              }
             });
-          }
-        }).catch(err => console.error("Failed to fetch stores on load:", err));
+            return merged;
+          });
+        }
+      }).catch(err => console.error("Failed to fetch stores on load:", err));
     });
     return () => { isMounted = false; };
   }, []);
@@ -279,7 +283,7 @@ export const SellerApp = ({ isDarkMode, setIsDarkMode, t, DynamicRenderer }) => 
       const metaName = storeSchema.metadata?.brand_identity;
       const storeName = storeSchema.name || metaName || heroTitle || "Unknown Brand";
       const storeCategory = storeSchema.category || storeSchema.metadata?.category || storeSchema.metadata?.industry || "General Store";
-      
+
       const payload = {
         session_id: getSessionId(),
         store_id: storeSchema.id,
@@ -310,7 +314,7 @@ export const SellerApp = ({ isDarkMode, setIsDarkMode, t, DynamicRenderer }) => 
       if (!res.success) {
         throw new Error(res.error || "Unknown error");
       }
-      
+
       const finalStoreId = res.store_id;
       setIsPublishing(false);
       setIsPublished(true);
@@ -366,7 +370,7 @@ export const SellerApp = ({ isDarkMode, setIsDarkMode, t, DynamicRenderer }) => 
         }
       });
       setShowPublishedModal(true);
-      
+
       setTimeout(() => {
         try {
           const canvas = document.createElement('canvas');
@@ -388,7 +392,7 @@ export const SellerApp = ({ isDarkMode, setIsDarkMode, t, DynamicRenderer }) => 
           console.error("Confetti error", e);
         }
       }, 50);
-      
+
       return true;
     } catch (err) {
       console.error("Publish failed:", err);
@@ -495,16 +499,16 @@ export const SellerApp = ({ isDarkMode, setIsDarkMode, t, DynamicRenderer }) => 
 
   return (
     <SellerProvider value={sellerContextValue}>
-      <div className={isDarkMode ? "" : "light-mode"} style={{
-      display: "flex",
-      height: "100vh",
-      width: "100%",
-      background: t.bg,
-      fontFamily: "'DM Sans', sans-serif",
-      color: t.text,
-      overflow: "hidden",
-    }}>
-      <style>{`
+      <div className="seller-app-container" style={{
+        display: "flex",
+        height: "100vh",
+        width: "100%",
+        background: t.bg,
+        fontFamily: "'DM Sans', sans-serif",
+        color: t.text,
+        overflow: "hidden",
+      }}>
+        <style>{`
         :root { color-scheme: ${isDarkMode ? "dark" : "light"}; }
         * { box-sizing: border-box; margin: 0; padding: 0; scrollbar-width: thin; scrollbar-color: ${isDarkMode ? "#2a2a2e transparent" : "#e5e7eb #f9fafb"}; }
         ::-webkit-scrollbar { width: 4px; height: 4px; }
@@ -530,31 +534,298 @@ export const SellerApp = ({ isDarkMode, setIsDarkMode, t, DynamicRenderer }) => 
         .markdown-body li { margin-bottom: 6px; padding-left: 4px; }
         .markdown-body li::marker { color: ${isDarkMode ? "#c8b89a" : "#8b7355"}; }
         .markdown-body strong { font-weight: 700; color: ${isDarkMode ? '#fff' : '#000'}; }
+
+        /* --- DESKTOP SPECIFIC STYLES --- */
+        @media (min-width: 769px) {
+          .chat-floating-btn {
+            display: none !important;
+          }
+        }
+
+        /* --- MOBILE RESPONSIVENESS --- */
+        @media (max-width: 768px) {
+          .seller-app-container {
+            flex-direction: column !important;
+          }
+          
+          /* Sidebar becomes Bottom Navigation */
+          .seller-sidebar {
+            width: 100% !important;
+            height: 60px !important;
+            flex-direction: row !important;
+            justify-content: space-around !important;
+            position: fixed !important;
+            bottom: 0 !important;
+            border-right: none !important;
+            border-top: 1px solid ${t.border} !important;
+            z-index: 100 !important;
+            padding: 0 !important;
+          }
+          .seller-sidebar .logo-container {
+            display: none !important; /* Hide logo on bottom nav */
+          }
+          .seller-sidebar .bottom-settings {
+            margin-top: 0 !important;
+            flex-direction: row !important;
+          }
+          
+          /* Main Content Area */
+          .seller-main-content {
+            height: calc(100vh - 60px) !important;
+            padding-bottom: 20px !important;
+          }
+          
+          /* Header adjustments */
+          .seller-header {
+            padding: 0 12px !important;
+          }
+          .seller-header-right {
+            gap: 4px !important;
+          }
+          .seller-header-right button {
+            padding: 4px 8px !important;
+          }
+          
+          /* Chat Panel as Full-Screen Overlay */
+          .seller-chat-panel {
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100% !important;
+            height: calc(100vh - 60px) !important;
+            border-radius: 0 !important;
+            z-index: 200 !important;
+            border: none !important;
+          }
+          .chat-floating-btn {
+            bottom: 70px !important;
+            right: 16px !important;
+          }
+          
+          .hide-on-mobile {
+            display: none !important;
+          }
+          
+          /* Analytics Mobile Adjustments */
+          .analytics-header-container {
+            flex-direction: column !important;
+            align-items: flex-start !important;
+            gap: 16px !important;
+          }
+          .analytics-controls {
+            flex-wrap: wrap !important;
+            width: 100% !important;
+          }
+          .analytics-controls select, .analytics-controls button {
+            flex: 1 1 auto !important;
+          }
+          .analytics-kpi-grid {
+            grid-template-columns: repeat(2, 1fr) !important;
+            gap: 12px !important;
+          }
+          .analytics-layout {
+            grid-template-columns: 1fr !important;
+          }
+          
+          /* Inventory Mobile Adjustments */
+          .inventory-header-container {
+            flex-direction: column !important;
+            align-items: flex-start !important;
+            gap: 16px !important;
+          }
+          .inventory-controls {
+            flex-wrap: wrap !important;
+            width: 100% !important;
+          }
+          .inventory-controls > div, .inventory-controls > button {
+            flex: 1 1 auto !important;
+          }
+          .inventory-controls input {
+            width: 100% !important;
+          }
+          .table-container {
+            border: none !important;
+            background: transparent !important;
+          }
+          .inventory-table thead {
+            display: none !important;
+          }
+          .inventory-table, .inventory-table tbody, .inventory-table tr, .inventory-table td {
+            display: block !important;
+            width: 100% !important;
+            box-sizing: border-box !important;
+          }
+          .inventory-table tr {
+            margin-bottom: 16px !important;
+            border-radius: 12px !important;
+            padding: 16px !important;
+            background: var(--card-bg, #161618) !important;
+            border: 1px solid var(--card-border, #2a2a2e) !important;
+          }
+          .inventory-table td {
+            padding: 8px 0 !important;
+            display: flex !important;
+            justify-content: space-between !important;
+            align-items: center !important;
+            border: none !important;
+            text-align: right !important;
+          }
+          .inventory-table td::before {
+            content: attr(data-label) !important;
+            color: #888 !important;
+            font-size: 11px !important;
+            text-transform: uppercase !important;
+            font-weight: 600 !important;
+          }
+          .inventory-table .td-product {
+            flex-direction: row !important;
+            justify-content: flex-start !important;
+            margin-bottom: 12px !important;
+            padding-bottom: 12px !important;
+            border-bottom: 1px dashed rgba(150, 150, 150, 0.2) !important;
+          }
+          .inventory-table .td-product::before {
+            display: none !important;
+          }
+          .inventory-table .td-checkbox {
+            display: none !important;
+          }
+          .inventory-table .td-actions {
+            justify-content: flex-end !important;
+            margin-top: 8px !important;
+          }
+          .inventory-table .td-actions::before {
+            display: none !important;
+          }
+          .inventory-pagination {
+            flex-direction: column !important;
+            gap: 16px !important;
+            border-radius: 12px !important;
+          }
+          
+          /* UI Adjustments for Panels */
+          .seller-panel {
+            padding: 24px 16px !important;
+            padding-bottom: 100px !important;
+          }
+          .marketing-title-area h2, .analytics-header-container h2 {
+            font-size: 20px !important;
+          }
+          .marketing-title-area p, .analytics-header-container p {
+            font-size: 12px !important;
+          }
+          .marketing-stats-grid h3, .analytics-kpi-grid h3 {
+            font-size: 20px !important;
+          }
+          .marketing-stats-grid > div, .analytics-kpi-grid > div {
+            padding: 12px 16px !important;
+          }
+          .analytics-layout {
+            grid-template-columns: 1fr !important;
+          }
+          
+          /* Marketing UI Adjustments */
+          .marketing-header {
+            flex-direction: column !important;
+            align-items: stretch !important;
+            gap: 16px !important;
+          }
+          .marketing-title-area {
+            flex-direction: column !important;
+            align-items: flex-start !important;
+            gap: 16px !important;
+          }
+          .marketing-title-area > div:nth-child(2) {
+            padding-left: 0 !important;
+            border-left: none !important;
+            width: 100% !important;
+          }
+          .marketing-title-area select {
+            width: 100% !important;
+          }
+          .marketing-stats-grid {
+            grid-template-columns: repeat(2, 1fr) !important;
+          }
+          .marketing-tabs {
+            justify-content: space-between !important;
+            gap: 4px !important;
+          }
+          .marketing-tabs > div {
+            flex: 1 !important;
+            padding: 10px 4px !important;
+            flex-direction: column !important;
+            justify-content: center !important;
+            text-align: center !important;
+            font-size: 10px !important;
+            gap: 6px !important;
+            border-radius: 12px !important;
+          }
+          .marketing-tabs > div svg {
+            width: 18px !important;
+            height: 18px !important;
+          }
+          .video-campaign-split {
+            flex-direction: column !important;
+            gap: 24px !important;
+          }
+          .image-campaigns-grid {
+            grid-template-columns: repeat(2, 1fr) !important;
+          }
+        }
       `}</style>
-      <SellerSidebar />
-      {/* MAIN STORE AREA — scrollable */}
-      <div style={{
-        flex: 1,
-        overflowY: "auto",
-        height: "100vh",
-        background: t.bg,
-      }}>
-        <SellerHeader />
-        {/* SELLER MODE: Studio Views */}
-        {appMode === "seller" && (
-          <>
-            <SellerStoresPanel />
-            <SellerPreview />
-            <SellerAnalyticsPanel />
-            <SellerProductsPanel />
-            <SellerSettingsPanel />
-            <SellerConnectorsPanel />
-          </>
+        <SellerSidebar />
+        {/* MAIN STORE AREA — scrollable */}
+        <div className="seller-main-content" style={{
+          flex: 1,
+          overflowY: "auto",
+          height: "100vh",
+          background: t.bg,
+        }}>
+          <SellerHeader />
+          {/* SELLER MODE: Studio Views */}
+          {appMode === "seller" && (
+            <>
+              <SellerStoresPanel />
+              <SellerPreview />
+              <SellerAnalyticsPanel />
+              <SellerProductsPanel />
+              <SellerSettingsPanel />
+              <SellerConnectorsPanel />
+            </>
+          )}
+        </div>
+        <SellerChatPanel />
+        {/* Floating Action Button (FAB) for SERA Chat */}
+        {appMode === "seller" && !chatOpen && (
+          <button
+            className="chat-floating-btn"
+            onClick={() => setChatOpen(true)}
+            style={{
+              position: 'fixed',
+              bottom: 32,
+              right: 32,
+              width: 48,
+              height: 48,
+              borderRadius: 24,
+              background: "#c8b89a", /* Premium Gold */
+              border: "none",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              cursor: "pointer",
+              boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+              zIndex: 90,
+              transition: "transform 0.2s, box-shadow 0.2s"
+            }}
+            onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.05)'; e.currentTarget.style.boxShadow = "0 8px 24px rgba(0,0,0,0.2)"; }}
+            onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = "0 4px 12px rgba(0,0,0,0.15)"; }}
+            title="Open SERA Chat"
+          >
+            <Plus size={24} color="#0f0f10" strokeWidth={2.5} />
+          </button>
         )}
+        <SellerModals />
       </div>
-      <SellerChatPanel />
-      <SellerModals />
-    </div>
     </SellerProvider>
   );
 }
