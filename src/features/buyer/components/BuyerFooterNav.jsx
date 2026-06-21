@@ -2,7 +2,7 @@ import React from 'react';
 import { useBuyerContext } from '../BuyerContext';
 
 export const BuyerFooterNav = () => {
-  const { t, isDarkMode, chatOpen, setChatOpen, chatWidth, cart, setIsCartOpen, buyerActiveNav, setBuyerActiveNav, setSelectedStorefront } = useBuyerContext();
+  const { t, isDarkMode, chatOpen, setChatOpen, chatWidth, cart, setIsCartOpen, buyerActiveNav, setBuyerActiveNav, setSelectedStorefront, followedStores } = useBuyerContext();
 
   const handleNavClick = (nav) => {
     setBuyerActiveNav(nav);
@@ -40,17 +40,22 @@ export const BuyerFooterNav = () => {
         <span style={{ fontSize: 10, fontWeight: 700, fontFamily: "'DM Sans', sans-serif" }}>Explore</span>
       </button>
 
-      {/* Saved */}
+      {/* Following */}
       <button 
-        onClick={() => handleNavClick('saved')}
-        style={{ background: 'none', border: 'none', color: buyerActiveNav === 'saved' ? '#c8b89a' : t.subtext, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, cursor: 'pointer', transition: 'color 0.2s' }}
-        onMouseEnter={e => { if (buyerActiveNav !== 'saved') e.currentTarget.style.color = t.text; }}
-        onMouseLeave={e => { if (buyerActiveNav !== 'saved') e.currentTarget.style.color = t.subtext; }}
+        onClick={() => handleNavClick('following')}
+        style={{ background: 'none', border: 'none', color: buyerActiveNav === 'following' ? '#c8b89a' : t.subtext, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, cursor: 'pointer', position: 'relative', transition: 'color 0.2s' }}
+        onMouseEnter={e => { if (buyerActiveNav !== 'following') e.currentTarget.style.color = t.text; }}
+        onMouseLeave={e => { if (buyerActiveNav !== 'following') e.currentTarget.style.color = t.subtext; }}
       >
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
-          <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
         </svg>
-        <span style={{ fontSize: 10, fontWeight: 600, fontFamily: "'DM Sans', sans-serif" }}>Saved</span>
+        {followedStores?.size > 0 && (
+          <span style={{ position: 'absolute', top: -4, right: -6, background: '#c8b89a', color: '#0f0f10', fontSize: 9, fontWeight: 800, minWidth: 16, height: 16, padding: '0 4px', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            {followedStores.size}
+          </span>
+        )}
+        <span style={{ fontSize: 10, fontWeight: 600, fontFamily: "'DM Sans', sans-serif" }}>Following</span>
       </button>
 
       {/* SERA Chat Toggle (Middle Action) */}

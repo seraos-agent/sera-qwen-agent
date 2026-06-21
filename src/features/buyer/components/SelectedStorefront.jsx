@@ -51,9 +51,27 @@ export const SelectedStorefront = () => {
             </div>
 
             <div style={{ display: 'flex', gap: 'clamp(12px, 3vw, 24px)', alignItems: 'center', justifyContent: 'center', flex: 1 }}>
-              <a href="#featured_products" onClick={(e) => { e.preventDefault(); document.querySelector('.section-wrapper-featured_products')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }} style={{ color: t.text, textDecoration: "none", fontSize: 'clamp(11px, 2vw, 13px)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1 }}>Shop</a>
-              <a href="#philosophy" onClick={(e) => { e.preventDefault(); document.querySelector('.section-wrapper-philosophy')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }} style={{ color: t.text, textDecoration: "none", fontSize: 'clamp(11px, 2vw, 13px)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1 }}>Our Story</a>
-              <a href="#footer" onClick={(e) => { e.preventDefault(); document.querySelector('.section-wrapper-footer')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }} style={{ color: t.text, textDecoration: "none", fontSize: 'clamp(11px, 2vw, 13px)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1 }}>FAQ</a>
+              <a 
+                href="#featured_products" 
+                onClick={(e) => { e.preventDefault(); document.querySelector('.section-wrapper-featured_products')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }} 
+                style={{ color: isDarkMode ? '#9ca3af' : '#6b7280', textDecoration: "none", fontSize: 'clamp(11px, 2vw, 13px)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1, transition: 'color 0.2s' }}
+                onMouseEnter={e => e.currentTarget.style.color = isDarkMode ? '#ffffff' : '#000000'}
+                onMouseLeave={e => e.currentTarget.style.color = isDarkMode ? '#9ca3af' : '#6b7280'}
+              >Shop</a>
+              <a 
+                href="#philosophy" 
+                onClick={(e) => { e.preventDefault(); document.querySelector('.section-wrapper-philosophy')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }} 
+                style={{ color: isDarkMode ? '#9ca3af' : '#6b7280', textDecoration: "none", fontSize: 'clamp(11px, 2vw, 13px)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1, transition: 'color 0.2s' }}
+                onMouseEnter={e => e.currentTarget.style.color = isDarkMode ? '#ffffff' : '#000000'}
+                onMouseLeave={e => e.currentTarget.style.color = isDarkMode ? '#9ca3af' : '#6b7280'}
+              >Our Story</a>
+              <a 
+                href="#footer" 
+                onClick={(e) => { e.preventDefault(); document.querySelector('.section-wrapper-footer')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }} 
+                style={{ color: isDarkMode ? '#9ca3af' : '#6b7280', textDecoration: "none", fontSize: 'clamp(11px, 2vw, 13px)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1, transition: 'color 0.2s' }}
+                onMouseEnter={e => e.currentTarget.style.color = isDarkMode ? '#ffffff' : '#000000'}
+                onMouseLeave={e => e.currentTarget.style.color = isDarkMode ? '#9ca3af' : '#6b7280'}
+              >FAQ</a>
             </div>
 
             <div style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 60, justifyContent: 'flex-end' }}>

@@ -12,6 +12,7 @@ import { BuyerChatPanel } from './components/BuyerChatPanel';
 import { SelectedStorefront } from './components/SelectedStorefront';
 import { BuyerModals } from './components/BuyerModals';
 import { BuyerCart } from './components/BuyerCart';
+import { BuyerProfile } from './components/BuyerProfile';
 
 export const BuyerApp = ({ isDarkMode, setIsDarkMode, t, DynamicRenderer }) => {
   // setIsDarkMode is kept from parent prop
@@ -395,14 +396,60 @@ export const BuyerApp = ({ isDarkMode, setIsDarkMode, t, DynamicRenderer }) => {
             <BuyerGrid />
           </div>
 
-          <div style={{ display: buyerActiveNav === 'saved' ? 'block' : 'none', padding: '60px 48px', color: t.text }}>
-            <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 32, fontWeight: 700, marginBottom: 12 }}>Saved Items</h2>
-            <p style={{ color: t.subtext }}>You haven't saved any products or stores yet.</p>
+          <div style={{ display: buyerActiveNav === 'following' ? 'block' : 'none', padding: '60px 48px', color: t.text }}>
+            <div style={{ marginBottom: 40 }}>
+              <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 32, fontWeight: 700, marginBottom: 12 }}>Following</h2>
+              <p style={{ color: t.subtext }}>Stores you love, all in one place.</p>
+            </div>
+            {(() => {
+              const allStores = [...CURATED_STORES, ...(userStores || [])];
+              const followedList = allStores.filter(store => followedStores?.has(store.id || store.store_id || store._id));
+              
+              if (followedList.length === 0) {
+                return <div style={{ padding: '40px 0', textAlign: 'center', color: t.subtext, background: isDarkMode ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.02)', borderRadius: 16 }}>You are not following any stores yet.</div>;
+              }
+              
+              return (
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 24 }}>
+                  {followedList.map(store => (
+                    <div
+                      key={store.id}
+                      onClick={() => setSelectedStorefront(store)}
+                      style={{ position: 'relative', aspectRatio: '3/4', borderRadius: 24, overflow: 'hidden', cursor: 'pointer', boxShadow: isDarkMode ? 'none' : '0 12px 32px rgba(0,0,0,0.08)', border: `1px solid ${isDarkMode ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)'}`, transition: 'transform 0.3s ease' }}
+                      onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.02)'}
+                      onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
+                    >
+                      {store.cover ? (
+                        <img src={store.cover} alt={store.name} style={{ width: '100%', height: '100%', objectFit: 'cover', position: 'absolute', inset: 0 }} onError={e => e.currentTarget.style.display = 'none'} />
+                      ) : (
+                        <div style={{ width: '100%', height: '100%', background: isDarkMode ? '#161618' : '#f9fafb', position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 40 }}>🛍️</div>
+                      )}
+                      {/* Gradient Overlay */}
+                      <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.6) 40%, transparent 100%)', zIndex: 1 }} />
+                      {/* Content */}
+                      <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: 20, zIndex: 2, display: 'flex', flexDirection: 'column' }}>
+                        <span style={{ fontSize: 10, fontWeight: 800, color: '#c8b89a', letterSpacing: 1, textTransform: 'uppercase', marginBottom: 6 }}>{store.category}</span>
+                        <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: 24, fontWeight: 700, color: '#fff', marginBottom: 8, lineHeight: 1.1 }}>{store.name}</h3>
+                        <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: 12, lineHeight: 1.5, marginBottom: 20, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{store.desc}</p>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                          <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: 11 }}>👥 {store.followers}</span>
+                          <button
+                            onClick={e => { e.stopPropagation(); toggleFollowStore(store.id || store.store_id || store._id); }}
+                            style={{ background: 'rgba(255,255,255,0.1)', color: '#fff', border: '1px solid rgba(255,255,255,0.2)', backdropFilter: 'blur(8px)', borderRadius: 100, padding: '6px 14px', fontSize: 11, fontWeight: 700, cursor: 'pointer', transition: 'all 0.2s ease' }}
+                          >
+                            Following
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              );
+            })()}
           </div>
 
-          <div style={{ display: buyerActiveNav === 'profile' ? 'block' : 'none', padding: '60px 48px', color: t.text }}>
-            <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 32, fontWeight: 700, marginBottom: 12 }}>Buyer Profile</h2>
-            <p style={{ color: t.subtext }}>Manage your shipping addresses and payment methods here.</p>
+          <div style={{ display: buyerActiveNav === 'profile' ? 'block' : 'none' }}>
+            <BuyerProfile />
           </div>
 
           <div style={{ display: buyerActiveNav === 'cart' ? 'block' : 'none' }}>

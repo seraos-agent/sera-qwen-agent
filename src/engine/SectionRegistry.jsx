@@ -122,6 +122,11 @@ export const SECTION_REGISTRY = {
     variants: {
       grid: (props) => {
         const t = props.isDarkMode ? storeThemeDark : storeThemeLight;
+        const [visibleCount, setVisibleCount] = React.useState(12);
+        
+        const allProducts = (props.products && props.products.length > 0) ? props.products : (props.isBuilding ? Array(4).fill({ name: "Generating Product...", price: "...", desc: "Curating product details and imagery..." }) : []);
+        const displayProducts = allProducts.slice(0, visibleCount);
+
         const skStyle = {
           backgroundImage: t.surface.skeleton,
           backgroundSize: "200% 100%",
@@ -135,7 +140,7 @@ export const SECTION_REGISTRY = {
               <span style={{ fontSize: 11, color: props.isDarkMode ? props.themeColor : t.text.primary, cursor: "pointer", fontWeight: 600, letterSpacing: 1, transition: "color 0.3s ease" }}>EXPLORE ALL</span>
             </div>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(clamp(140px, 20vw, 240px), 1fr))", gap: 'clamp(12px, 3vw, 24px)' }}>
-              {((props.products && props.products.length > 0) ? props.products : (props.isBuilding ? Array(4).fill({ name: "Generating Product...", price: "...", desc: "Curating product details and imagery..." }) : [])).map((p, i) => (
+              {displayProducts.map((p, i) => (
                 <div
                   key={i}
                   className="product-card hover-lift"
@@ -195,6 +200,28 @@ export const SECTION_REGISTRY = {
                 </div>
               ))}
             </div>
+            {visibleCount < allProducts.length && (
+              <div style={{ display: "flex", justifyContent: "center", marginTop: 40 }}>
+                <button
+                  onClick={() => setVisibleCount(prev => prev + 12)}
+                  style={{
+                    background: "transparent",
+                    border: `1px solid ${props.isDarkMode ? "#c8b89a" : "#8b7355"}`,
+                    color: props.isDarkMode ? "#c8b89a" : "#8b7355",
+                    padding: "10px 24px",
+                    borderRadius: 100,
+                    fontSize: 13,
+                    fontWeight: 700,
+                    cursor: "pointer",
+                    transition: "all 0.3s ease"
+                  }}
+                  onMouseEnter={e => { e.currentTarget.style.background = props.isDarkMode ? "#c8b89a" : "#8b7355"; e.currentTarget.style.color = props.isDarkMode ? "#000" : "#fff"; }}
+                  onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = props.isDarkMode ? "#c8b89a" : "#8b7355"; }}
+                >
+                  Load More
+                </button>
+              </div>
+            )}
           </div>
         );
       },

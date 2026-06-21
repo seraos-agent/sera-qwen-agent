@@ -34,10 +34,10 @@ export const BuyerHeader = () => {
             Explore
           </button>
           <button 
-            onClick={() => { setBuyerActiveNav('saved'); setChatOpen(false); }}
-            style={{ background: 'none', border: 'none', color: buyerActiveNav === 'saved' ? (isDarkMode ? '#c8b89a' : '#8b7355') : t.subtext, cursor: 'pointer', display: 'flex', alignItems: 'center', transition: 'color 0.2s', padding: 4 }}
-            onMouseEnter={e => { if (buyerActiveNav !== 'saved') e.currentTarget.style.color = t.text; }}
-            onMouseLeave={e => { if (buyerActiveNav !== 'saved') e.currentTarget.style.color = t.subtext; }}
+            onClick={() => { setBuyerActiveNav('following'); setChatOpen(false); }}
+            style={{ background: 'none', border: 'none', color: buyerActiveNav === 'following' ? (isDarkMode ? '#c8b89a' : '#8b7355') : t.subtext, cursor: 'pointer', display: 'flex', alignItems: 'center', transition: 'color 0.2s', padding: 4 }}
+            onMouseEnter={e => { if (buyerActiveNav !== 'following') e.currentTarget.style.color = t.text; }}
+            onMouseLeave={e => { if (buyerActiveNav !== 'following') e.currentTarget.style.color = t.subtext; }}
             title="Saved Items"
           >
             <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">

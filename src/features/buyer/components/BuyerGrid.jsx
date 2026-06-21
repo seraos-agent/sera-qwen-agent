@@ -11,36 +11,58 @@ export const BuyerGrid = () => {
     getDisplayBrandName
   } = useBuyerContext();
 
+  const [visibleCount, setVisibleCount] = React.useState(12);
+  const loaderRef = React.useRef(null);
+
+  React.useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          setVisibleCount(prev => prev + 12);
+        }
+      },
+      { threshold: 0.1 }
+    );
+    if (loaderRef.current) {
+      observer.observe(loaderRef.current);
+    }
+    return () => {
+      if (loaderRef.current) observer.unobserve(loaderRef.current);
+    };
+  }, []);
+
+
   return (
     <div className="buyer-content-wrapper" style={{ padding: '0 48px', width: '100%', margin: '0 auto' }}>
 
       {/* Category Filter Tabs */}
       <div style={{ display: 'flex', gap: 12, marginBottom: 40, overflowX: 'auto', paddingBottom: 12, WebkitOverflowScrolling: 'touch' }}>
         {['all', 'Modern Lifestyle', 'Artisanal Coffee', 'Creator Gadgets', 'Organic Skincare'].map(cat => {
-          const displayCat = cat === 'all' ? 'All' 
+          const displayCat = cat === 'all' ? 'All'
             : cat === 'Modern Lifestyle' ? 'Lifestyle'
-            : cat === 'Artisanal Coffee' ? 'Coffee'
-            : cat === 'Creator Gadgets' ? 'Electronics'
-            : cat === 'Organic Skincare' ? 'Skincare' : cat;
-            
+              : cat === 'Artisanal Coffee' ? 'Coffee'
+                : cat === 'Creator Gadgets' ? 'Electronics'
+                  : cat === 'Organic Skincare' ? 'Skincare' : cat;
+
           return (
-          <button
-            key={cat}
-            onClick={() => setSelectedCategoryFilter(cat)}
-            style={{
-              background: selectedCategoryFilter === cat ? (isDarkMode ? '#c8b89a' : '#8b7355') : (isDarkMode ? '#1a1a1e' : '#f3f4f6'),
-              color: selectedCategoryFilter === cat ? (isDarkMode ? '#0f0f10' : '#ffffff') : (isDarkMode ? '#ffffff' : '#111827'),
-              border: `1px solid ${selectedCategoryFilter === cat ? 'transparent' : (isDarkMode ? '#2a2a2e' : '#e5e7eb')}`,
-              borderRadius: 100, padding: '6px 16px', fontSize: 12,
-              fontWeight: selectedCategoryFilter === cat ? 700 : 500,
-              cursor: 'pointer', whiteSpace: 'nowrap'
-            }}
-            onMouseEnter={e => { if (selectedCategoryFilter !== cat) e.currentTarget.style.background = isDarkMode ? '#2a2a2e' : '#e5e7eb'; }}
-            onMouseLeave={e => { if (selectedCategoryFilter !== cat) e.currentTarget.style.background = isDarkMode ? '#1a1a1e' : '#f3f4f6'; }}
-          >
-            {displayCat}
-          </button>
-        )})}
+            <button
+              key={cat}
+              onClick={() => setSelectedCategoryFilter(cat)}
+              style={{
+                background: selectedCategoryFilter === cat ? (isDarkMode ? '#c8b89a' : '#8b7355') : (isDarkMode ? '#1a1a1e' : '#f3f4f6'),
+                color: selectedCategoryFilter === cat ? (isDarkMode ? '#0f0f10' : '#ffffff') : (isDarkMode ? '#ffffff' : '#111827'),
+                border: `1px solid ${selectedCategoryFilter === cat ? 'transparent' : (isDarkMode ? '#2a2a2e' : '#e5e7eb')}`,
+                borderRadius: 100, padding: '6px 16px', fontSize: 12,
+                fontWeight: selectedCategoryFilter === cat ? 700 : 500,
+                cursor: 'pointer', whiteSpace: 'nowrap'
+              }}
+              onMouseEnter={e => { if (selectedCategoryFilter !== cat) e.currentTarget.style.background = isDarkMode ? '#2a2a2e' : '#e5e7eb'; }}
+              onMouseLeave={e => { if (selectedCategoryFilter !== cat) e.currentTarget.style.background = isDarkMode ? '#1a1a1e' : '#f3f4f6'; }}
+            >
+              {displayCat}
+            </button>
+          )
+        })}
       </div>
 
       {/* Top Curated Stores */}
@@ -107,14 +129,14 @@ export const BuyerGrid = () => {
           const sData = s.storeData || s.customSchema?.storeData || s.schema?.storeData || {};
           const videos = sData.promoVideos?.length > 0 ? sData.promoVideos
             : sData.promoVideo ? [sData.promoVideo]
-            : s.promoVideo ? [s.promoVideo]
-            : sData.branding?.promoVideos?.length > 0 ? sData.branding.promoVideos
-            : s.branding?.promoVideos?.length > 0 ? s.branding.promoVideos
-            : sData.branding?.promoVideo ? [sData.branding.promoVideo]
-            : s.branding?.promoVideo ? [s.branding.promoVideo]
-            : sData.branding?.videoUrl ? [sData.branding.videoUrl]
-            : s.branding?.videoUrl ? [s.branding.videoUrl]
-            : [];
+              : s.promoVideo ? [s.promoVideo]
+                : sData.branding?.promoVideos?.length > 0 ? sData.branding.promoVideos
+                  : s.branding?.promoVideos?.length > 0 ? s.branding.promoVideos
+                    : sData.branding?.promoVideo ? [sData.branding.promoVideo]
+                      : s.branding?.promoVideo ? [s.branding.promoVideo]
+                        : sData.branding?.videoUrl ? [sData.branding.videoUrl]
+                          : s.branding?.videoUrl ? [s.branding.videoUrl]
+                            : [];
           [...new Set(videos)].forEach((vidUrl, idx) => {
             allCampaigns.push({ id: `${s.id}-promo-${idx}`, store: s, videoUrl: vidUrl });
           });
@@ -159,61 +181,71 @@ export const BuyerGrid = () => {
           <span style={{ fontSize: 12, color: t.subtext }}>Updated in real-time</span>
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 20 }}>
-          {Array.from(new Map([...CURATED_STORES, ...(userStores || [])].map(s => [s.id || s._id || s.store_id, s])).values())
-            .flatMap(s =>
-              (s.storeData?.products || s.products || (s.customSchema || s.schema)?.layout?.find(l => l.type === 'featured_products')?.props?.products || [])
-                .filter(p => p.name && p.price && !p.name.toLowerCase().includes('generating') && !p.name.includes('...'))
-                .map(p => ({
-                  id: p.name || p.id,
-                  name: p.name, price: p.price,
-                  desc: p.description || p.desc,
-                  image: p.imageUrl || p.image,
-                  verticalVideoUrl: p.verticalVideoUrl,
-                  landscapeVideoUrl: p.landscapeVideoUrl,
-                  storeId: s.id || s.store_id || s._id,
-                  store: (s.customSchema || s.schema)?.metadata?.brand_identity || s.storeData?.title || s.name || 'AI Store',
-                  aiTag: p.promo || 'Trending',
-                  rating: 4.8,
-                  sales: 340 + (((p.id || p.name || 'A').charCodeAt(0) * 43) % 500)
-                }))
-            )
-            .filter(p => selectedCategoryFilter === 'all' || [...CURATED_STORES, ...(userStores || [])].find(s => s.id === p.storeId)?.category === selectedCategoryFilter)
-            .filter(p => !buyerSearchQuery || p.name.toLowerCase().includes(buyerSearchQuery.toLowerCase()) || p.store.toLowerCase().includes(buyerSearchQuery.toLowerCase()) || p.aiTag.toLowerCase().includes(buyerSearchQuery.toLowerCase()))
-            .map(prod => (
-              <div
-                key={prod.id}
-                onClick={() => {
-                  setSelectedProductDetail({ name: prod.name, price: prod.price, desc: prod.desc || 'Premium curated item directly promoted by our top AI storefronts.', imageUrl: prod.image, verticalVideoUrl: prod.verticalVideoUrl, landscapeVideoUrl: prod.landscapeVideoUrl, promo: prod.aiTag, store: prod.store, rating: prod.rating, sales: prod.sales });
-                  setModalQty(1);
-                }}
-                style={{ background: isDarkMode ? '#161618' : '#fff', border: `1px solid ${t.border}`, borderRadius: 16, overflow: 'hidden', transition: 'all 0.3s ease', display: 'flex', flexDirection: 'column', cursor: 'pointer', boxShadow: isDarkMode ? 'none' : '0 6px 18px rgba(0,0,0,0.03)' }}
-              >
-                <div style={{ height: 220, width: '100%', background: '#1a1a1e', position: 'relative' }}>
-                  <img src={prod.image} alt={prod.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                  <div style={{ position: 'absolute', top: 10, left: 10, background: 'rgba(200,184,154,0.9)', color: '#0f0f10', fontSize: 10, fontWeight: 700, padding: '2px 8px', borderRadius: 10, backdropFilter: 'blur(4px)' }}>
-                    {prod.aiTag}
-                  </div>
-                </div>
-                <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', flex: 1 }}>
-                  <span
-                    onClick={e => { e.stopPropagation(); window.dispatchEvent(new CustomEvent('sera:openStore', { detail: { storeId: prod.storeId } })); }}
-                    style={{ fontSize: 11, color: '#c8b89a', marginBottom: 4, fontWeight: 700, cursor: 'pointer' }}
+          {(() => {
+            const allProducts = Array.from(new Map([...CURATED_STORES, ...(userStores || [])].map(s => [s.id || s._id || s.store_id, s])).values())
+              .flatMap(s =>
+                (s.storeData?.products || s.products || (s.customSchema || s.schema)?.layout?.find(l => l.type === 'featured_products')?.props?.products || [])
+                  .filter(p => p.name && p.price && !p.name.toLowerCase().includes('generating') && !p.name.includes('...'))
+                  .map(p => ({
+                    id: p.name || p.id,
+                    name: p.name, price: p.price,
+                    desc: p.description || p.desc,
+                    image: p.imageUrl || p.image,
+                    verticalVideoUrl: p.verticalVideoUrl,
+                    landscapeVideoUrl: p.landscapeVideoUrl,
+                    storeId: s.id || s.store_id || s._id,
+                    store: (s.customSchema || s.schema)?.metadata?.brand_identity || s.storeData?.title || s.name || 'AI Store',
+                    aiTag: p.promo || 'Trending',
+                    rating: 4.8,
+                    sales: 340 + (((p.id || p.name || 'A').charCodeAt(0) * 43) % 500)
+                  }))
+              )
+              .filter(p => selectedCategoryFilter === 'all' || [...CURATED_STORES, ...(userStores || [])].find(s => s.id === p.storeId)?.category === selectedCategoryFilter)
+              .filter(p => !buyerSearchQuery || p.name.toLowerCase().includes(buyerSearchQuery.toLowerCase()) || p.store.toLowerCase().includes(buyerSearchQuery.toLowerCase()) || p.aiTag.toLowerCase().includes(buyerSearchQuery.toLowerCase()));
+
+            return (
+              <>
+                {allProducts.slice(0, visibleCount).map(prod => (
+                  <div
+                    key={prod.id}
+                    onClick={() => {
+                      setSelectedProductDetail({ name: prod.name, price: prod.price, desc: prod.desc || 'Premium curated item directly promoted by our top AI storefronts.', imageUrl: prod.image, verticalVideoUrl: prod.verticalVideoUrl, landscapeVideoUrl: prod.landscapeVideoUrl, promo: prod.aiTag, store: prod.store, rating: prod.rating, sales: prod.sales });
+                      setModalQty(1);
+                    }}
+                    style={{ background: isDarkMode ? '#161618' : '#fff', border: `1px solid ${t.border}`, borderRadius: 16, overflow: 'hidden', transition: 'all 0.3s ease', display: 'flex', flexDirection: 'column', cursor: 'pointer', boxShadow: isDarkMode ? 'none' : '0 6px 18px rgba(0,0,0,0.03)' }}
                   >
-                    View Store
-                  </span>
-                  <h4 style={{ fontSize: 15, fontWeight: 700, color: t.text, marginBottom: 4, lineHeight: 1.3 }}>{prod.name}</h4>
-                  <p style={{ fontSize: 12, color: t.subtext, marginBottom: 12, lineHeight: 1.4, flex: 1, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>{prod.desc}</p>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: 12, borderTop: `1px solid ${t.border}` }}>
-                    <span style={{ fontSize: 15, fontWeight: 800, color: isDarkMode ? '#c8b89a' : '#8b7355' }}>{prod.price}</span>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, color: t.subtext }}>
-                      <span>⭐ {prod.rating}</span>
-                      <span>•</span>
-                      <span>{prod.sales}</span>
+                    <div style={{ height: 220, width: '100%', background: '#1a1a1e', position: 'relative' }}>
+                      <img src={prod.image} alt={prod.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      <div style={{ position: 'absolute', top: 10, left: 10, background: 'rgba(200,184,154,0.9)', color: '#0f0f10', fontSize: 10, fontWeight: 700, padding: '2px 8px', borderRadius: 10, backdropFilter: 'blur(4px)' }}>
+                        {prod.aiTag}
+                      </div>
+                    </div>
+                    <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', flex: 1 }}>
+                      <span
+                        onClick={e => { e.stopPropagation(); window.dispatchEvent(new CustomEvent('sera:openStore', { detail: { storeId: prod.storeId } })); }}
+                        style={{ fontSize: 11, color: '#c8b89a', marginBottom: 4, fontWeight: 700, cursor: 'pointer' }}
+                      >
+                        View Store
+                      </span>
+                      <h4 style={{ fontSize: 15, fontWeight: 700, color: t.text, marginBottom: 4, lineHeight: 1.3 }}>{prod.name}</h4>
+                      <p style={{ fontSize: 12, color: t.subtext, marginBottom: 12, lineHeight: 1.4, flex: 1, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>{prod.desc}</p>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: 12, borderTop: `1px solid ${t.border}` }}>
+                        <span style={{ fontSize: 15, fontWeight: 800, color: isDarkMode ? '#c8b89a' : '#8b7355' }}>{prod.price}</span>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, color: t.subtext }}>
+                          <span>⭐ {prod.rating}</span>
+                          <span>•</span>
+                          <span>{prod.sales}</span>
+                        </div>
+                      </div>
                     </div>
                   </div>
+                ))}
+                <div ref={loaderRef} style={{ width: '100%', height: 20, padding: 10, display: "flex", justifyContent: "center" }}>
+                  {visibleCount < allProducts.length && <span style={{ color: t.subtext, fontSize: 12 }}>Loading more items...</span>}
                 </div>
-              </div>
-            ))}
+              </>
+            );
+          })()}
         </div>
       </div>
     </div>

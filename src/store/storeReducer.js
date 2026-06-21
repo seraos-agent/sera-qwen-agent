@@ -12,7 +12,7 @@ export const initialState = {
   buyerAiMessages: [{ role: "agent", text: "What are you looking for today?", action: "idle", hasAction: false }],
   buyerAiStatus: "",
   selectedCategoryFilter: "all",
-  followedStores: new Set(["urban-essentials"]),
+  followedStores: new Set(),
   cart: [],
   isCartOpen: false,
   selectedProductDetail: null,
