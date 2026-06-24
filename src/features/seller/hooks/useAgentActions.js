@@ -13,7 +13,9 @@ export const useAgentActions = ({
   lastUploadedImages,
   setBuildingStage,
   setActiveNav,
-  setUserStores
+  setUserStores,
+  setVideoFormat,
+  setActivePromoTab
 }) => {
 
   // Helper: register/update the current store schema into userStores list
@@ -79,7 +81,6 @@ export const useAgentActions = ({
 
   const applyAction = (action, rawParams, prevSnap) => {
     const params = normalizeAgentParams(action, rawParams || {});
-    console.log(`ðŸ› ï¸ Applying Action: ${action}`, params);
     if (action === 'update_schema') {
       const usedUrls = new Set();
       const layoutWithImages = (params.schema?.layout || []).map(section => {
@@ -267,19 +268,26 @@ export const useAgentActions = ({
               return prev;
             });
           }
-          if (params.aspect_ratio === "9:16") {
+          const ratioStr = String(params.aspect_ratio || params.ratio || params.type || "").toLowerCase();
+          const isVertical = ratioStr.includes("9:16") || ratioStr.includes("9/16") || ratioStr.includes("vertical") || ratioStr.includes("portrait") || ratioStr.includes("promo");
+          if (isVertical) {
             setStoreData(p => {
-              const currentList = p.promoVideos || (p.promoVideo ? [p.promoVideo] : []);
-              return { ...p, promoVideo: finalUrl, promoVideos: [...currentList, finalUrl] };
+              const currentList = (Array.isArray(p.promoVideos) ? p.promoVideos : (p.promoVideo ? [p.promoVideo] : [])).filter(v => typeof v === 'string' && v.trim() !== "");
+              const nextList = currentList.includes(finalUrl) ? currentList : [...currentList, finalUrl];
+              return { ...p, promoVideo: finalUrl, promoVideos: nextList };
             });
             addStep("Generating vertical promo video");
+            if (setVideoFormat) setVideoFormat("vertical");
           } else {
             setStoreData(p => {
-              const currentList = p.storeVideos || (p.storeVideo ? [p.storeVideo] : []);
-              return { ...p, storeVideo: finalUrl, storeVideos: [...currentList, finalUrl] };
+              const currentList = (Array.isArray(p.storeVideos) ? p.storeVideos : (p.storeVideo ? [p.storeVideo] : [])).filter(v => typeof v === 'string' && v.trim() !== "");
+              const nextList = currentList.includes(finalUrl) ? currentList : [...currentList, finalUrl];
+              return { ...p, storeVideo: finalUrl, storeVideos: nextList };
             });
             addStep("Generating landscape store banner");
+            if (setVideoFormat) setVideoFormat("landscape");
           }
+          if (setActivePromoTab) setActivePromoTab("video");
           setActiveNav("promotions");
         }
         break;
@@ -362,7 +370,7 @@ export const useAgentActions = ({
           const stepId = addStep(params.imageIndex !== undefined ? `Processing uploaded image: ${params.name}` : `Generating image for: ${params.name}`, true);
           const uniqueSalt = Math.floor(Math.random() * 1000000);
           const promptStr = sanitizePrompt(params.imagePrompt || params.name);
-          // Standardized Pollinations URL: removed model=flux for stability, added nologo=true
+          // Setup default/fallback URL handling
           let finalImageUrl = "";
           if (params.imageIndex !== undefined && lastUploadedImages.current[params.imageIndex]) {
             finalImageUrl = lastUploadedImages.current[params.imageIndex];
@@ -415,7 +423,7 @@ export const useAgentActions = ({
         }
         break;
       case 'change_product_desc':
-        console.log("AGENT change_product_desc CALLED WITH:", params);
+        // Debug removed
         const descText = params.desc || params.description || params.newDesc || params.newDescription || params.new_desc || params.text;
         const targetProdName = params.productName || params.name || params.product || params.target;
         if (targetProdName && descText) {
@@ -440,7 +448,7 @@ export const useAgentActions = ({
           const stepId = addStep(params.imageIndex !== undefined ? `Updating with uploaded image: ${params.productName}` : `Regenerating image: ${params.productName}`, true);
           const uniqueSalt = Math.floor(Math.random() * 1000000);
           const promptStr = sanitizePrompt(params.imagePrompt || params.productName);
-          // Standardized Pollinations URL
+          // Setup fallback URL handling
           let finalImageUrl = params.imageUrl || "";
           if (params.imageIndex !== undefined && lastUploadedImages.current[params.imageIndex]) {
             finalImageUrl = lastUploadedImages.current[params.imageIndex];
@@ -541,9 +549,26 @@ export const useAgentActions = ({
                         props: {
                           ...s.props,
                           items: (s.props?.items || []).map(ph => {
+                            const currentTitle = String(ph.label || ph.title || "").trim().toLowerCase();
                             const targetTitle = String(params.philosophyTitle).trim().toLowerCase();
-                            const currentTitle = String(ph.title || ph.label || "").trim().toLowerCase();
-                            if (currentTitle === targetTitle || currentTitle.includes(targetTitle) || targetTitle.includes(currentTitle)) {
+                            
+                            // Check exact/substring match
+                            let isMatch = currentTitle === targetTitle || currentTitle.includes(targetTitle) || targetTitle.includes(currentTitle);
+                            
+                            // Fuzzy fallback: if words overlap
+                            if (!isMatch) {
+                              const currWords = currentTitle.split(/\s+/);
+                              const targetWords = targetTitle.split(/\s+/);
+                              const overlap = currWords.filter(w => targetWords.includes(w) && w.length > 3);
+                              if (overlap.length > 0) isMatch = true;
+                            }
+                            
+                            // Second fallback: If title has "safety" and target has "safety", match it
+                            if (!isMatch && currentTitle.includes("safety") && targetTitle.includes("safety")) {
+                                isMatch = true;
+                            }
+
+                            if (isMatch) {
                               return { ...ph, imageUrl: finalImageUrl, verifiedUrl: finalImageUrl, stepId: null };
                             }
                             return ph;

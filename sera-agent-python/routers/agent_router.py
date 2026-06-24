@@ -32,16 +32,20 @@ async def retry_assets(request: RetryAssetsRequest):
 
     async def response_generator():
         progress_queue = asyncio.Queue()
-        asyncio.create_task(handle_retry_assets(schema, failed_ids, progress_queue))
+        bg_task = asyncio.create_task(handle_retry_assets(schema, failed_ids, progress_queue))
         
-        while True:
-            msg = await progress_queue.get()
-            if msg is None:
-                break
-            if isinstance(msg, str):
-                yield msg
-            else:
-                yield json.dumps(msg) + "\n"
+        try:
+            while True:
+                msg = await progress_queue.get()
+                if msg is None:
+                    break
+                if isinstance(msg, str):
+                    yield msg
+                else:
+                    yield json.dumps(msg) + "\n"
+        finally:
+            if not bg_task.done():
+                bg_task.cancel()
                 
     return StreamingResponse(response_generator(), media_type="text/event-stream")
 
@@ -167,3 +171,22 @@ async def embed_text(request: EmbedRequest):
     except Exception as e:
         logger.error(f"Error generating embedding in Python: {str(e)}")
         return {"success": False, "error": str(e), "embedding": [0.0] * 768}
+
+from pydantic import BaseModel
+class GenerateImageRequest(BaseModel):
+    prompt: str
+    aspect_ratio: str = "1:1"
+
+@router.post("/generate-image")
+async def generate_image(request: GenerateImageRequest):
+    logger.info(f"🎨 Received direct image generation request for prompt: {request.prompt}")
+    try:
+        from tools.sera_tools import generate_image_asset
+        result = await generate_image_asset(request.prompt, request.aspect_ratio)
+        if result.get("success"):
+            return {"success": True, "url": result["url"]}
+        else:
+            return {"success": False, "error": result.get("error", "Unknown error")}
+    except Exception as e:
+        logger.error(f"Error in direct image generation: {str(e)}")
+        return {"success": False, "error": str(e)}

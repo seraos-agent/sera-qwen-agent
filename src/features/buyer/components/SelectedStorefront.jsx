@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { VideoPlayer } from '../../../components/VideoPlayer';
 import { useBuyerContext } from '../BuyerContext';
 import { CURATED_STORES } from '../../../utils/constants';
 
@@ -147,10 +148,10 @@ export const SelectedStorefront = () => {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 40 }}>
                   {[...new Set(sVids)].map((vidUrl, i) => (
                     <div key={i} style={{ maxWidth: 1100, margin: '0 auto', borderRadius: 24, overflow: 'hidden', position: 'relative', aspectRatio: '21/9', background: '#000', boxShadow: '0 24px 60px rgba(0,0,0,0.5)', width: '100%' }}>
-                      <video
-                        src={vidUrl} autoPlay loop muted playsInline preload="auto"
-                        onCanPlay={e => { e.currentTarget.style.opacity = '0.8'; }}
-                        style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0, transition: 'opacity 0.5s ease' }}
+                      <VideoPlayer
+                        key={vidUrl}
+                        src={vidUrl}
+                        style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.8, transition: 'opacity 0.5s ease' }}
                       />
                       <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.9) 0%, transparent 60%)', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', padding: 'clamp(20px, 4vw, 40px) clamp(20px, 6vw, 60px)' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>

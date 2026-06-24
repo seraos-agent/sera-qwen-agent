@@ -1,23 +1,27 @@
 import React from 'react';
+import { VideoPlayer } from '../../../components/VideoPlayer';
 import { useSeller } from '../SellerContext';
 
 export const SellerModals = () => {
-  const { 
+  const {
     isDarkMode, t, selectedPhilosophy, setSelectedPhilosophy,
     showPublishedModal, setShowPublishedModal, storeSchema,
-    selectedProductDetail, setSelectedProductDetail, modalQty, setModalQty
+    selectedProductDetail, setSelectedProductDetail, modalQty, setModalQty,
+    previewMode
   } = useSeller();
+
+  const isMobileView = window.innerWidth < 768 || previewMode === "mobile";
 
   return (
     <>
       {/* PHILOSOPHY DETAIL MODAL */}
       {selectedPhilosophy && (
         <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.8)", zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center", backdropFilter: "blur(8px)", padding: 20 }} onClick={() => setSelectedPhilosophy(null)}>
-          <div onClick={(e) => e.stopPropagation()} style={{ background: isDarkMode ? "#161618" : "#fff", border: `1px solid ${isDarkMode ? "#2a2a2e" : "#e5e7eb"}`, borderRadius: 24, overflow: "hidden", width: "100%", maxWidth: 800, display: "flex", flexDirection: window.innerWidth < 768 ? "column" : "row", boxShadow: "0 24px 60px rgba(0,0,0,0.6)", maxHeight: "90vh" }}>
-            <div style={{ width: window.innerWidth < 768 ? "100%" : "45%", background: "#1a1a1e", position: "relative", minHeight: 300 }}>
+          <div onClick={(e) => e.stopPropagation()} style={{ background: isDarkMode ? "#161618" : "#fff", border: `1px solid ${isDarkMode ? "#2a2a2e" : "#e5e7eb"}`, borderRadius: 24, overflow: "hidden", width: "100%", maxWidth: 800, display: "flex", flexDirection: isMobileView ? "column" : "row", boxShadow: "0 24px 60px rgba(0,0,0,0.6)", maxHeight: "90vh" }}>
+            <div style={{ width: isMobileView ? "100%" : "45%", background: "#1a1a1e", position: "relative", minHeight: 300 }}>
               <img src={selectedPhilosophy.imageUrl} alt={selectedPhilosophy.label || selectedPhilosophy.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
             </div>
-            <div style={{ width: window.innerWidth < 768 ? "100%" : "55%", padding: "40px", display: "flex", flexDirection: "column", overflowY: "auto" }}>
+            <div style={{ width: isMobileView ? "100%" : "55%", padding: "40px", display: "flex", flexDirection: "column", overflowY: "auto" }}>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20 }}>
                 <span style={{ fontSize: 13, color: t.subtext, fontWeight: 600, textTransform: "uppercase" }}>PREVIEW MODE</span>
                 <button onClick={() => setSelectedPhilosophy(null)} style={{ background: "none", border: "none", color: t.subtext, cursor: "pointer", fontSize: 20 }}>&times;</button>
@@ -32,18 +36,20 @@ export const SellerModals = () => {
       {/* PRODUCT DETAIL MODAL (QUICK VIEW / PDP) */}
       {selectedProductDetail && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(8px)', padding: 20 }}>
-          <div style={{ background: isDarkMode ? '#161618' : '#fff', border: `1px solid ${isDarkMode ? "#2a2a2e" : "#e5e7eb"}`, borderRadius: 24, overflow: 'hidden', width: '100%', maxWidth: 850, display: 'flex', flexDirection: window.innerWidth < 768 ? 'column' : 'row', boxShadow: '0 24px 60px rgba(0,0,0,0.6)', maxHeight: '90vh' }}>
+          <div style={{ background: isDarkMode ? '#161618' : '#fff', border: `1px solid ${isDarkMode ? "#2a2a2e" : "#e5e7eb"}`, borderRadius: 24, overflow: 'hidden', width: '100%', maxWidth: isMobileView ? 400 : 850, display: 'flex', flexDirection: isMobileView ? 'column' : 'row', boxShadow: '0 24px 60px rgba(0,0,0,0.6)', maxHeight: '90vh' }}>
             {/* Left: Image / Video */}
-            <div style={{ width: window.innerWidth < 768 ? '100%' : '50%', background: '#1a1a1e', position: 'relative', minHeight: 300 }}>
+            <div style={{ width: isMobileView ? '100%' : '50%', background: '#1a1a1e', position: 'relative', minHeight: 300, aspectRatio: isMobileView ? '4/4' : 'auto' }}>
               {selectedProductDetail.verticalVideoUrl ? (
-                <video src={selectedProductDetail.verticalVideoUrl} autoPlay loop muted playsInline preload="auto"
-                  onCanPlay={e => { e.currentTarget.style.opacity = '1'; }}
-                  style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0, transition: 'opacity 0.4s ease' }}
+                <VideoPlayer 
+                  key={selectedProductDetail.verticalVideoUrl}
+                  src={selectedProductDetail.verticalVideoUrl} 
+                  style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 1, transition: 'opacity 0.4s ease' }}
                 />
               ) : selectedProductDetail.landscapeVideoUrl ? (
-                <video src={selectedProductDetail.landscapeVideoUrl} autoPlay loop muted playsInline preload="auto"
-                  onCanPlay={e => { e.currentTarget.style.opacity = '1'; }}
-                  style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0, transition: 'opacity 0.4s ease' }}
+                <VideoPlayer 
+                  key={selectedProductDetail.landscapeVideoUrl}
+                  src={selectedProductDetail.landscapeVideoUrl} 
+                  style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 1, transition: 'opacity 0.4s ease' }}
                 />
               ) : (
                 <img src={selectedProductDetail.imageUrl} alt={selectedProductDetail.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
@@ -56,7 +62,7 @@ export const SellerModals = () => {
             </div>
 
             {/* Right: Content */}
-            <div style={{ width: window.innerWidth < 768 ? '100%' : '50%', padding: '40px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', overflowY: 'auto' }}>
+            <div style={{ width: isMobileView ? '100%' : '50%', padding: '40px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', overflowY: 'auto' }}>
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
                   <span style={{ fontSize: 13, color: t.subtext, fontWeight: 600, textTransform: 'uppercase', letterSpacing: 1 }}>{selectedProductDetail.store}</span>
@@ -107,7 +113,7 @@ export const SellerModals = () => {
           </div>
         </div>
       )}
-      
+
       {/* PUBLISH SUCCESS MODAL */}
       {showPublishedModal && (
         <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.8)", zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center", backdropFilter: "blur(8px)", padding: 20 }} onClick={() => setShowPublishedModal(false)}>

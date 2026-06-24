@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { VideoPlayer } from '../../../components/VideoPlayer';
 import { useBuyerContext } from '../BuyerContext';
 import { CURATED_STORES } from '../../../utils/constants';
 
@@ -154,9 +155,8 @@ export const BuyerGrid = () => {
               {allCampaigns.map(camp => (
                 <div key={camp.id} style={{ width: "100%", cursor: 'pointer' }} onClick={e => { e.stopPropagation(); window.dispatchEvent(new CustomEvent('sera:openStore', { detail: { storeId: camp.store.id || camp.store.store_id || camp.store._id } })); }}>
                   <div style={{ borderRadius: 16, overflow: 'hidden', position: 'relative', aspectRatio: '9/16', background: t.card, border: `1px solid ${t.border}` }}>
-                    <video src={camp.videoUrl} autoPlay loop muted playsInline preload="auto"
-                      onCanPlay={e => { e.currentTarget.style.opacity = '1'; }}
-                      style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0, transition: 'opacity 0.4s ease' }}
+                    <VideoPlayer key={camp.videoUrl} src={camp.videoUrl}
+                      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                     />
                     <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: "40%", background: "linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 100%)", pointerEvents: "none" }} />
                     <div style={{ position: "absolute", bottom: "8px", left: "8px", right: "8px", display: "flex", justifyContent: "space-between", alignItems: "flex-end", gap: 12 }}>
@@ -205,9 +205,9 @@ export const BuyerGrid = () => {
 
             return (
               <>
-                {allProducts.slice(0, visibleCount).map(prod => (
+                {allProducts.slice(0, visibleCount).map((prod, idx) => (
                   <div
-                    key={prod.id}
+                    key={`${prod.id}-${idx}`}
                     onClick={() => {
                       setSelectedProductDetail({ name: prod.name, price: prod.price, desc: prod.desc || 'Premium curated item directly promoted by our top AI storefronts.', imageUrl: prod.image, verticalVideoUrl: prod.verticalVideoUrl, landscapeVideoUrl: prod.landscapeVideoUrl, promo: prod.aiTag, store: prod.store, rating: prod.rating, sales: prod.sales });
                       setModalQty(1);
@@ -215,7 +215,11 @@ export const BuyerGrid = () => {
                     style={{ background: isDarkMode ? '#161618' : '#fff', border: `1px solid ${t.border}`, borderRadius: 16, overflow: 'hidden', transition: 'all 0.3s ease', display: 'flex', flexDirection: 'column', cursor: 'pointer', boxShadow: isDarkMode ? 'none' : '0 6px 18px rgba(0,0,0,0.03)' }}
                   >
                     <div style={{ height: 220, width: '100%', background: '#1a1a1e', position: 'relative' }}>
-                      <img src={prod.image} alt={prod.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      {prod.image && prod.image.endsWith('.mp4') ? (
+                        <VideoPlayer key={prod.image} src={prod.image} hideControls style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      ) : (
+                        <img src={prod.image} alt={prod.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      )}
                       <div style={{ position: 'absolute', top: 10, left: 10, background: 'rgba(200,184,154,0.9)', color: '#0f0f10', fontSize: 10, fontWeight: 700, padding: '2px 8px', borderRadius: 10, backdropFilter: 'blur(4px)' }}>
                         {prod.aiTag}
                       </div>

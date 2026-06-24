@@ -1,5 +1,6 @@
 import React from 'react';
 import { SECTION_REGISTRY } from './SectionRegistry';
+import { VideoPlayer } from '../components/VideoPlayer';
 
 export function DynamicRenderer({ layout, globalProps }) {
   if (!layout || !Array.isArray(layout)) return null;
@@ -49,15 +50,10 @@ export function DynamicRenderer({ layout, globalProps }) {
                     {[...new Set(sVids)].map((vidUrl, i) => (
                       <div key={i} style={{ maxWidth: 1100, margin: "0 auto", width: "100%" }}>
                         <div style={{ borderRadius: "clamp(0px, 4vw, 24px)", overflow: "hidden", position: "relative", aspectRatio: "16/9", background: globalProps.isDarkMode ? "#1a1a1e" : "#f3f4f6", border: `1px solid ${globalProps.isDarkMode ? "#2a2a2e" : "#e5e7eb"}` }}>
-                          <video
+                          <VideoPlayer
+                            key={vidUrl}
                             src={vidUrl}
-                            autoPlay
-                            loop
-                            muted
-                            playsInline
-                            preload="auto"
-                            onCanPlay={e => { e.currentTarget.style.opacity = '1'; }}
-                            style={{ width: "100%", height: "100%", objectFit: "cover", opacity: 0, transition: "opacity 0.4s ease" }}
+                            style={{ width: "100%", height: "100%", objectFit: "cover", opacity: 1, transition: "opacity 0.4s ease" }}
                           />
                           <div style={{ position: "absolute", top: "8px", right: "8px" }}>
                             <span style={{ background: "rgba(0,0,0,0.5)", backdropFilter: "blur(4px)", color: "#fff", fontSize: 9, fontWeight: 600, padding: "2px 8px", borderRadius: 100, display: "flex", alignItems: "center", gap: 4 }}><div style={{ width: 4, height: 4, borderRadius: "50%", background: "#4ade80", animation: "pulse 1.5s infinite" }} /> Live Now</span>
@@ -102,17 +98,12 @@ export function DynamicRenderer({ layout, globalProps }) {
 
                     <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 24 }}>
                       {pVids.map((vidUrl, i) => (
-                        <div key={i} style={{ width: "100%" }}>
-                          <div style={{ borderRadius: 16, overflow: "hidden", position: "relative", aspectRatio: "9/16", background: globalProps.isDarkMode ? "#1a1a1e" : "#f3f4f6", border: `1px solid ${globalProps.isDarkMode ? "#2a2a2e" : "#e5e7eb"}` }}>
-                            <video
+                        <div key={i} style={{ width: "100%", display: "flex", justifyContent: "flex-start" }}>
+                          <div style={{ width: "100%", maxWidth: globalProps.isSellerMobile ? 180 : 280, borderRadius: 16, overflow: "hidden", position: "relative", aspectRatio: "9/16", background: globalProps.isDarkMode ? "#1a1a1e" : "#f3f4f6", border: `1px solid ${globalProps.isDarkMode ? "#2a2a2e" : "#e5e7eb"}` }}>
+                            <VideoPlayer
+                              key={vidUrl}
                               src={vidUrl}
-                              autoPlay
-                              loop
-                              muted
-                              playsInline
-                              preload="auto"
-                              onCanPlay={e => { e.currentTarget.style.opacity = '1'; }}
-                              style={{ width: "100%", height: "100%", objectFit: "cover", opacity: 0, transition: "opacity 0.4s ease" }}
+                              style={{ width: "100%", height: "100%", objectFit: "cover", opacity: 1, transition: "opacity 0.4s ease" }}
                             />
                             <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: "40%", background: "linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 100%)", pointerEvents: "none" }} />
                             <div style={{ position: "absolute", bottom: "8px", left: "8px", right: "8px", display: "flex", justifyContent: "space-between", alignItems: "flex-end", gap: 12 }}>

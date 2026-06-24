@@ -5,7 +5,7 @@ import { getSessionId } from '../../../utils/constants';
 import confetti from 'canvas-confetti';
 
 export const SellerHeader = () => {
-  const { activeNav, setActiveNav, isDarkMode, setIsDarkMode, t, themeColor, userStores, setStoreSchema, activeAnalyticsStoreId, setActiveAnalyticsStoreId, analyticsData, isLoadingAnalytics, setIsPublishing, isPublishing, isPublished, setIsPublished, storeSchema, storeData, heroImage, products, setProducts, setPublishedSchema, setUserStores, activePromoTab, setActivePromoTab, videoFormat, setVideoFormat, selectedPhilosophy, setSelectedPhilosophy, appMode, filteredStores, selectedCategoryFilter, setSelectedCategoryFilter, buyerSearchQuery, setBuyerSearchQuery, setAppMode, previewMode, setPreviewMode, setShowPublishedModal, chatOpen, setChatOpen, handlePublishStore } = useSeller();
+  const { activeNav, setActiveNav, isDarkMode, setIsDarkMode, t, themeColor, userStores, setStoreSchema, activeAnalyticsStoreId, setActiveAnalyticsStoreId, analyticsData, isLoadingAnalytics, setIsPublishing, isPublishing, isPublished, setIsPublished, storeSchema, storeData, heroImage, products, setProducts, setPublishedSchema, setUserStores, activePromoTab, setActivePromoTab, videoFormat, setVideoFormat, selectedPhilosophy, setSelectedPhilosophy, appMode, filteredStores, selectedCategoryFilter, setSelectedCategoryFilter, buyerSearchQuery, setBuyerSearchQuery, setAppMode, previewMode, setPreviewMode, setShowPublishedModal, chatOpen, setChatOpen, handlePublishStore, buildingStage } = useSeller();
   
   return (
     <>
@@ -54,18 +54,21 @@ export const SellerHeader = () => {
             {appMode === "seller" && activeNav === "studio" && (
               <button
                 onClick={async () => {
+                  if (buildingStage > 0 || isPublishing) return;
                   const success = await handlePublishStore();
                   if (success) {
-                    console.log("Store published via unified handler.");
+                    // Store published
                   }
                 }}
+                disabled={buildingStage > 0 || isPublishing}
                 style={{
                   marginLeft: 8, background: "#c8b89a", color: "#0f0f10", border: "none",
-                  borderRadius: 6, padding: "4px 12px", cursor: "pointer",
+                  borderRadius: 6, padding: "4px 12px", cursor: (buildingStage > 0 || isPublishing) ? "not-allowed" : "pointer",
+                  opacity: (buildingStage > 0 || isPublishing) ? 0.5 : 1,
                   fontWeight: 600, fontSize: 11, fontFamily: "'DM Sans', sans-serif", transition: "all 0.2s"
                 }}
               >
-                {isPublishing ? "Publishing..." : "Publish"}
+                {isPublishing ? "Publishing..." : (buildingStage > 0 ? "Generating..." : "Publish")}
               </button>
             )}
             {/* Flip Mode Toggle Button (Modern Minimalist Pill) */}

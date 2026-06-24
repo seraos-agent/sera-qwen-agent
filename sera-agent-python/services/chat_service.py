@@ -282,7 +282,7 @@ async def run_execution_pipeline(start_time, session_id, agent_type, runner, use
             else: final_text = chunk
             
         raw_json = extract_json_from_text(final_text)
-        sub_agents_team = [{"agent": "store_agent", "objective": "Design store structure"}, {"agent": "marketing_agent", "objective": "Define audience and brand positioning"}] # default
+        sub_agents_team = [{"agent": "store_agent", "objective": "Design store structure"}] # default
         action_from_plan = "idle"
         if raw_json:
             try:
@@ -468,7 +468,7 @@ async def run_execution_pipeline(start_time, session_id, agent_type, runner, use
     raw_json = extract_json_from_text(final_text)
     action = "idle"
     params = {}
-    chat_out = ""
+    chat_out = final_text.split('```')[0].split('{')[0].strip()
     text_out = "Execution completed."
     
     if raw_json:
@@ -476,17 +476,20 @@ async def run_execution_pipeline(start_time, session_id, agent_type, runner, use
             data = json.loads(raw_json)
             action = data.get("action", "idle")
             params = data.get("params", {})
-            chat_out = data.get("chat", "")
-            text_out = data.get("text", "Execution completed.")
+            if data.get("chat"):
+                chat_out = data.get("chat")
+            if data.get("text"):
+                text_out = data.get("text")
         except Exception as e:
             logger.error(f"JSON Decode Error in final output: {e}\nRaw JSON was: {raw_json}\nFull text was: {final_text}")
-            chat_out = final_text
     else:
         logger.error(f"Failed to extract JSON from final output! Full text was: {final_text}")
         chat_out = final_text
 
     if action in ["batch_create", "update_schema", "update_philosophy"]:
-        schema = params.get("schema", {}) or params
+        schema = params.get("schema")
+        if not schema:
+            schema = dict(params)
         if "layout" not in schema: schema["layout"] = []
         
         # ── Fix: Map top-level brand fields into the schema layout sections ──
@@ -522,15 +525,19 @@ async def run_execution_pipeline(start_time, session_id, agent_type, runner, use
         # Put updated schema back into params
         params["schema"] = schema
 
-    def restore_assets(obj):
+    def restore_assets(obj, visited=None):
+        if visited is None: visited = set()
+        if id(obj) in visited: return
+        visited.add(id(obj))
+        
         if isinstance(obj, dict):
             for k, v in obj.items():
                 if isinstance(v, str) and v in ASSET_STORE: obj[k] = ASSET_STORE[v]
-                elif isinstance(v, (dict, list)): restore_assets(v)
+                elif isinstance(v, (dict, list)): restore_assets(v, visited)
         elif isinstance(obj, list):
             for i, v in enumerate(obj):
                 if isinstance(v, str) and v in ASSET_STORE: obj[i] = ASSET_STORE[v]
-                elif isinstance(v, (dict, list)): restore_assets(v)
+                elif isinstance(v, (dict, list)): restore_assets(v, visited)
     restore_assets(params)
 
     # 1. Dual Output System: Instant UI Render
@@ -594,7 +601,8 @@ async def run_execution_pipeline(start_time, session_id, agent_type, runner, use
         "decision_rationale": workspace["recommendations"] if 'workspace' in locals() else [],
         "conflict_summary": workspace["objections"] if 'workspace' in locals() else [],
         "agent_agreement_map": agreement_map,
-        "backend_agent_message": chat_out if chat_out else None
+        "backend_agent_message": chat_out if chat_out else None,
+        "failed_assets_after_retries": params.get("failed_assets", [])
     }
     
     if request.chatMode == "buyer":
@@ -613,11 +621,6 @@ async def run_execution_pipeline(start_time, session_id, agent_type, runner, use
             async for chunk in execute_agent_pass(start_time, session_id, "spokesperson_agent", spokesperson_runner, spokesperson_msgs, request):
                 if isinstance(chunk, str) and chunk.endswith("\n"): 
                     yield chunk
-                    try:
-                        chunk_data = json.loads(chunk.strip())
-                        if chunk_data.get('type') == 'agent_message_start' or chunk_data.get('type') == 'text_chunk':
-                            spokesperson_text += chunk_data.get('chunk', '') or chunk_data.get('text', '')
-                    except: pass
                 else:
                     spokesperson_text = chunk
                     
@@ -629,6 +632,7 @@ async def run_execution_pipeline(start_time, session_id, agent_type, runner, use
 
     # 3. Final event to close the transaction
     yield emit_lifecycle("completed", session_id)
+    
     yield json.dumps({
         "event_id": f"evt_final_{int(time.time())}",
         "timestamp": int(time.time()),
@@ -638,5 +642,5 @@ async def run_execution_pipeline(start_time, session_id, agent_type, runner, use
         "action": action,
         "params": params,
         "text": spokesperson_text,
-        "chat": chat_out
+        "chat": spokesperson_text
     }) + "\n"

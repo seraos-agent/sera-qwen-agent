@@ -23,7 +23,9 @@ export const useSellerChat = ({
   setProducts,
   setDraftSchema,
   setActiveNav,
-  setUserStores
+  setUserStores,
+  setVideoFormat,
+  setActivePromoTab
 }) => {
   const [chatWidth, setChatWidth] = useState(380);
   const [isAttachMenuOpen, setIsAttachMenuOpen] = useState(false);
@@ -103,7 +105,7 @@ export const useSellerChat = ({
   const [openingLine, setOpeningLine] = useState("");
   const openingCaptured = useRef(false);
   const actionAppliedRef = useRef(false);
-  const [buildingStage, setBuildingStage] = useState(0); 
+  const [buildingStage, setBuildingStage] = useState(0);
   const [visibilityMode, setVisibilityMode] = useState('agent');
 
   const stopAgentWork = () => {
@@ -247,7 +249,9 @@ export const useSellerChat = ({
     lastUploadedImages,
     setBuildingStage,
     setActiveNav,
-    setUserStores
+    setUserStores,
+    setVideoFormat,
+    setActivePromoTab
   });
 
   const setThemeColor = (color) => setStoreSchema(prev => ({ ...prev, theme: { ...prev.theme, themeColor: color } }));
@@ -284,23 +288,23 @@ export const useSellerChat = ({
     lastUploadedImages.current = currentImages;
     lastUserMsgRef.current = userMsg;
     setIsTyping(true);
-    setAgentActivity([]); 
+    setAgentActivity([]);
     agentActivityRef.current = [];
-    setBuildingStage(0); 
+    setBuildingStage(0);
     setExecutionState(null);
     executionStateRef.current = null;
     setOpeningLine("");
     openingCaptured.current = false;
     actionAppliedRef.current = false;
-    
-    const prevSnapBeforeRun = { 
-      storeData, 
-      products: [...products], 
-      themeColor, 
+
+    const prevSnapBeforeRun = {
+      storeData,
+      products: [...products],
+      themeColor,
       heroBg,
-      storeSchema: JSON.parse(JSON.stringify(storeSchema)) 
+      storeSchema: JSON.parse(JSON.stringify(storeSchema))
     };
-    
+
     try {
       let storeContextToSend = {};
       if (appMode === "buyer") {
@@ -313,9 +317,9 @@ export const useSellerChat = ({
       } else {
         storeContextToSend = {
           ...storeSchema,
-          storeId: storeSchema.id || activeAnalyticsStoreId, 
-          activeTab: activeNav, 
-          products, 
+          storeId: storeSchema.id || activeAnalyticsStoreId,
+          activeTab: activeNav,
+          products,
           themeColor,
           heroBg
         };
@@ -328,7 +332,7 @@ export const useSellerChat = ({
       if (!response.body) {
         throw new Error("ReadableStream not supported or empty body.");
       }
-      
+
       const contentType = response.headers.get("Content-Type");
       if (contentType && contentType.includes("application/json")) {
         const data = await response.json();
@@ -349,7 +353,7 @@ export const useSellerChat = ({
         if (ui) applyAction(action, params);
         return;
       }
-      
+
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
       let buffer = "";
@@ -369,11 +373,12 @@ export const useSellerChat = ({
                   setBuildingStage(2);
                 }
                 setMessages(prev => {
+                  const existingPending = prev.find(m => m.id === "pending_agent_msg");
                   const noPending = prev.filter(m => m.id !== "pending_agent_msg");
                   return [...noPending, {
                     id: "pending_agent_msg",
                     role: "agent",
-                    text: "",
+                    text: existingPending ? existingPending.text : "",
                     action: data.action,
                     params: data.params,
                     hasAction: isStoreMutationAction(data.action, data.params),
@@ -382,32 +387,32 @@ export const useSellerChat = ({
                     prevState: prevSnapBeforeRun
                   }];
                 });
-                
+
                 if (data.action === "show_plan") {
-                  applyAction("update_schema", data.params); 
+                  applyAction("update_schema", data.params);
                 } else if (isStoreMutationAction(data.action, data.params) || data.action !== 'idle') {
                   applyAction(data.action, data.params);
                 }
                 actionAppliedRef.current = true;
               } else if (data.type === "agent_message_start" || data.type === "text_chunk") {
                 setEphemeralThought(null);
-                
+
                 if (!openingCaptured.current) {
                   const currentText = data.text !== undefined ? data.text : (openingLine + (data.chunk || ""));
-                  
+
                   // Bersihkan teks dari code block, JSON bracket, dan line break
                   let cleanText = currentText.split('\n')[0].split('```')[0].split('{')[0].trim();
-                  
+
                   // Ambil hanya kalimat pertama jika ada titik
                   if (cleanText.includes('.')) {
                     cleanText = cleanText.split('.')[0] + '.';
                   }
-                  
+
                   // Batasi panjang maksimal 100 karakter
                   if (cleanText.length > 100) {
                     cleanText = cleanText.substring(0, 97) + '...';
                   }
-                  
+
                   setOpeningLine(cleanText);
 
                   // Set flag captured jika teks sudah mencapai titik batas atau ada tanda kode
@@ -498,30 +503,30 @@ export const useSellerChat = ({
                 setMessages(prev => {
                   const last = prev[prev.length - 1];
                   if (last && last.id === "pending_agent_msg") {
-                    return [...prev.slice(0, -1), { 
-                      ...last, 
-                      text: data.text || last.text, 
-                      chat: data.chat, 
-                      action: data.action, 
-                      params: data.params 
+                    return [...prev.slice(0, -1), {
+                      ...last,
+                      text: data.text || last.text,
+                      chat: data.chat,
+                      action: data.action,
+                      params: data.params
                     }];
                   } else if (last && last.role === "agent") {
-                    return [...prev.slice(0, -1), { 
-                      ...last, 
-                      text: data.text || last.text, 
-                      chat: data.chat, 
-                      action: data.action, 
-                      params: data.params 
+                    return [...prev.slice(0, -1), {
+                      ...last,
+                      text: data.text || last.text,
+                      chat: data.chat,
+                      action: data.action,
+                      params: data.params
                     }];
                   } else {
-                    return [...prev, { 
-                      id: "pending_agent_msg", 
-                      role: "agent", 
-                      text: data.text, 
-                      chat: data.chat, 
-                      action: data.action, 
+                    return [...prev, {
+                      id: "pending_agent_msg",
+                      role: "agent",
+                      text: data.text,
+                      chat: data.chat,
+                      action: data.action,
                       params: data.params,
-                      status: "done" 
+                      status: "done"
                     }];
                   }
                 });
@@ -666,7 +671,7 @@ export const useSellerChat = ({
                 return { ...m, retryStatus: remaining === 0 ? 'success' : 'partial', params: { ...m.params, pending_retries: stillFailed } };
               }));
             }
-          } catch (e) {}
+          } catch (e) { }
         }
       }
     } catch (err) {

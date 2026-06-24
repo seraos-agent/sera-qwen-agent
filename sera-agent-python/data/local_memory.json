@@ -216,6 +216,36 @@
         "role": "user",
         "content": "cek store aktif",
         "ts": "2026-06-20 01:46:57.676569"
+      },
+      {
+        "role": "user",
+        "content": "hey sera check store active",
+        "ts": "2026-06-21 23:12:15.281348"
+      },
+      {
+        "role": "assistant",
+        "content": "Saat ini hanya ada **satu toko aktif** di marketplace kami. Biarkan saya perkenalkan... ✨\n\n---\n\n### Muse Atelier\n\n*\"Wardrobe architecture for the discerning. Each piece is an investment in self-composition, timeless drape, impeccable cut, quiet luxury.\"*\n\n![Store Banner](http://127.0.0.1:8000/assets/asset_1781841180240_2572.png)\n[View Store](#store_agent_store_zz6j727ku)\n\n---\n\n**Muse Atelier** adalah rumah mode *quiet luxury* yang menawarkan koleksi pakaian premium dengan sentuhan artisan. Beberapa produk unggulannya antara lain:\n\n- **The Nocturne Gown**, Gaun sutra malam hari, **$450** 🥇 *Best Seller*\n- **The Structure Blazer**, Blazer wol Italia, **$350**  *New*\n- **The Slip of Silk**, Gaun slip sutra 22-momme, **$280**\n- **The Soirée Cocktail**, Gaun koktail satin, **$390**\n- **The Summer Linen**, Gaun linen musim panas, **$220** *Seasonal*\n- **The Statement Jumpsuit**, Jumpsuit lebar liquid crepe, **$310**\n\nApakah Anda tertarik melihat-lihat produk dari **Muse Atelier**?\n\nAtau ada yang bisa saya bantu cari lebih lanjut?",
+        "ts": "2026-06-21 23:12:15.305693"
+      },
+      {
+        "role": "user",
+        "content": "check stores active",
+        "ts": "2026-06-23 02:47:21.707480"
+      },
+      {
+        "role": "assistant",
+        "content": "Maaf, terjadi gangguan koneksi. Silakan coba lagi.",
+        "ts": "2026-06-23 02:47:21.757327"
+      },
+      {
+        "role": "user",
+        "content": "check stores active",
+        "ts": "2026-06-23 02:48:15.244000"
+      },
+      {
+        "role": "assistant",
+        "content": "Sekarang koneksi sudah lancar! Ada **3 toko aktif** di marketplace kami. Biarkan saya perkenalkan semuanya. ✨\n\n---\n\n### 1. Muse Atelier\n\n*\"Wardrobe architecture for the discerning, timeless drape, impeccable cut, quiet luxury.\"*\n\n![Store Banner](http://127.0.0.1:8000/assets/asset_1781841180240_2572.png)\n[View Store](#store_agent_store_zz6j727ku)\n\nRumah mode *quiet luxury* dengan koleksi **gaun malam**, **blazer tailored**, dan **silk dress** premium. Mulai dari **$220 - $450**.\n\n---\n\n### 2. Lumina Botanics\n\n*\"Transparent skincare formulated with dermatological precision and earth-derived healing.\"*\n\n![Store Banner](http://127.0.0.1:8000/assets/asset_1782087032162_9967.png)\n[View Store](#store_store_1782087296225)\n\nSkincare klinis berbasis botanikal dengan formula transparan. Mulai dari **$28 - $48**.\n\n---\n\n### 3. Tesla Experience\n\n*\"The perfect blend of sustainable innovation, luxury, and unmatched performance.\"*\n\n![Store Banner](http://127.0.0.1:8000/assets/asset_1782177089732_2577.png)\n[View Store](#store_store_1782182811971)\n\nMobil listrik futuristik dan aksesori premium. Mulai dari **$250 - $89,990**.\n\n---\n\nToko favorit Anda sebelumnya adalah **Muse Atelier**, apakah Anda ingin melihat koleksi terbaru mereka, atau penasaran dengan toko lainnya?\n\n😊",
+        "ts": "2026-06-23 02:48:15.264291"
       }
     ]
   }

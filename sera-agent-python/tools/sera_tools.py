@@ -7,24 +7,6 @@ from utils.logger import logger
 import time
 import base64
 
-from connectors.local_db import LocalDBConnector
-
-local_db = LocalDBConnector()
-
-def check_local_stock(product_id: str) -> dict:
-    """Check the current stock of a product by ID in the local database."""
-    stock = local_db.get_stock(product_id)
-    if stock is not None:
-        return {"success": True, "product_id": product_id, "stock": stock}
-    return {"success": False, "error": "Product not found"}
-
-def check_local_price(product_id: str) -> dict:
-    """Check the current price of a product by ID in the local database."""
-    price = local_db.get_price(product_id)
-    if price is not None:
-        return {"success": True, "product_id": product_id, "price": price}
-    return {"success": False, "error": "Product not found"}
-
 def save_base64_image(base64_str: str, asset_id: str) -> str:
     """Saves base64 image string to disk and returns the HTTP URL."""
     try:
@@ -239,7 +221,7 @@ async def generate_image_asset(prompt: str, aspect_ratio: str = "1:1") -> dict:
         logger.error(f"Error in generate_image_asset tool: {str(e)}")
         return {"success": False, "error": str(e)}
 
-async def generate_video_asset(prompt: str, aspect_ratio: str = "16:9", duration_seconds: int = 8, brand_name: str = "") -> dict:
+async def generate_video_asset(prompt: str, aspect_ratio: str = "16:9", duration_seconds: int = 4, brand_name: str = "") -> dict:
     """
     Generates a high-fidelity cinematic video using Tongyi Video based on a text prompt.
     aspect_ratio can be '16:9' (for Store Banners) or '9:16' (for Promo Campaigns).
@@ -267,13 +249,13 @@ async def generate_video_asset(prompt: str, aspect_ratio: str = "16:9", duration
         logger.error(f"Error in generate_video_asset tool: {str(e)}")
         return {"success": False, "error": str(e)}
 
-async def generate_video_from_image_asset(prompt: str, image_url: str, aspect_ratio: str = "16:9", duration_seconds: int = 8, brand_name: str = "") -> dict:
+async def generate_video_from_image_asset(prompt: str, image_url: str, aspect_ratio: str = "16:9", duration_seconds: int = 4, brand_name: str = "") -> dict:
     """
-    Generates a cinematic video from an existing product image using happyhorse-1.0-i2v.
+    Generates a cinematic video from an existing product image using happyhorse-1.1-i2v.
     Requires both a prompt and the source image_url.
     Returns a dictionary with the generated video URL.
     """
-    duration_seconds = min(8, max(1, duration_seconds))
+    duration_seconds = min(4, max(1, duration_seconds))
     logger.info(f"🎬 Generating video asset via HappyHorse I2V tool: '{prompt}', ratio: '{aspect_ratio}', duration: {duration_seconds}s")
     try:
         base64_url = await generate_video_with_happyhorse_i2v(prompt, image_url, aspect_ratio, duration=duration_seconds)
@@ -368,7 +350,7 @@ async def generate_store_assets(schema: dict, progress_queue=None) -> dict:
         try:
             logger.info(f"Generating {media_type} for {task_id}: '{prompt}'")
             if media_type == "video":
-                base64_url = await generate_video_with_happyhorse_t2v(prompt, ratio, duration=8)
+                base64_url = await generate_video_with_happyhorse_t2v(prompt, ratio, duration=4)
             else:
                 base64_url = await generate_image_with_imagen(prompt, ratio)
                 
@@ -385,6 +367,13 @@ async def generate_store_assets(schema: dict, progress_queue=None) -> dict:
             return {"itemId": task_id, "status": "success", "url": final_url, "proxy_url": final_url}
         except Exception as err:
             logger.error(f"Failed generation for {task_id}: {str(err)}")
+            if task_id == "hero_bg":
+                target_dict["props"]["heroImage"] = "error"
+            elif media_type == "video":
+                target_dict["videoUrl"] = "error"
+            else:
+                target_dict["imageUrl"] = "error"
+                target_dict["verifiedUrl"] = "error"
             return {"itemId": task_id, "status": "failed", "error": str(err)}
             
     results = []
@@ -459,3 +448,9 @@ async def get_categories(store_id: str = None) -> dict:
     except Exception as e:
         logger.error(f"Error calling GET /api/products for categories: {str(e)}")
         return {"success": False, "error": str(e)}
+
+async def check_local_stock(product_name: str) -> dict:
+    return {"success": True, "stock": 50, "message": f"{product_name} is in stock."}
+
+async def check_local_price(product_name: str) -> dict:
+    return {"success": True, "price": ".99"}

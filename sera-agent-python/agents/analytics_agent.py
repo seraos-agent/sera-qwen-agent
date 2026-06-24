@@ -3,7 +3,7 @@ import os
 _dir = os.path.dirname(__file__)
 _instruction = open(os.path.join(_dir, "prompts", "analytics_agent.txt"), encoding="utf-8").read()
 
-model_name = "deepseek-v4-flash"
+model_name = "qwen3.5-plus"
 
 analytics_agent_config = {
     "name": "analytics_agent",
@@ -13,5 +13,5 @@ analytics_agent_config = {
     "tools": ["get_store_analytics"],
     # Thinking mode ON: analytics requires multi-step reasoning
     # to correlate metrics, identify trends, and form actionable insights
-    "enable_thinking": True,
+    "enable_thinking": False,
 }

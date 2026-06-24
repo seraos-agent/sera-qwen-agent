@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  # 1. Python Agent Runtime (ADK)
+  sera-python-agent:
+    build: 
+      context: ./sera-agent-python
+      dockerfile: Dockerfile
+    container_name: sera-python-agent
+    ports:
+      - "8000:8000"
+    environment:
+      # Variabel ini akan diambil dari file .env di mesin ECS Anda
+      - DASHSCOPE_API_KEY=${DASHSCOPE_API_KEY}
+      - PORT=8000
+    restart: unless-stopped
+
+  # 2. Node.js API Server
+  sera-node-server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: sera-node-server
+    ports:
+      - "3001:3001" # Port ini yang akan dipanggil oleh Vercel (Frontend)
+    environment:
+      - MONGODB_URI=${MONGODB_URI}
+      - PORT=3001
+      # Penting: Node.js memanggil agen Python melalui nama container (jaringan internal)
+      - ADK_SERVICE_URL=http://sera-python-agent:8000
+      - GOOGLE_CLOUD_PROJECT=sera-495721
+    depends_on:
+      - sera-python-agent
+    restart: unless-stopped

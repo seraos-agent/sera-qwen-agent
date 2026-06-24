@@ -67,9 +67,10 @@ async def generate_image_with_imagen(prompt: str, aspect_ratio: str = "1:1") -> 
             
             @retry_http
             async def download_image():
-                img_response = await http_manager.client.get(image_url, timeout=30.0)
-                img_response.raise_for_status()
-                return img_response.content
+                async with httpx.AsyncClient() as client:
+                    img_response = await client.get(image_url, timeout=30.0)
+                    img_response.raise_for_status()
+                    return img_response.content
                 
             img_bytes = await download_image()
             base64_str = base64.b64encode(img_bytes).decode("utf-8")

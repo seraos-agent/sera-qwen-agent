@@ -101,28 +101,22 @@ app.post('/api/execute-task', async (req, res) => {
   const { action, prompt, taskId, itemId } = req.body;
   if (!action || !prompt) return res.status(400).json({ status: "failed", error: "Missing action or prompt" });
 
-  const maxRetries = 3;
+  const maxRetries = 1;
   let attempt = 0;
   let lastError = "Unknown error";
   let httpStatus = 500;
 
-  const uniqueSalt = Math.floor(Math.random() * 1000000);
-  const targetUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?seed=${uniqueSalt}&model=turbo`;
-
-  const userAgents = [
-    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36',
-    'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
-  ];
+  const targetUrl = `http://localhost:8000/api/agent/generate-image`;
 
   while (attempt <= maxRetries) {
     try {
-      const randomUA = userAgents[Math.floor(Math.random() * userAgents.length)];
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15s timeout per attempt
+      const timeoutId = setTimeout(() => controller.abort(), 60000);
 
       const response = await fetch(targetUrl, {
-        headers: { 'User-Agent': randomUA },
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt: prompt, aspect_ratio: "1:1" }),
         signal: controller.signal
       });
       clearTimeout(timeoutId);
@@ -130,16 +124,16 @@ app.post('/api/execute-task', async (req, res) => {
       httpStatus = response.status;
 
       if (response.ok) {
-        const buffer = await response.arrayBuffer();
-        if (buffer.byteLength > 1000) { // Verify asset existence & validity
+        const data = await response.json();
+        if (data.success && data.url) {
           const result = {
             action,
             status: "success",
             asset_created: true,
             http_status: httpStatus,
             retry_count: attempt,
-            url: targetUrl,
-            proxy_url: `${req.protocol}://${req.get('host')}/api/proxy-image?url=${encodeURIComponent(targetUrl)}`,
+            url: data.url,
+            proxy_url: data.url,
             itemId
           };
 

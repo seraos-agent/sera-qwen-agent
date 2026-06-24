@@ -155,7 +155,7 @@ export const SellerApp = ({ isDarkMode, setIsDarkMode, t, DynamicRenderer }) => 
                 followers: "1.2K",
                 desc: dbStore.description || dbStore.store_desc || dbStore.desc || "Brand Identity",
                 products: dbStore.products || [],
-                schema: dbStore.customSchema || dbStore.schema || null,
+                customSchema: dbStore.customSchema || dbStore.schema || null,
                 storeData: dbStore.storeData || {},
                 isUserStore: true,
                 createdAt: dbStore.created_at || new Date().toISOString()
@@ -237,11 +237,13 @@ export const SellerApp = ({ isDarkMode, setIsDarkMode, t, DynamicRenderer }) => 
     heroBg: storeSchema?.theme?.heroBg || "#000000",
     storeData,
     setStoreSchema,
-    setStoreData: (data) => setStoreSchema(prev => ({ ...prev, layout: prev.layout.map(s => s.type === "hero" ? { ...s, props: { ...s.props, ...data } } : s) })),
+    setStoreData,
     setProducts,
     setDraftSchema,
     setActiveNav,
-    setUserStores
+    setUserStores,
+    setVideoFormat,
+    setActivePromoTab
   });
 
   const {
@@ -275,6 +277,10 @@ export const SellerApp = ({ isDarkMode, setIsDarkMode, t, DynamicRenderer }) => 
   };
 
   const handlePublishStore = async () => {
+    if (buildingStage > 0) {
+      alert("Please wait for the AI to finish generating the store assets before publishing.");
+      return false;
+    }
     setIsPublishing(true);
     try {
       const productsList = storeSchema.layout?.find(s => s.type === "featured_products")?.props?.products || storeSchema.products || [];

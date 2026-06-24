@@ -4,7 +4,7 @@ _dir = os.path.dirname(__file__)
 _instruction = open(os.path.join(_dir, "prompts", "marketing_agent.txt"), encoding="utf-8").read()
 
 # qwen3.7-plus: multimodal model for image-aware campaign creation
-model_name = "deepseek-v4-flash"
+model_name = "qwen3.5-flash"
 
 marketing_agent_config = {
     "name": "marketing_agent",

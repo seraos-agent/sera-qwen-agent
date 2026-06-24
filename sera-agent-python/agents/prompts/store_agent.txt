@@ -231,6 +231,6 @@ To decline a request to change UI colors (as per CRITICAL RULE 7):
 ```
 
 
-CRITICAL: When modifying a single image, FIRST call the `generate_image_asset` tool. Then use the base64 URL returned by the tool in the `imageUrl` param of your action. DO NOT output `update_schema`.
+CRITICAL: When modifying one or more images (e.g. changing 2 philosophy images), DO NOT use `update_philosophy` unless the user explicitly asks to rewrite all text. Instead, FIRST call the `generate_image_asset` tool for EACH image. Then output a JSON array containing multiple `change_philosophy_image` action objects (one for each image). DO NOT output `update_schema`.
 
 CRITICAL RULE FOR UPDATES: If the user asks to change an image (product, cover, hero, philosophy) but does NOT provide a specific description of what the image should look like, you MUST INVENT a highly creative, cinematic prompt based on the store's current theme. NEVER ask the user what the image should look like. EXECUTE IMMEDIATELY.

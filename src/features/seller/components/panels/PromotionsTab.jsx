@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { VideoPlayer } from '../../../../components/VideoPlayer';
 import { useSeller } from '../../SellerContext';
 
 export const PromotionsTab = () => {
@@ -120,13 +121,10 @@ export const PromotionsTab = () => {
                           // Landscape Preview
                           <div style={{ width: "100%", minHeight: 160, aspectRatio: "16/9", background: isDarkMode ? "#1a1a1e" : "#f3f4f6", borderRadius: 12, overflow: "hidden", position: "relative", border: `1px solid ${isDarkMode ? "#2a2a2e" : "#e5e7eb"}` }}>
                             {storeData.storeVideo ? (
-                              <video
+                              <VideoPlayer
+                                key={storeData.storeVideo}
                                 src={storeData.storeVideo}
-                                autoPlay loop muted
-                                playsInline
-                                preload="auto"
-                                onCanPlay={e => { e.currentTarget.style.opacity = '0.9'; }}
-                                style={{ width: "100%", height: "100%", objectFit: "cover", opacity: 0, transition: "opacity 0.4s ease" }}
+                                style={{ width: "100%", height: "100%", objectFit: "cover", opacity: 0.9, transition: "opacity 0.4s ease" }}
                               />
                             ) : (
                               <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", color: t.subtext, background: isDarkMode ? "#1a1a1e" : "#e5e7eb", padding: "16px", textAlign: "center" }}>
@@ -141,12 +139,10 @@ export const PromotionsTab = () => {
                           <div style={{ height: 340, aspectRatio: "9/16", borderRadius: 16, overflow: "hidden", position: "relative", background: isDarkMode ? "#1a1a1e" : "#f3f4f6", cursor: "pointer", border: `1px solid ${isDarkMode ? "#2a2a2e" : "#e5e7eb"}` }}>
                             {storeData.promoVideo ? (
                               <>
-                                <video
+                                <VideoPlayer
+                                  key={storeData.promoVideo}
                                   src={storeData.promoVideo}
-                                  autoPlay loop muted playsInline
-                                  preload="auto"
-                                  onCanPlay={e => { e.currentTarget.style.opacity = '1'; }}
-                                  style={{ width: "100%", height: "100%", objectFit: "cover", opacity: 0, transition: "opacity 0.4s ease" }}
+                                  style={{ width: "100%", height: "100%", objectFit: "cover", opacity: 1, transition: "opacity 0.4s ease" }}
                                 />
                                 {/* Gradient overlay */}
                                 <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(0,0,0,0.9) 0%, transparent 45%)" }} />
@@ -236,11 +232,12 @@ export const PromotionsTab = () => {
                             <div style={{ display: "flex", gap: 12, overflowX: "auto", paddingBottom: 8, minHeight: 70 }}>
                               {(storeData.storeVideos || (storeData.storeVideo ? [storeData.storeVideo] : [])).map((vid, idx) => (
                                 <div key={idx} style={{ position: "relative", width: 120, height: 68, borderRadius: 8, overflow: "hidden", border: storeData.storeVideo === vid ? `2px solid #c8b89a` : `1px solid ${t.border}`, flexShrink: 0, cursor: "pointer", background: "#000" }} onClick={() => setStoreData(p => ({ ...p, storeVideo: vid }))}>
-                                  <video
+                                  <VideoPlayer
+                                    key={vid}
                                     src={vid}
                                     preload="metadata"
-                                    onCanPlay={e => { e.currentTarget.style.opacity = '0.7'; }}
-                                    style={{ width: "100%", height: "100%", objectFit: "cover", opacity: 0, transition: "opacity 0.3s ease" }}
+                                    hideControls
+                                    style={{ width: "100%", height: "100%", objectFit: "cover", opacity: 0.7, transition: "opacity 0.3s ease" }}
                                   />
                                   <button onClick={(e) => { e.stopPropagation(); setStoreData(p => { const nv = (p.storeVideos || []).filter(v => v !== vid); return { ...p, storeVideos: nv, storeVideo: p.storeVideo === vid ? (nv[0] || "") : p.storeVideo }; }); }} style={{ position: "absolute", top: 4, right: 4, background: "rgba(0,0,0,0.7)", color: "#fff", border: "none", borderRadius: "50%", width: 20, height: 20, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}><svg width="10" height="10" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg></button>
                                 </div>
@@ -314,7 +311,7 @@ export const PromotionsTab = () => {
                             <div style={{ display: "flex", gap: 12, overflowX: "auto", paddingBottom: 8, minHeight: 110 }}>
                               {(storeData.promoVideos || (storeData.promoVideo ? [storeData.promoVideo] : [])).map((vid, idx) => (
                                 <div key={idx} style={{ position: "relative", width: 68, height: 120, borderRadius: 8, overflow: "hidden", border: storeData.promoVideo === vid ? `2px solid #c8b89a` : `1px solid ${t.border}`, flexShrink: 0, cursor: "pointer", background: "#000" }} onClick={() => setStoreData(p => ({ ...p, promoVideo: vid }))}>
-                                  <video src={vid} style={{ width: "100%", height: "100%", objectFit: "cover", opacity: 0.7 }} />
+                                  <VideoPlayer key={vid} src={vid} hideControls style={{ width: "100%", height: "100%", objectFit: "cover", opacity: 0.7 }} />
                                   <button onClick={(e) => { e.stopPropagation(); setStoreData(p => { const nv = (p.promoVideos || []).filter(v => v !== vid); return { ...p, promoVideos: nv, promoVideo: p.promoVideo === vid ? (nv[0] || "") : p.promoVideo }; }); }} style={{ position: "absolute", top: 4, right: 4, background: "rgba(0,0,0,0.7)", color: "#fff", border: "none", borderRadius: "50%", width: 20, height: 20, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}><svg width="10" height="10" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg></button>
                                 </div>
                               ))}

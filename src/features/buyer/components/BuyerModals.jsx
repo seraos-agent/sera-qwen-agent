@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { VideoPlayer } from '../../../components/VideoPlayer';
 import confetti from 'canvas-confetti';
 import { useBuyerContext } from '../BuyerContext';
 
@@ -53,9 +54,9 @@ export const BuyerModals = () => {
               <>
                 <div style={{ width: '50%', background: '#1a1a1e', position: 'relative' }}>
                   {selectedProductDetail.verticalVideoUrl ? (
-                    <video src={selectedProductDetail.verticalVideoUrl} autoPlay loop muted playsInline style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    <VideoPlayer key={selectedProductDetail.verticalVideoUrl} src={selectedProductDetail.verticalVideoUrl} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                   ) : selectedProductDetail.landscapeVideoUrl ? (
-                    <video src={selectedProductDetail.landscapeVideoUrl} autoPlay loop muted playsInline style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    <VideoPlayer key={selectedProductDetail.landscapeVideoUrl} src={selectedProductDetail.landscapeVideoUrl} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                   ) : (
                     <img src={selectedProductDetail.imageUrl} alt={selectedProductDetail.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                   )}
@@ -117,9 +118,9 @@ export const BuyerModals = () => {
               <>
                 <div style={{ width: '100%', background: '#1a1a1e', position: 'relative', aspectRatio: '4/4' }}>
                   {selectedProductDetail.verticalVideoUrl ? (
-                    <video src={selectedProductDetail.verticalVideoUrl} autoPlay loop muted playsInline style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    <VideoPlayer key={selectedProductDetail.verticalVideoUrl} src={selectedProductDetail.verticalVideoUrl} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                   ) : selectedProductDetail.landscapeVideoUrl ? (
-                    <video src={selectedProductDetail.landscapeVideoUrl} autoPlay loop muted playsInline style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    <VideoPlayer key={selectedProductDetail.landscapeVideoUrl} src={selectedProductDetail.landscapeVideoUrl} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                   ) : (
                     <img src={selectedProductDetail.imageUrl} alt={selectedProductDetail.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                   )}

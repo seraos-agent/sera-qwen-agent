@@ -70,29 +70,33 @@ async def fallback_asset_generation(schema: dict, session_id: str, action: str, 
         except Exception as ex:
             await q.put({"done": True, "res": {"success": False, "error": str(ex)}})
             
-    asyncio.create_task(run_gen_task())
+    gen_task = asyncio.create_task(run_gen_task())
     res = None
     results = []
     
-    while True:
-        msg = await q.get()
-        if msg.get("done"):
-            res = msg["res"]
-            break
-        yield json.dumps({
-            "event_id": f"evt_fallback_execution_{int(time.time())}_{len(msg['results'])}",
-            "timestamp": int(time.time()),
-            "session_id": session_id,
-            "type": "execution_state",
-            "state": {
-                "task_id": f"task_{int(time.time())}",
-                "results": msg["results"]
-            }
-        }) + "\n"
+    try:
+        while True:
+            msg = await q.get()
+            if msg.get("done"):
+                res = msg["res"]
+                break
+            yield json.dumps({
+                "event_id": f"evt_fallback_execution_{int(time.time())}_{len(msg['results'])}",
+                "timestamp": int(time.time()),
+                "session_id": session_id,
+                "type": "execution_state",
+                "state": {
+                    "task_id": f"task_{int(time.time())}",
+                    "results": msg["results"]
+                }
+            }) + "\n"
+    finally:
+        if not gen_task.done():
+            gen_task.cancel()
 
     if res and res.get("success"):
         results = res.get("results", [])
-        max_retries = 3
+        max_retries = 1
         attempt = 0
         while attempt < max_retries:
             failed_items = [r for r in results if r.get("status") == "failed"]
@@ -109,19 +113,43 @@ async def fallback_asset_generation(schema: dict, session_id: str, action: str, 
                 "done": False
             }) + "\n"
             
+            import asyncio
+            from services.llm_service import generate_text_sync
+
+            async def rewrite_prompt(p_dict, key):
+                old_prompt = p_dict.get(key) or p_dict.get("name", "")
+                sys_msg = f"The following image generation prompt failed safety filters or encountered an error: '{old_prompt}'. Please rewrite it to be completely safe, generic, and remove any potentially sensitive, violent, explicit, or political words. Focus only on describing the visual e-commerce product aesthetics. Output ONLY the new prompt text without quotes."
+                new_prompt = await asyncio.to_thread(generate_text_sync, sys_msg)
+                if new_prompt and new_prompt.strip():
+                    p_dict[key] = new_prompt.strip()
+
+            rewrite_tasks = []
+
             for sec in schema.get("layout", []):
                 st = sec.get("type")
                 props = sec.get("props", {})
-                if st == "featured_products":
+                
+                if st == "hero":
+                    if any(f.get("itemId") == "hero_bg" for f in failed_items):
+                        props["heroImage"] = ""
+                        rewrite_tasks.append(rewrite_prompt(props, "heroImagePrompt"))
+                        
+                elif st == "featured_products":
                     for idx, p in enumerate(props.get("products", [])):
                         if any(f.get("itemId") == f"prod_{idx}" for f in failed_items):
                             p["verifiedUrl"] = ""
                             p["imageUrl"] = ""
+                            rewrite_tasks.append(rewrite_prompt(p, "imagePrompt"))
+                            
                 elif st == "philosophy":
                     for idx, item in enumerate(props.get("items", [])):
                         if any(f.get("itemId") == f"philo_{idx}" for f in failed_items):
                             item["verifiedUrl"] = ""
                             item["imageUrl"] = ""
+                            rewrite_tasks.append(rewrite_prompt(item, "imagePrompt"))
+            
+            if rewrite_tasks:
+                await asyncio.gather(*rewrite_tasks)
                             
             q_retry = asyncio.Queue()
             async def run_retry_task():
@@ -131,23 +159,27 @@ async def fallback_asset_generation(schema: dict, session_id: str, action: str, 
                 except Exception as ex:
                     await q_retry.put({"done": True, "res": {"success": False}})
             
-            asyncio.create_task(run_retry_task())
+            retry_task = asyncio.create_task(run_retry_task())
             retry_res = None
-            while True:
-                r_msg = await q_retry.get()
-                if r_msg.get("done"):
-                    retry_res = r_msg["res"]
-                    break
-                yield json.dumps({
-                    "event_id": f"evt_fallback_execution_retry_{int(time.time())}_{attempt}",
-                    "timestamp": int(time.time()),
-                    "session_id": session_id,
-                    "type": "execution_state",
-                    "state": {
-                        "task_id": f"task_retry_{int(time.time())}",
-                        "results": r_msg.get("results", [])
-                    }
-                }) + "\n"
+            try:
+                while True:
+                    r_msg = await q_retry.get()
+                    if r_msg.get("done"):
+                        retry_res = r_msg["res"]
+                        break
+                    yield json.dumps({
+                        "event_id": f"evt_fallback_execution_retry_{int(time.time())}_{attempt}",
+                        "timestamp": int(time.time()),
+                        "session_id": session_id,
+                        "type": "execution_state",
+                        "state": {
+                            "task_id": f"task_retry_{int(time.time())}",
+                            "results": r_msg.get("results", [])
+                        }
+                    }) + "\n"
+            finally:
+                if not retry_task.done():
+                    retry_task.cancel()
 
             if retry_res and retry_res.get("success"):
                 retry_results = retry_res.get("results", [])
@@ -160,6 +192,7 @@ async def fallback_asset_generation(schema: dict, session_id: str, action: str, 
             attempt += 1
 
         params["schema"] = res.get("schema")
+        params["failed_assets"] = [f for f in results if f.get("status") == "failed"]
         if action == "update_philosophy":
             for sec in params["schema"].get("layout", []):
                 if sec.get("type") == "philosophy":

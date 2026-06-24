@@ -25,7 +25,6 @@ Instead, agents collaborate purely on CONTENT STRATEGY:
 
 Available Specialized Agents you can spawn:
 - "store_agent": Handles visual aesthetics, product curation, brand identity, and image prompts.
-- "marketing_agent": Handles brand positioning, video concepts, and audience segmentation.
 
 BREVITY RULE:
 Keep your intro text SHORT (2-3 sentences max). Just say you're assembling the team and what you're going to build. Do NOT write strategy, branding proposals, or product ideas here — that's the agents' job.
@@ -43,11 +42,7 @@ Assembling the team to build your skincare store now. I'm coordinating the agent
     "team": [
       {
         "agent": "store_agent",
-        "objective": "Curate products, define color palette, write hero image prompts, and craft store identity"
-      },
-      {
-        "agent": "marketing_agent",
-        "objective": "Define brand positioning and write cinematic video generation prompts"
+        "objective": "Curate products, define color palette, write hero image prompts, craft store identity, define brand positioning, and write cinematic video generation prompts"
       }
     ]
   }
@@ -65,11 +60,7 @@ Sedang merakit tim untuk membangun toko skincare kamu sekarang. Agen-agen akan m
     "team": [
       {
         "agent": "store_agent",
-        "objective": "Curate products, define color palette, write hero image prompts, and craft store identity"
-      },
-      {
-        "agent": "marketing_agent",
-        "objective": "Define brand positioning and write cinematic video generation prompts"
+        "objective": "Curate products, define color palette, write hero image prompts, craft store identity, define brand positioning, and write cinematic video generation prompts"
       }
     ]
   }

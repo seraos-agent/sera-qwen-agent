@@ -2,6 +2,24 @@ import os
 import json
 import time
 
+def generate_text_sync(prompt: str) -> str:
+    from openai import OpenAI
+    client = OpenAI(
+        api_key=os.environ.get('QWEN_API_KEY') or os.environ.get('DASHSCOPE_API_KEY'),
+        base_url="https://dashscope-intl.aliyuncs.com/compatible-mode/v1"
+    )
+    try:
+        response = client.chat.completions.create(
+            model='qwen-plus',
+            messages=[{"role": "user", "content": prompt}]
+        )
+        return response.choices[0].message.content
+    except Exception as e:
+        import logging
+        logging.error(f"Error in generate_text_sync: {e}")
+        return prompt  # fallback to original prompt
+
+
 def handle_conversational_greeting(session_id: str, chat_mode: str = "agent"):
     if chat_mode == "buyer":
         final_text = "**Hello!** What are you looking for today?"

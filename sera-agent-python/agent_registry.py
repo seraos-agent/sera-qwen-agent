@@ -46,33 +46,33 @@ API_KEY  = os.environ.get("QWEN_API_KEY") or os.environ.get("DASHSCOPE_API_KEY")
 
 # ── Per-Agent LLM Configs ──────────────────────────────────────────────────────
 
-# Orchestrator: fast routing decisions — thinking OFF
+# Orchestrator: fast routing decisions + multimodal (can see images)
 orchestrator_llm_cfg = {
-    "model": "qwen3.6-plus",
+    "model": "qwen3.5-flash",
     "model_server": BASE_URL,
     "api_key": API_KEY,
     "generate_cfg": {"extra_body": {"enable_thinking": False}}
 }
 
-# Store: deep creative reasoning for layout/brand — thinking via prompt, not internal
+# Store: deep creative reasoning for layout/brand
 store_llm_cfg = {
-    "model": "deepseek-v4-flash",
+    "model": "qwen3.5-plus",
     "model_server": BASE_URL,
     "api_key": API_KEY,
-    "generate_cfg": {"extra_body": {"enable_thinking": True}}
+    "generate_cfg": {"extra_body": {"enable_thinking": False}}
 }
 
-# Analytics: multi-step data interpretation — thinking ON
+# Analytics: multi-step data interpretation
 analytics_llm_cfg = {
-    "model": "deepseek-v4-flash",
+    "model": "qwen3.5-plus",
     "model_server": BASE_URL,
     "api_key": API_KEY,
-    "generate_cfg": {"extra_body": {"enable_thinking": True}}
+    "generate_cfg": {"extra_body": {"enable_thinking": False}}
 }
 
-# Marketing: creative content generation — thinking OFF (speed)
+# Marketing: creative content + multimodal analysis
 marketing_llm_cfg = {
-    "model": "deepseek-v4-flash",
+    "model": "qwen3.5-flash",
     "model_server": BASE_URL,
     "api_key": API_KEY,
     "generate_cfg": {}
@@ -86,17 +86,17 @@ image_product_llm_cfg = {
     "generate_cfg": {}
 }
 
-# Plan: deep strategy reasoning — thinking ON
+# Plan: deep strategy reasoning
 plan_llm_cfg = {
-    "model": "qwen3.6-plus",
+    "model": "qwen3.5-plus",
     "model_server": BASE_URL,
     "api_key": API_KEY,
-    "generate_cfg": {"extra_body": {"enable_thinking": True}}
+    "generate_cfg": {"extra_body": {"enable_thinking": False}}
 }
 
-# Buyer: deepseek-v4-flash — fast commerce assistant, no thinking needed
+# Buyer: fast commerce assistant + multimodal
 buyer_llm_cfg = {
-    "model": "deepseek-v4-flash",
+    "model": "qwen3.5-flash",
     "model_server": BASE_URL,
     "api_key": API_KEY,
     "generate_cfg": {}

@@ -3,7 +3,7 @@ import os
 _dir = os.path.dirname(__file__)
 _instruction = open(os.path.join(_dir, "prompts", "consensus_agent.txt"), encoding="utf-8").read()
 
-model_name = os.environ.get("CONSENSUS_MODEL", "deepseek-v4-flash")
+model_name = os.environ.get("CONSENSUS_MODEL", "qwen3.5-plus")
 
 consensus_agent_config = {
     "name": "consensus_agent",

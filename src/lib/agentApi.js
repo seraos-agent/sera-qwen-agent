@@ -10,8 +10,8 @@
  *   8000 → Python ADK Multi-Agent Service (chat, embed)
  */
 
-export const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001';
-export const QWEN_URL    = import.meta.env.VITE_QWEN_URL    || 'http://localhost:8000'; // Python Qwen Service
+export const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || `http://${window.location.hostname}:3001`;
+export const QWEN_URL    = import.meta.env.VITE_QWEN_URL    || `http://${window.location.hostname}:8000`; // Python Qwen Service
 
 /**
  * Sanitize history before sending to ADK to prevent token overflow.

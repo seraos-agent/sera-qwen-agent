@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { VideoPlayer } from '../components/VideoPlayer';
 import { storeThemeDark, storeThemeLight } from '../utils/constants';
 import { ImageLoadingPlaceholder } from '../components/ImageLoadingPlaceholder';
 
@@ -123,7 +124,7 @@ export const SECTION_REGISTRY = {
       grid: (props) => {
         const t = props.isDarkMode ? storeThemeDark : storeThemeLight;
         const [visibleCount, setVisibleCount] = React.useState(12);
-        
+
         const allProducts = (props.products && props.products.length > 0) ? props.products : (props.isBuilding ? Array(4).fill({ name: "Generating Product...", price: "...", desc: "Curating product details and imagery..." }) : []);
         const displayProducts = allProducts.slice(0, visibleCount);
 
@@ -173,15 +174,23 @@ export const SECTION_REGISTRY = {
                   {/* Image: shimmer while loading, real image on top */}
                   <div style={{ aspectRatio: "1 / 1", width: "100%", position: "relative", ...((p.verifiedUrl || p.imageUrl) ? { backgroundColor: t.surface.secondary } : skStyle), transition: "background-color 0.3s ease" }}>
                     {!(p.verifiedUrl || p.imageUrl) && <ImageLoadingPlaceholder />}
-                    {p.imageUrl && (
-                      <img
+                    {p.imageUrl && p.imageUrl.endsWith('.mp4') ? (
+                      <VideoPlayer
                         key={`${p.imageUrl}-${p.verifiedUrl ? 'verified' : 'pending'}`}
                         src={p.imageUrl}
-                        alt={p.name}
-                        style={{ width: "100%", height: "100%", objectFit: "cover", position: "absolute", inset: 0, opacity: (p.verifiedUrl || p.imageUrl) ? 1 : 0, transition: "opacity 0.5s ease-in" }}
-                        onLoad={e => { e.currentTarget.style.opacity = 1; e.currentTarget.style.display = "block"; }}
-                        onError={e => { e.currentTarget.style.display = "none"; }}
+                        style={{ width: "100%", height: "100%", objectFit: "cover", position: "absolute", inset: 0, opacity: 1 }}
                       />
+                    ) : (
+                      p.imageUrl && (
+                        <img
+                          key={`${p.imageUrl}-${p.verifiedUrl ? 'verified' : 'pending'}`}
+                          src={p.imageUrl}
+                          alt={p.name}
+                          style={{ width: "100%", height: "100%", objectFit: "cover", position: "absolute", inset: 0, opacity: (p.verifiedUrl || p.imageUrl) ? 1 : 0, transition: "opacity 0.5s ease-in" }}
+                          onLoad={e => { e.currentTarget.style.opacity = 1; e.currentTarget.style.display = "block"; }}
+                          onError={e => { e.currentTarget.style.display = "none"; }}
+                        />
+                      )
                     )}
                     {p.promo && <div style={{ position: "absolute", top: 8, left: 8, background: props.themeColor || "rgba(200,184,154,0.9)", color: "#000", fontSize: 9, fontWeight: 800, padding: "3px 8px", borderRadius: 8, zIndex: 2, backdropFilter: "blur(4px)" }}>{p.promo}</div>}
                   </div>
@@ -236,7 +245,11 @@ export const SECTION_REGISTRY = {
             <div style={{ display: "grid", gridTemplateColumns: "repeat(12, 1fr)", gap: 20 }}>
               {((props.products && props.products.length > 0) ? props.products : (props.isBuilding ? Array(3).fill({ name: "Generating...", price: "..." }) : [])).slice(0, 3).map((p, i) => (
                 <div key={i} style={{ gridColumn: i === 0 ? "span 8" : "span 4", height: i === 0 ? 600 : 290, position: "relative", overflow: "hidden", borderRadius: 4, backgroundColor: t.surface.secondary, transition: "background-color 0.3s ease" }}>
-                  <img src={p.imageUrl} style={{ width: "100%", height: "100%", objectFit: "cover" }} alt={p.name} />
+                  {p.imageUrl && p.imageUrl.endsWith('.mp4') ? (
+                    <VideoPlayer src={p.imageUrl} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                  ) : (
+                    <img src={p.imageUrl} style={{ width: "100%", height: "100%", objectFit: "cover" }} alt={p.name} />
+                  )}
                   <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(0,0,0,0.7), transparent)", display: "flex", flexDirection: "column", justifyContent: "flex-end", padding: 30 }}>
                     <h3 style={{ color: "#fff", fontSize: i === 0 ? 32 : 18 }}>{p.name}</h3>
                     <p style={{ color: props.themeColor, fontWeight: 600, marginTop: 5 }}>{p.price}</p>
@@ -280,7 +293,11 @@ export const SECTION_REGISTRY = {
                 {doubledItems.map((v, i) => (
                   <div key={i} className="philosophy-card" onClick={() => props.onSelectPhilosophy && props.onSelectPhilosophy(v)} style={{ flex: "0 0 clamp(200px, 60vw, 350px)", height: "clamp(280px, 60vh, 450px)", position: "relative", borderRadius: 24, overflow: "hidden", cursor: "pointer", ...((v.verifiedUrl || v.imageUrl) ? { backgroundColor: t.surface.secondary } : { backgroundImage: t.surface.skeleton, backgroundSize: "200% 100%", animation: "shimmer 1.8s infinite linear" }) }}>
                     {!(v.verifiedUrl || v.imageUrl) && <ImageLoadingPlaceholder />}
-                    {v.imageUrl && <img key={`${v.imageUrl}-${v.verifiedUrl ? 'verified' : 'pending'}`} src={v.imageUrl} style={{ width: "100%", height: "100%", objectFit: "cover", position: "absolute", inset: 0, opacity: (v.verifiedUrl || v.imageUrl) ? 1 : 0, transition: "opacity 0.5s ease-in" }} onLoad={e => { e.currentTarget.style.opacity = 1; e.currentTarget.style.display = "block"; }} onError={e => { e.currentTarget.style.display = "none"; }} />}
+                    {v.imageUrl && v.imageUrl.endsWith('.mp4') ? (
+                      <VideoPlayer key={`${v.imageUrl}-${v.verifiedUrl ? 'verified' : 'pending'}`} src={v.imageUrl} style={{ width: "100%", height: "100%", objectFit: "cover", position: "absolute", inset: 0, opacity: 1 }} />
+                    ) : (
+                      v.imageUrl && <img key={`${v.imageUrl}-${v.verifiedUrl ? 'verified' : 'pending'}`} src={v.imageUrl} style={{ width: "100%", height: "100%", objectFit: "cover", position: "absolute", inset: 0, opacity: (v.verifiedUrl || v.imageUrl) ? 1 : 0, transition: "opacity 0.5s ease-in" }} onLoad={e => { e.currentTarget.style.opacity = 1; e.currentTarget.style.display = "block"; }} onError={e => { e.currentTarget.style.display = "none"; }} />
+                    )}
                     <div style={{ position: "absolute", inset: 0, padding: "clamp(20px, 4vw, 40px)", display: "flex", flexDirection: "column", justifyContent: "flex-end", background: "linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 60%)" }}>
                       <h4 style={{ fontSize: 'clamp(10px, 2.5vw, 12px)', fontWeight: 800, color: props.themeColor || "#fff", letterSpacing: 4, textTransform: "uppercase", marginBottom: 12 }}>{v.label || v.title}</h4>
                       <p style={{ fontSize: 'clamp(12px, 3.5vw, 15px)', color: "rgba(255,255,255,0.9)", lineHeight: 1.5, fontWeight: 300, display: "-webkit-box", WebkitLineClamp: 4, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{v.sub || v.body}</p>
@@ -454,11 +471,10 @@ export const SECTION_REGISTRY = {
           <section style={{ padding: "60px 40px", background: props.isDarkMode ? "#0f0f10" : "#ffffff" }}>
             <div style={{ maxWidth: 1100, margin: "0 auto", width: "100%" }}>
               <div style={{ position: "relative", width: "100%", aspectRatio: "16/9", borderRadius: "clamp(12px, 3vw, 24px)", overflow: "hidden", background: "#1a1a1e", border: `1px solid ${props.isDarkMode ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)"}` }}>
-                <video
+                <VideoPlayer
+                  key={props.videoUrl}
                   src={props.videoUrl}
-                  autoPlay loop muted playsInline preload="auto"
-                  onCanPlay={e => { e.currentTarget.style.opacity = '1'; }}
-                  style={{ width: "100%", height: "100%", objectFit: "cover", opacity: 0, transition: "opacity 0.4s ease" }}
+                  style={{ width: "100%", height: "100%", objectFit: "cover", opacity: 1, transition: "opacity 0.4s ease" }}
                 />
                 <div style={{ position: "absolute", top: "8px", right: "8px" }}>
                   <span style={{ background: "rgba(0,0,0,0.5)", backdropFilter: "blur(4px)", color: "#fff", fontSize: 9, fontWeight: 600, padding: "2px 8px", borderRadius: 100, display: "flex", alignItems: "center", gap: 4 }}><div style={{ width: 4, height: 4, borderRadius: "50%", background: "#4ade80", animation: "pulse 1.5s infinite" }} /> Live Now</span>
@@ -495,14 +511,13 @@ export const SECTION_REGISTRY = {
                   <span style={{ background: "rgba(239, 68, 68, 0.9)", color: "#fff", fontSize: 10, fontWeight: 800, padding: "4px 10px", borderRadius: 100, textTransform: "uppercase", letterSpacing: 0.5 }}>Flash Sale</span>
                 </div>
               </div>
-              <div style={{ display: "flex", justifyContent: "center" }}>
-                <div style={{ maxWidth: 300, width: "100%" }}>
-                  <div style={{ borderRadius: 16, overflow: "hidden", position: "relative", aspectRatio: "9/16", background: props.isDarkMode ? "#1a1a1e" : "#f3f4f6", border: `1px solid ${props.isDarkMode ? "#2a2a2e" : "#e5e7eb"}` }}>
-                    <video
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 24 }}>
+                <div style={{ width: "100%", display: "flex", justifyContent: "flex-start" }}>
+                  <div style={{ width: "100%", maxWidth: props.isSellerMobile ? 180 : 280, borderRadius: 16, overflow: "hidden", position: "relative", aspectRatio: "9/16", background: props.isDarkMode ? "#1a1a1e" : "#f3f4f6", border: `1px solid ${props.isDarkMode ? "#2a2a2e" : "#e5e7eb"}` }}>
+                    <VideoPlayer
+                      key={props.videoUrl}
                       src={props.videoUrl}
-                      autoPlay loop muted playsInline preload="auto"
-                      onCanPlay={e => { e.currentTarget.style.opacity = '1'; }}
-                      style={{ width: "100%", height: "100%", objectFit: "cover", opacity: 0, transition: "opacity 0.4s ease" }}
+                      style={{ width: "100%", height: "100%", objectFit: "cover", opacity: 1, transition: "opacity 0.4s ease" }}
                     />
                     <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: "40%", background: "linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 100%)", pointerEvents: "none" }} />
                     <div style={{ position: "absolute", bottom: "8px", left: "8px", right: "8px", display: "flex", justifyContent: "space-between", alignItems: "flex-end", gap: 12 }}>

@@ -2,10 +2,20 @@
 import { useState, useEffect } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { VideoPlayer } from "./components/VideoPlayer";
 
 const mdComponents = {
   img: ({ node, ...props }) => {
+    const isVideo = props.src && props.src.toLowerCase().endsWith('.mp4');
     const isProduct = props.alt && props.alt.toLowerCase().includes('product');
+
+    if (isVideo) {
+      return (
+        <span style={{ display: 'block', marginTop: 12, marginBottom: 12, borderRadius: 12, overflow: 'hidden', boxShadow: '0 4px 12px rgba(0,0,0,0.15)' }}>
+          <VideoPlayer {...props} style={{ width: '100%', height: 'auto', display: 'block', objectFit: 'cover', maxHeight: 220 }} />
+        </span>
+      );
+    }
 
     if (isProduct) {
       return (

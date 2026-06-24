@@ -346,7 +346,7 @@ async def run_buyer_direct(
                 "agent": "buyer_agent",
                 "action": "idle",
                 "params": {},
-                "text": "Maaf, terjadi gangguan koneksi. Silakan coba lagi.",
+                "text": "Sorry, there was a connection error. Please try again.",
                 "chat": ""
             }) + "\n"
             return

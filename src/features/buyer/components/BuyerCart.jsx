@@ -51,7 +51,7 @@ export const BuyerCart = () => {
                       </div>
                       <button
                         onClick={() => setCart(prev => prev.filter(c => c.id !== item.id))}
-                        style={{ background: 'none', border: 'none', color: t.subtext, cursor: 'pointer', padding: 8, opacity: 0.6, transition: 'all 0.2s', background: isDarkMode ? '#1a1a1e' : '#f3f4f6', borderRadius: '50%' }}
+                        style={{ border: 'none', color: t.subtext, cursor: 'pointer', padding: 8, opacity: 0.6, transition: 'all 0.2s', background: isDarkMode ? '#1a1a1e' : '#f3f4f6', borderRadius: '50%' }}
                         onMouseEnter={e => { e.currentTarget.style.opacity = 1; e.currentTarget.style.color = '#ef4444'; e.currentTarget.style.background = isDarkMode ? '#2a2a2e' : '#e5e7eb'; }}
                         onMouseLeave={e => { e.currentTarget.style.opacity = 0.6; e.currentTarget.style.color = t.subtext; e.currentTarget.style.background = isDarkMode ? '#1a1a1e' : '#f3f4f6'; }}
                         title="Remove item"

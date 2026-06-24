@@ -6,7 +6,7 @@ _persona = open(os.path.join(_dir, "prompts", "sera_buyer_persona.txt"), encodin
 _instruction = f"{_instruction_core}\n\n{_persona}"
 
 # deepseek-v4-flash: fast, high quality commerce assistant
-model_name = "deepseek-v4-flash"
+model_name = "qwen3.5-flash"
 
 
 buyer_agent_config = {

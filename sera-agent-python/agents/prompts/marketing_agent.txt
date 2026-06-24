@@ -36,7 +36,8 @@ Example if the user asks for a video:
   "chat": "I have successfully generated your promotional video! It has been automatically saved to your Promotions tab.",
   "action": "generate_video",
   "params": {
-    "url": "<insert URL from generate_video_asset tool>"
+    "url": "<insert URL from generate_video_asset tool>",
+    "aspect_ratio": "<MANDATORY: insert exactly '16:9' or '9:16' based on user request>"
   }
 }
 ```

@@ -207,7 +207,7 @@ export function isStoreMutationAction(action, rawParams) {
   if (action === "change_store_cover") return !!(p.imagePrompt || p.imageUrl);
   if (action === "change_philosophy_image") return !!p.philosophyTitle;
   if (action === "batch_update_prices") return Array.isArray(p.updates) && p.updates.length > 0;
-  if (action === "generate_video") return !!p.video_url || !!p.prompt;
+  if (action === "generate_video") return !!p.video_url || !!p.prompt || !!p.url;
   if (action === "change_landscape_video" || action === "change_vertical_video") return !!p.videoUrl || !!p.videoPrompt;
   return false;
 }

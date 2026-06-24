@@ -133,7 +133,7 @@ export const publishStore = async (req, res) => {
   }));
 
   // Update customSchema with permanent GCS URLs so MongoDB saves the permanent URLs
-  let finalCustomSchema = req.body.customSchema || null;
+  let finalCustomSchema = req.body.customSchema || req.body.schema || null;
   if (finalCustomSchema && finalCustomSchema.layout) {
     finalCustomSchema.layout = await Promise.all(finalCustomSchema.layout.map(async s => {
       // Upload any standalone section video
@@ -321,6 +321,15 @@ export const deleteStore = async (req, res) => {
     await callFlexibleMcpTool(['delete_document', 'delete_many', 'delete-many', 'deleteMany'], { collection: 'products', filter: { store_id: storeId } });
     await callFlexibleMcpTool(['delete_document', 'delete_many', 'delete-many', 'deleteMany'], { collection: 'analytics', filter: { store_id: storeId } });
     
+    // Also delete from local mock DB to prevent them from returning from the dead
+    try {
+      localDelete('stores', { store_id: storeId });
+      localDelete('products', { store_id: storeId });
+      localDelete('analytics', { store_id: storeId });
+    } catch (e) {
+      console.log("Local delete error:", e.message);
+    }
+
     console.log(`✅ Deleted store and associated data for: ${storeId}`);
     return res.json({ success: true, message: "Store deleted successfully" });
   } catch (err) {
@@ -572,7 +581,7 @@ export const getAnalytics = async (req, res) => {
   }
 };
 
-import { localFind } from '../dbHelper.js';
+import { localFind, localDelete } from '../dbHelper.js';
 
 export const getStores = async (req, res) => {
   const { session_id } = req.query;
