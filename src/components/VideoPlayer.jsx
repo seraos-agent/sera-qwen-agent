@@ -5,10 +5,17 @@ export const VideoPlayer = ({ src, style = {}, hideControls = false, ...props })
   const videoRef = useRef(null);
 
   useEffect(() => {
-    if (videoRef.current && src) {
-      videoRef.current.play().catch(e => console.warn("Autoplay prevented by browser:", e));
+    if (videoRef.current) {
+      // Strictly enforce muted state directly on the DOM node
+      // React's `muted={isMuted}` prop sometimes fails to apply consistently across browsers
+      videoRef.current.muted = isMuted;
+      videoRef.current.defaultMuted = isMuted;
+      
+      if (src) {
+        videoRef.current.play().catch(e => console.warn("Autoplay prevented by browser:", e));
+      }
     }
-  }, [src]);
+  }, [src, isMuted]);
 
   if (!src) return null;
 
