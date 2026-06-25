@@ -195,13 +195,32 @@ export const PromotionsTab = () => {
                                   type="file"
                                   accept="video/mp4,video/webm,video/quicktime"
                                   style={{ display: "none" }}
-                                  onChange={(e) => {
+                                  onChange={async (e) => {
                                     if (e.target.files && e.target.files[0]) {
-                                      const url = URL.createObjectURL(e.target.files[0]);
+                                      const file = e.target.files[0];
+                                      // Show preview immediately with blob URL
+                                      const blobUrl = URL.createObjectURL(file);
                                       setStoreData(p => {
                                         const currentList = p.storeVideos || (p.storeVideo ? [p.storeVideo] : []);
-                                        return { ...p, storeVideo: url, storeVideos: [...currentList, url] };
+                                        return { ...p, storeVideo: blobUrl, storeVideos: [...currentList, blobUrl], _uploadingStoreVideo: true };
                                       });
+                                      // Upload to server
+                                      try {
+                                        const formData = new FormData();
+                                        formData.append('video', file, file.name);
+                                        const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://api.setaradapps.com';
+                                        const res = await fetch(`${BACKEND_URL}/api/upload-video`, { method: 'POST', body: formData });
+                                        const data = await res.json();
+                                        if (data.success && data.url) {
+                                          setStoreData(p => {
+                                            const filteredList = (p.storeVideos || []).filter(v => !v.startsWith('blob:'));
+                                            return { ...p, storeVideo: data.url, storeVideos: [...filteredList, data.url], _uploadingStoreVideo: false };
+                                          });
+                                        }
+                                      } catch (err) {
+                                        console.error('Video upload failed:', err);
+                                        setStoreData(p => ({ ...p, _uploadingStoreVideo: false }));
+                                      }
                                     }
                                   }}
                                 />
@@ -274,13 +293,30 @@ export const PromotionsTab = () => {
                                   type="file"
                                   accept="video/mp4,video/webm,video/quicktime"
                                   style={{ display: "none" }}
-                                  onChange={(e) => {
+                                  onChange={async (e) => {
                                     if (e.target.files && e.target.files[0]) {
-                                      const url = URL.createObjectURL(e.target.files[0]);
+                                      const file = e.target.files[0];
+                                      const blobUrl = URL.createObjectURL(file);
                                       setStoreData(p => {
                                         const currentList = p.promoVideos || (p.promoVideo ? [p.promoVideo] : []);
-                                        return { ...p, promoVideo: url, promoVideos: [...currentList, url] };
+                                        return { ...p, promoVideo: blobUrl, promoVideos: [...currentList, blobUrl], _uploadingPromoVideo: true };
                                       });
+                                      try {
+                                        const formData = new FormData();
+                                        formData.append('video', file, file.name);
+                                        const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://api.setaradapps.com';
+                                        const res = await fetch(`${BACKEND_URL}/api/upload-video`, { method: 'POST', body: formData });
+                                        const data = await res.json();
+                                        if (data.success && data.url) {
+                                          setStoreData(p => {
+                                            const filteredList = (p.promoVideos || []).filter(v => !v.startsWith('blob:'));
+                                            return { ...p, promoVideo: data.url, promoVideos: [...filteredList, data.url], _uploadingPromoVideo: false };
+                                          });
+                                        }
+                                      } catch (err) {
+                                        console.error('Promo video upload failed:', err);
+                                        setStoreData(p => ({ ...p, _uploadingPromoVideo: false }));
+                                      }
                                     }
                                   }}
                                 />

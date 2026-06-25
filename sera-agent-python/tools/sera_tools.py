@@ -27,13 +27,13 @@ def save_base64_image(base64_str: str, asset_id: str) -> str:
         with open(file_path, "wb") as f:
             f.write(base64.b64decode(encoded))
             
-        public_url = os.environ.get("PUBLIC_URL", "http://127.0.0.1:8000")
+        public_url = os.environ.get("PUBLIC_URL", "https://ai.setaradapps.com")
         return f"{public_url}/assets/{asset_id}.{ext}"
     except Exception as e:
         logger.error(f"Failed to save image {asset_id}: {e}")
         return base64_str
 
-NODE_BACKEND_URL = os.getenv("NODE_BACKEND_URL", "http://localhost:3001")
+NODE_BACKEND_URL = os.getenv("NODE_BACKEND_URL", "https://api.setaradapps.com")
 
 async def get_store_analytics(store_id: str) -> dict:
     """

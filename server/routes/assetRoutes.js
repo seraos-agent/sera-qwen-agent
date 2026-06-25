@@ -1,7 +1,68 @@
 import express from 'express';
+import { createWriteStream, mkdirSync, existsSync } from 'fs';
+import { join, dirname } from 'path';
+import { fileURLToPath } from 'url';
+import { pipeline } from 'stream/promises';
+import { Readable } from 'stream';
 
+const __dirname = dirname(fileURLToPath(import.meta.url));
 const router = express.Router();
 const proxyImageCache = new Map();
+
+const PYTHON_ASSETS_DIR = '/root/sera-project/sera-agent-python/assets';
+const PUBLIC_URL = process.env.PUBLIC_URL || 'https://ai.setaradapps.com';
+
+// Upload video endpoint — saves directly to Python assets dir
+router.post('/upload-video', async (req, res) => {
+  try {
+    const chunks = [];
+    req.on('data', chunk => chunks.push(chunk));
+    await new Promise((resolve, reject) => {
+      req.on('end', resolve);
+      req.on('error', reject);
+    });
+
+    const body = Buffer.concat(chunks);
+    // Parse Content-Type for boundary
+    const contentType = req.headers['content-type'] || '';
+    const boundaryMatch = contentType.match(/boundary=([^;]+)/);
+    if (!boundaryMatch) return res.status(400).json({ error: 'No boundary found' });
+
+    const boundary = boundaryMatch[1];
+    const boundaryBuf = Buffer.from('--' + boundary);
+
+    // Find file content
+    const headerEnd = body.indexOf('\r\n\r\n');
+    if (headerEnd === -1) return res.status(400).json({ error: 'Invalid multipart' });
+
+    const header = body.slice(0, headerEnd).toString();
+    const filenameMatch = header.match(/filename="([^"]+)"/);
+    const originalName = filenameMatch ? filenameMatch[1] : 'video.mp4';
+    const ext = originalName.split('.').pop() || 'mp4';
+
+    const fileStart = headerEnd + 4;
+    // Find end boundary
+    const endBoundaryBuf = Buffer.from('\r\n--' + boundary);
+    const fileEnd = body.indexOf(endBoundaryBuf, fileStart);
+    const fileContent = fileEnd !== -1 ? body.slice(fileStart, fileEnd) : body.slice(fileStart);
+
+    const assetId = `video_${Date.now()}_${Math.floor(Math.random() * 10000)}`;
+    const filename = `${assetId}.${ext}`;
+    const savePath = join(PYTHON_ASSETS_DIR, filename);
+
+    // Save file
+    if (!existsSync(PYTHON_ASSETS_DIR)) mkdirSync(PYTHON_ASSETS_DIR, { recursive: true });
+    const { writeFileSync } = await import('fs');
+    writeFileSync(savePath, fileContent);
+
+    const url = `${PUBLIC_URL}/assets/${filename}`;
+    console.log(`✅ Video uploaded: ${url}`);
+    return res.json({ success: true, url });
+  } catch (err) {
+    console.error('❌ Video upload error:', err.message);
+    return res.status(500).json({ error: err.message });
+  }
+});
 
 router.get('/assets/:filename', async (req, res) => {
   res.status(404).send('Asset not found');
