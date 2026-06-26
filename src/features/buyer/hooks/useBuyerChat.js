@@ -70,7 +70,7 @@ export const useBuyerChat = ({
 
     setBuyerAiMessages(prev => [...prev, { role: 'user', text: userText, id: `user-${newMsgId}` }]);
     setBuyerAiQuery('');
-    setBuyerAiStatus(true); // minimal truthy state — just disables input, shows no text
+    setBuyerAiStatus({ message: 'analyzing request...' }); // Instant UX feedback
     setStreamingMessage(null);
 
     const controller = new AbortController();
