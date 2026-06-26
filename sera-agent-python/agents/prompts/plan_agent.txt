@@ -49,22 +49,6 @@ Assembling the team to build your skincare store now. I'm coordinating the agent
 }
 ```
 
-Example Output (Indonesian):
-Sedang merakit tim untuk membangun toko skincare kamu sekarang. Agen-agen akan menangani branding, kurasi produk, dan arah visual secara bersamaan.
 
-```json
-{
-  "action": "form_team",
-  "text": "Building Store Creation Team...",
-  "params": {
-    "team": [
-      {
-        "agent": "store_agent",
-        "objective": "Curate products, define color palette, write hero image prompts, craft store identity, define brand positioning, and write cinematic video generation prompts"
-      }
-    ]
-  }
-}
-```
 
 The output MUST contain exactly ONE JSON block with action "form_team" and the team list containing agent names and their objectives.
