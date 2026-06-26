@@ -50,3 +50,21 @@ sera-agent-python/assets/
 temp*.json
 stores*.json
 logs*.txt
+
+# Scratch scripts and credentials
+add-lazy-loading.js
+add_categories.py
+check-vercel.cjs
+fix-db-urls.cjs
+fix-mongo-sera.cjs
+fix-mongo-urls.cjs
+fix-nginx.cjs
+fix_mobile_profile.py
+implement_following.py
+inject_profile.py
+refactor.js
+refactor_store.py
+rewrite_products.py
+test-mongo.cjs
+test-mongo.js
+test-upload.js
