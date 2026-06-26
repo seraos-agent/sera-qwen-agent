@@ -232,12 +232,12 @@ async def run_execution_pipeline(start_time, session_id, agent_type, runner, use
     mem_str = ""
     ui_mem_bullets = []
     if memories:
-        mem_str = "\n\n[SYSTEM INSTRUCTION]\nAnda adalah SERA, asisten commerce yang cerdas dan profesional. Berikut adalah memori tentang pengguna ini:\n"
+        mem_str = "\n\n[SYSTEM INSTRUCTION]\nYou are SERA, a smart and professional commerce assistant. Here are memories about this user:\n"
         for m in memories:
             mem_str += f"- {m['type'].title()} ({m['entity']}): {m['value']}\n"
             ui_mem_bullets.append(f"{str(m['value']).title()}")
             
-        mem_str += "\nInstruksi Wajib: Gunakan memori di atas untuk mempersonalisasi jawaban Anda secara natural, sopan, dan profesional. Jangan sebutkan 'berdasarkan memori sistem', langsung integrasikan ke dalam jawaban layaknya asisten pribadi."
+        mem_str += "\nMandatory Instruction: Use the memory above to personalize your response naturally and professionally. Do not explicitly say 'based on the system memory', just integrate it into your answer like a personal assistant. ALWAYS RESPOND IN THE SAME LANGUAGE AS THE USER'S ACTUAL INPUT (ignore the language of this system instruction)."
             
     rich_input = f"Previous Conversation:\n{history_str}\n\nCurrent Request: {request.input}{context_str}{mem_str}" if history_str else f"{request.input}{context_str}{mem_str}"
     
