@@ -87,7 +87,7 @@ export const BuyerProfile = () => {
         {/* Universal Identity Card */}
         <div className="bento-item-4 bento-card-padding" style={{ ...cardStyle, padding: undefined, alignItems: 'center', textAlign: 'center', justifyContent: 'center' }}>
           <div style={{ width: 100, height: 100, borderRadius: '50%', background: 'linear-gradient(135deg, #c8b89a 0%, #8b7355 100%)', padding: 3, marginBottom: 20 }}>
-            <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=200&h=200" alt="User Profile" style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover', border: `3px solid ${isDarkMode ? '#161618' : '#fff'}` }} />
+            <img loading="lazy" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=200&h=200" alt="User Profile" style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover', border: `3px solid ${isDarkMode ? '#161618' : '#fff'}` }} />
           </div>
           <h3 style={{ fontSize: 20, fontWeight: 700, marginBottom: 4 }}>Alexia Sterling</h3>
           <p style={{ color: t.subtext, fontSize: 13, marginBottom: 16 }}>alexia.s@example.com</p>
@@ -145,7 +145,7 @@ export const BuyerProfile = () => {
             {/* Native Order */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 16, padding: '16px', border: `1px solid ${t.border}`, borderRadius: 16, background: isDarkMode ? 'rgba(255,255,255,0.02)' : '#fff' }}>
               <div style={{ width: 48, height: 48, borderRadius: 12, background: isDarkMode ? '#2a2a2e' : '#f3f4f6', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&q=80&w=100&h=100" alt="Item" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 12 }} />
+                <img loading="lazy" src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&q=80&w=100&h=100" alt="Item" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 12 }} />
               </div>
               <div style={{ flex: 1 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
@@ -163,7 +163,7 @@ export const BuyerProfile = () => {
             {/* Shopify Order */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 16, padding: '16px', border: `1px solid ${t.border}`, borderRadius: 16, background: isDarkMode ? 'rgba(255,255,255,0.02)' : '#fff' }}>
               <div style={{ width: 48, height: 48, borderRadius: 12, background: isDarkMode ? '#2a2a2e' : '#f3f4f6', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <img src="https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&q=80&w=100&h=100" alt="Item" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 12 }} />
+                <img loading="lazy" src="https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&q=80&w=100&h=100" alt="Item" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 12 }} />
               </div>
               <div style={{ flex: 1 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>

@@ -46,7 +46,7 @@ export const SellerStoresPanel = () => {
                   >
                     <div style={{ height: 180, position: "relative", background: isDarkMode ? "#111" : "#e5e7eb" }}>
                       {store.cover ? (
-                        <img src={store.cover} alt={store.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                        <img loading="lazy" src={store.cover} alt={store.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                       ) : (
                         <div style={{ width: "100%", height: "100%", background: isDarkMode ? "linear-gradient(135deg, #1a1a1e 0%, #000 100%)" : "linear-gradient(135deg, #e5e7eb 0%, #d1d5db 100%)", display: "flex", alignItems: "center", justifyContent: "center" }}>
                           <svg width="32" height="32" fill="none" stroke={isDarkMode ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)"} strokeWidth="2" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2" /><circle cx="8.5" cy="8.5" r="1.5" /><polyline points="21 15 16 10 5 21" /></svg>

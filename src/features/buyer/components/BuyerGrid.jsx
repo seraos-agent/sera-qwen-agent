@@ -89,7 +89,7 @@ export const BuyerGrid = () => {
                 onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
               >
                 {store.cover ? (
-                  <img src={store.cover} alt={store.name} style={{ width: '100%', height: '100%', objectFit: 'cover', position: 'absolute', inset: 0 }} onError={e => e.currentTarget.style.display = 'none'} />
+                  <img loading="lazy" src={store.cover} alt={store.name} style={{ width: '100%', height: '100%', objectFit: 'cover', position: 'absolute', inset: 0 }} onError={e => e.currentTarget.style.display = 'none'} />
                 ) : (
                   <div style={{ width: '100%', height: '100%', background: isDarkMode ? '#161618' : '#f9fafb', position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 40 }}>🛍️</div>
                 )}
@@ -218,7 +218,7 @@ export const BuyerGrid = () => {
                       {prod.image && prod.image.endsWith('.mp4') ? (
                         <VideoPlayer key={prod.image} src={prod.image} hideControls style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                       ) : (
-                        <img src={prod.image} alt={prod.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        <img loading="lazy" src={prod.image} alt={prod.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                       )}
                       <div style={{ position: 'absolute', top: 10, left: 10, background: 'rgba(200,184,154,0.9)', color: '#0f0f10', fontSize: 10, fontWeight: 700, padding: '2px 8px', borderRadius: 10, backdropFilter: 'blur(4px)' }}>
                         {prod.aiTag}

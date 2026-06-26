@@ -19,7 +19,7 @@ export const SellerModals = () => {
         <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.8)", zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center", backdropFilter: "blur(8px)", padding: 20 }} onClick={() => setSelectedPhilosophy(null)}>
           <div onClick={(e) => e.stopPropagation()} style={{ background: isDarkMode ? "#161618" : "#fff", border: `1px solid ${isDarkMode ? "#2a2a2e" : "#e5e7eb"}`, borderRadius: 24, overflow: "hidden", width: "100%", maxWidth: 800, display: "flex", flexDirection: isMobileView ? "column" : "row", boxShadow: "0 24px 60px rgba(0,0,0,0.6)", maxHeight: "90vh" }}>
             <div style={{ width: isMobileView ? "100%" : "45%", background: "#1a1a1e", position: "relative", minHeight: 300 }}>
-              <img src={selectedPhilosophy.imageUrl} alt={selectedPhilosophy.label || selectedPhilosophy.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+              <img loading="lazy" src={selectedPhilosophy.imageUrl} alt={selectedPhilosophy.label || selectedPhilosophy.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
             </div>
             <div style={{ width: isMobileView ? "100%" : "55%", padding: "40px", display: "flex", flexDirection: "column", overflowY: "auto" }}>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20 }}>
@@ -52,7 +52,7 @@ export const SellerModals = () => {
                   style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 1, transition: 'opacity 0.4s ease' }}
                 />
               ) : (
-                <img src={selectedProductDetail.imageUrl} alt={selectedProductDetail.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                <img loading="lazy" src={selectedProductDetail.imageUrl} alt={selectedProductDetail.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
               )}
               {selectedProductDetail.promo && (
                 <div style={{ position: 'absolute', top: 20, left: 20, background: '#c8b89a', color: '#0f0f10', fontSize: 11, fontWeight: 800, padding: '6px 12px', borderRadius: 8 }}>

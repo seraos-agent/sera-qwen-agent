@@ -445,7 +445,7 @@ export const PromotionsTab = () => {
                             {(() => {
                               const imgUrl = p.verifiedUrl || p.imageUrl || p.image;
                               return imgUrl ? (
-                                <img src={imgUrl} alt={p.name} style={{ width: 72, height: 72, minWidth: 72, minHeight: 72, flexShrink: 0, objectFit: "cover", borderRight: `1px solid ${t.border}` }} />
+                                <img loading="lazy" src={imgUrl} alt={p.name} style={{ width: 72, height: 72, minWidth: 72, minHeight: 72, flexShrink: 0, objectFit: "cover", borderRight: `1px solid ${t.border}` }} />
                               ) : (
                                 <div style={{ width: 72, height: 72, minWidth: 72, minHeight: 72, flexShrink: 0, background: isDarkMode ? "#2a2a2e" : "#e5e7eb", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 24, borderRight: `1px solid ${t.border}` }}>🛍️</div>
                               );

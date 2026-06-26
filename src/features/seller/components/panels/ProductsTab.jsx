@@ -200,7 +200,7 @@ export const ProductsTab = () => {
                         }}
                         title="Click to change photo"
                       >
-                        {p.imageUrl ? (p.imageUrl.endsWith('.mp4') ? <VideoPlayer key={p.imageUrl} src={p.imageUrl} hideControls style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <img src={p.imageUrl} style={{ width: "100%", height: "100%", objectFit: "cover" }} />) : "📷"}
+                        {p.imageUrl ? (p.imageUrl.endsWith('.mp4') ? <VideoPlayer key={p.imageUrl} src={p.imageUrl} hideControls style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <img loading="lazy" src={p.imageUrl} style={{ width: "100%", height: "100%", objectFit: "cover" }} />) : "📷"}
                         <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", opacity: 0, transition: "opacity 0.2s" }} onMouseEnter={e => e.currentTarget.style.opacity = 1} onMouseLeave={e => e.currentTarget.style.opacity = 0}>
                           <svg width="20" height="20" fill="none" stroke="#fff" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="17 8 12 3 7 8" /><line x1="12" y1="3" x2="12" y2="15" /></svg>
                         </div>

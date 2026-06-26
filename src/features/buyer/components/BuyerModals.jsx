@@ -27,7 +27,7 @@ export const BuyerModals = () => {
           >
             <button onClick={() => setSelectedPhilosophy(null)} style={{ position: 'absolute', top: 16, right: 16, background: 'rgba(0,0,0,0.5)', border: 'none', color: '#fff', cursor: 'pointer', fontSize: 24, width: 36, height: 36, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10 }}>&times;</button>
             <div style={{ width: window.innerWidth < 768 ? '100%' : '45%', background: '#1a1a1e', position: 'relative', height: window.innerWidth < 768 ? 'clamp(150px, 30vh, 250px)' : 'auto', minHeight: window.innerWidth < 768 ? 0 : 300 }}>
-              <img src={selectedPhilosophy.imageUrl} alt={selectedPhilosophy.label || selectedPhilosophy.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              <img loading="lazy" src={selectedPhilosophy.imageUrl} alt={selectedPhilosophy.label || selectedPhilosophy.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
             </div>
             <div style={{ width: window.innerWidth < 768 ? '100%' : '55%', padding: 'clamp(20px, 5vw, 40px)', display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
               <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 'clamp(20px, 5vw, 36px)', fontWeight: 700, color: t.text, marginBottom: 'clamp(12px, 3vw, 24px)', lineHeight: 1.2, paddingRight: 24 }}>
@@ -58,7 +58,7 @@ export const BuyerModals = () => {
                   ) : selectedProductDetail.landscapeVideoUrl ? (
                     <VideoPlayer key={selectedProductDetail.landscapeVideoUrl} src={selectedProductDetail.landscapeVideoUrl} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                   ) : (
-                    <img src={selectedProductDetail.imageUrl} alt={selectedProductDetail.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    <img loading="lazy" src={selectedProductDetail.imageUrl} alt={selectedProductDetail.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                   )}
                   {selectedProductDetail.promo && (
                     <div style={{ position: 'absolute', top: 16, left: 16, background: '#c8b89a', color: '#0f0f10', fontSize: 10, fontWeight: 800, padding: '4px 10px', borderRadius: 8 }}>{selectedProductDetail.promo}</div>
@@ -122,7 +122,7 @@ export const BuyerModals = () => {
                   ) : selectedProductDetail.landscapeVideoUrl ? (
                     <VideoPlayer key={selectedProductDetail.landscapeVideoUrl} src={selectedProductDetail.landscapeVideoUrl} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                   ) : (
-                    <img src={selectedProductDetail.imageUrl} alt={selectedProductDetail.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    <img loading="lazy" src={selectedProductDetail.imageUrl} alt={selectedProductDetail.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                   )}
                   {selectedProductDetail.promo && (
                     <div style={{ position: 'absolute', top: 16, left: 16, background: '#c8b89a', color: '#0f0f10', fontSize: 10, fontWeight: 800, padding: '4px 10px', borderRadius: 8 }}>{selectedProductDetail.promo}</div>

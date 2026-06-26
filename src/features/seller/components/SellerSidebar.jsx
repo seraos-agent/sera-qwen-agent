@@ -28,7 +28,7 @@ export const SellerSidebar = () => {
     }}>
       {/* Official Logo */}
       <div className="logo-container" style={{ marginBottom: 20, padding: "0 10px" }}>
-        <img src="/sera-logo.png" alt="SERA" style={{ width: 32, height: 32, borderRadius: 8 }} />
+        <img loading="lazy" src="/sera-logo.png" alt="SERA" style={{ width: 32, height: 32, borderRadius: 8 }} />
       </div>
       {NAV_ICONS.filter(nav => nav.id !== 'profile').map(({ id, icon }) => (
         <button

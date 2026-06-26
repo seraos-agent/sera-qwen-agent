@@ -29,7 +29,7 @@ export const SellerHeader = () => {
               style={{ width: 28, height: 28, borderRadius: "50%", background: isDarkMode ? "#1a1a1e" : "#f3f4f6", border: `2px solid ${activeNav === 'profile' ? '#c8b89a' : (isDarkMode ? '#2a2a2e' : '#e5e7eb')}`, padding: 0, overflow: "hidden", cursor: "pointer", transition: "all 0.2s" }}
               title="Profile Settings"
             >
-              <img src="/sera-logo.png" alt="Profile" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+              <img loading="lazy" src="/sera-logo.png" alt="Profile" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
             </button>
             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
               <span style={{ fontSize: 13, fontWeight: 700, color: isDarkMode ? "#c8b89a" : "#8b7355", letterSpacing: 0.5 }}>SERA</span>

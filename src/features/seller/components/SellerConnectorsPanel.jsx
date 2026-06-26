@@ -6,7 +6,7 @@ const CONNECTORS_REGISTRY = [
     id: "slack",
     name: "Slack",
     category: "Communication",
-    icon: <img src="/slack%20logo.jpeg" alt="Slack" style={{ width: "100%", height: "100%", borderRadius: "50%", objectFit: "cover" }} />,
+    icon: <img loading="lazy" src="/slack%20logo.jpeg" alt="Slack" style={{ width: "100%", height: "100%", borderRadius: "50%", objectFit: "cover" }} />,
     type: "oauth_direct",
     fields: []
   },
@@ -14,7 +14,7 @@ const CONNECTORS_REGISTRY = [
     id: "telegram",
     name: "Telegram",
     category: "Communication",
-    icon: <img src="/telegram%20logo.jpeg" alt="Telegram" style={{ width: "100%", height: "100%", borderRadius: "50%", objectFit: "cover" }} />,
+    icon: <img loading="lazy" src="/telegram%20logo.jpeg" alt="Telegram" style={{ width: "100%", height: "100%", borderRadius: "50%", objectFit: "cover" }} />,
     type: "oauth_direct",
     fields: []
   },
@@ -23,7 +23,7 @@ const CONNECTORS_REGISTRY = [
     id: "native",
     name: "Native Store",
     category: "Commerce",
-    icon: <img src="/sera-logo.png" alt="SERA" style={{ width: "100%", height: "100%", borderRadius: "50%", objectFit: "cover" }} />,
+    icon: <img loading="lazy" src="/sera-logo.png" alt="SERA" style={{ width: "100%", height: "100%", borderRadius: "50%", objectFit: "cover" }} />,
     type: "native",
     fields: []
   },
@@ -31,7 +31,7 @@ const CONNECTORS_REGISTRY = [
     id: "shopify",
     name: "Shopify",
     category: "Commerce",
-    icon: <img src="/shopify%20logo.jpeg" alt="Shopify" style={{ width: "100%", height: "100%", borderRadius: "50%", objectFit: "cover" }} />,
+    icon: <img loading="lazy" src="/shopify%20logo.jpeg" alt="Shopify" style={{ width: "100%", height: "100%", borderRadius: "50%", objectFit: "cover" }} />,
     type: "oauth_direct",
     fields: []
   },
@@ -39,7 +39,7 @@ const CONNECTORS_REGISTRY = [
     id: "woocommerce",
     name: "WooCommerce",
     category: "Commerce",
-    icon: <img src="/woo%20logo.jpeg" alt="WooCommerce" style={{ width: "100%", height: "100%", borderRadius: "50%", objectFit: "cover" }} />,
+    icon: <img loading="lazy" src="/woo%20logo.jpeg" alt="WooCommerce" style={{ width: "100%", height: "100%", borderRadius: "50%", objectFit: "cover" }} />,
     type: "custom",
     fields: [
       { name: "storeUrl", label: "Store URL", type: "text" },

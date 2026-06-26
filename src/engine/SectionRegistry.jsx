@@ -182,8 +182,7 @@ export const SECTION_REGISTRY = {
                       />
                     ) : (
                       p.imageUrl && (
-                        <img
-                          key={`${p.imageUrl}-${p.verifiedUrl ? 'verified' : 'pending'}`}
+                        <img loading="lazy" key={`${p.imageUrl}-${p.verifiedUrl ? 'verified' : 'pending'}`}
                           src={p.imageUrl}
                           alt={p.name}
                           style={{ width: "100%", height: "100%", objectFit: "cover", position: "absolute", inset: 0, opacity: (p.verifiedUrl || p.imageUrl) ? 1 : 0, transition: "opacity 0.5s ease-in" }}
@@ -248,7 +247,7 @@ export const SECTION_REGISTRY = {
                   {p.imageUrl && p.imageUrl.endsWith('.mp4') ? (
                     <VideoPlayer src={p.imageUrl} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                   ) : (
-                    <img src={p.imageUrl} style={{ width: "100%", height: "100%", objectFit: "cover" }} alt={p.name} />
+                    <img loading="lazy" src={p.imageUrl} style={{ width: "100%", height: "100%", objectFit: "cover" }} alt={p.name} />
                   )}
                   <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(0,0,0,0.7), transparent)", display: "flex", flexDirection: "column", justifyContent: "flex-end", padding: 30 }}>
                     <h3 style={{ color: "#fff", fontSize: i === 0 ? 32 : 18 }}>{p.name}</h3>
@@ -296,7 +295,7 @@ export const SECTION_REGISTRY = {
                     {v.imageUrl && v.imageUrl.endsWith('.mp4') ? (
                       <VideoPlayer key={`${v.imageUrl}-${v.verifiedUrl ? 'verified' : 'pending'}`} src={v.imageUrl} style={{ width: "100%", height: "100%", objectFit: "cover", position: "absolute", inset: 0, opacity: 1 }} />
                     ) : (
-                      v.imageUrl && <img key={`${v.imageUrl}-${v.verifiedUrl ? 'verified' : 'pending'}`} src={v.imageUrl} style={{ width: "100%", height: "100%", objectFit: "cover", position: "absolute", inset: 0, opacity: (v.verifiedUrl || v.imageUrl) ? 1 : 0, transition: "opacity 0.5s ease-in" }} onLoad={e => { e.currentTarget.style.opacity = 1; e.currentTarget.style.display = "block"; }} onError={e => { e.currentTarget.style.display = "none"; }} />
+                      v.imageUrl && <img loading="lazy" key={`${v.imageUrl}-${v.verifiedUrl ? 'verified' : 'pending'}`} src={v.imageUrl} style={{ width: "100%", height: "100%", objectFit: "cover", position: "absolute", inset: 0, opacity: (v.verifiedUrl || v.imageUrl) ? 1 : 0, transition: "opacity 0.5s ease-in" }} onLoad={e => { e.currentTarget.style.opacity = 1; e.currentTarget.style.display = "block"; }} onError={e => { e.currentTarget.style.display = "none"; }} />
                     )}
                     <div style={{ position: "absolute", inset: 0, padding: "clamp(20px, 4vw, 40px)", display: "flex", flexDirection: "column", justifyContent: "flex-end", background: "linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 60%)" }}>
                       <h4 style={{ fontSize: 'clamp(10px, 2.5vw, 12px)', fontWeight: 800, color: props.themeColor || "#fff", letterSpacing: 4, textTransform: "uppercase", marginBottom: 12 }}>{v.label || v.title}</h4>

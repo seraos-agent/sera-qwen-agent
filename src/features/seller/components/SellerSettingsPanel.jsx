@@ -31,7 +31,7 @@ export const SellerSettingsPanel = () => {
           <div style={{ padding: "0 32px 32px 32px", display: "flex", flexDirection: "column", position: "relative" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginTop: -40, marginBottom: 24 }}>
               <div style={{ width: 100, height: 100, borderRadius: "50%", background: isDarkMode ? "#1a1a1e" : "#ffffff", display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden", border: `4px solid ${isDarkMode ? '#161618' : '#ffffff'}`, boxShadow: "0 8px 24px rgba(0,0,0,0.1)", zIndex: 2 }}>
-                 <img src="/sera-logo.png" alt="Profile" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                 <img loading="lazy" src="/sera-logo.png" alt="Profile" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
               </div>
               <button style={{ background: isDarkMode ? "#2a2a2e" : "#e5e7eb", color: t.text, border: "none", padding: "8px 20px", borderRadius: 100, fontSize: 13, fontWeight: 600, cursor: "pointer", transition: "all 0.2s" }}>Edit Profile</button>
             </div>

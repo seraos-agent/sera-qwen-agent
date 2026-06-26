@@ -420,7 +420,7 @@ export const BuyerApp = ({ isDarkMode, setIsDarkMode, t, DynamicRenderer }) => {
                       onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
                     >
                       {store.cover ? (
-                        <img src={store.cover} alt={store.name} style={{ width: '100%', height: '100%', objectFit: 'cover', position: 'absolute', inset: 0 }} onError={e => e.currentTarget.style.display = 'none'} />
+                        <img loading="lazy" src={store.cover} alt={store.name} style={{ width: '100%', height: '100%', objectFit: 'cover', position: 'absolute', inset: 0 }} onError={e => e.currentTarget.style.display = 'none'} />
                       ) : (
                         <div style={{ width: '100%', height: '100%', background: isDarkMode ? '#161618' : '#f9fafb', position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 40 }}>🛍️</div>
                       )}

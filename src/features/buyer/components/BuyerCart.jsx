@@ -42,7 +42,7 @@ export const BuyerCart = () => {
             <div style={{ padding: 'clamp(20px, 4vw, 32px)', display: 'flex', flexDirection: 'column', gap: 24 }}>
               {cart.map((item, idx) => (
                 <div key={item.id} className="cart-item-row" style={{ display: 'flex', gap: 'clamp(16px, 3vw, 32px)', alignItems: 'flex-start', paddingBottom: idx === cart.length - 1 ? 0 : 32, borderBottom: idx === cart.length - 1 ? 'none' : `1px solid ${t.border}` }}>
-                  <img src={item.imageUrl} alt={item.name} className="cart-item-image" style={{ width: 'clamp(80px, 25vw, 120px)', height: 'clamp(80px, 25vw, 120px)', borderRadius: 16, objectFit: 'cover', background: '#1a1a1e' }} />
+                  <img loading="lazy" src={item.imageUrl} alt={item.name} className="cart-item-image" style={{ width: 'clamp(80px, 25vw, 120px)', height: 'clamp(80px, 25vw, 120px)', borderRadius: 16, objectFit: 'cover', background: '#1a1a1e' }} />
                   <div className="cart-item-info" style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', minHeight: 'clamp(80px, 25vw, 120px)' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12 }}>
                       <div>

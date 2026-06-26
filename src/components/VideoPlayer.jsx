@@ -58,7 +58,7 @@ export const VideoPlayer = ({ src, style = {}, hideControls = false, ...props })
         loop 
         muted={isMuted} 
         playsInline 
-        preload="auto"
+        preload="metadata"
         style={videoStyle} 
         {...props} 
       />

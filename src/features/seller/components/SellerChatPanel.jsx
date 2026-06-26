@@ -308,11 +308,11 @@ export const SellerChatPanel = () => {
                   {m.images && m.images.length > 0 && (
                     <div style={{ display: "grid", gridTemplateColumns: m.images.length > 1 ? "1fr 1fr" : "1fr", gap: 6, marginTop: 8 }}>
                       {m.images.map((img, idx) => (
-                        <img key={idx} src={img} alt={`uploaded-${idx}`} style={{ width: "100%", borderRadius: 6, display: "block" }} />
+                        <img loading="lazy" key={idx} src={img} alt={`uploaded-${idx}`} style={{ width: "100%", borderRadius: 6, display: "block" }} />
                       ))}
                     </div>
                   )}
-                  {m.image && !m.images && <img src={m.image} alt="uploaded" style={{ marginTop: 8, maxWidth: "100%", borderRadius: 6, display: "block" }} />}
+                  {m.image && !m.images && <img loading="lazy" src={m.image} alt="uploaded" style={{ marginTop: 8, maxWidth: "100%", borderRadius: 6, display: "block" }} />}
                 </div>
               </div>
             );
@@ -472,7 +472,7 @@ export const SellerChatPanel = () => {
                 <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
                   {pendingImages.map((img, idx) => (
                     <div key={idx} style={{ position: "relative", width: 60, height: 60, borderRadius: 8, overflow: "hidden", border: "1px solid #333", background: "#111113" }}>
-                      <img src={img} alt="preview" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                      <img loading="lazy" src={img} alt="preview" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                       <button
                         onClick={() => setPendingImages(prev => prev.filter((_, i) => i !== idx))}
                         style={{ position: "absolute", top: 2, right: 2, background: "rgba(0,0,0,0.7)", border: "none", borderRadius: "50%", width: 16, height: 16, color: "#fff", fontSize: 10, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}
