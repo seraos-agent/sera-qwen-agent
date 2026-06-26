@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 
-export const VideoPlayer = ({ src, style = {}, hideControls = false, ...props }) => {
+export const VideoPlayer = ({ src, style = {}, hideControls = false, mutePosition = { top: 10, right: 10 }, ...props }) => {
   const [isMuted, setIsMuted] = useState(true);
   const videoRef = useRef(null);
 
@@ -71,14 +71,13 @@ export const VideoPlayer = ({ src, style = {}, hideControls = false, ...props })
           }}
           style={{
             position: 'absolute',
-            bottom: 12,
-            right: 12,
+            ...mutePosition,
             background: 'rgba(0, 0, 0, 0.6)',
             backdropFilter: 'blur(4px)',
             border: '1px solid rgba(255, 255, 255, 0.2)',
             borderRadius: '50%',
-            width: 32,
-            height: 32,
+            width: 24,
+            height: 24,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -90,13 +89,13 @@ export const VideoPlayer = ({ src, style = {}, hideControls = false, ...props })
           title={isMuted ? "Unmute" : "Mute"}
         >
           {isMuted ? (
-            <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+            <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M11 5L6 9H2v6h4l5 4V5z" />
               <line x1="23" y1="9" x2="17" y2="15" />
               <line x1="17" y1="9" x2="23" y2="15" />
             </svg>
           ) : (
-            <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+            <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M11 5L6 9H2v6h4l5 4V5z" />
               <path strokeLinecap="round" strokeLinejoin="round" d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07" />
             </svg>

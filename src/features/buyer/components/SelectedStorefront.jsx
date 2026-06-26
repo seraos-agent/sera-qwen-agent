@@ -151,6 +151,7 @@ export const SelectedStorefront = () => {
                       <VideoPlayer
                         key={vidUrl}
                         src={vidUrl}
+                        mutePosition={{ bottom: 10, right: 10 }}
                         style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.8, transition: 'opacity 0.5s ease' }}
                       />
                       <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.9) 0%, transparent 60%)', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', padding: 'clamp(20px, 4vw, 40px) clamp(20px, 6vw, 60px)' }}>

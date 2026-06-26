@@ -4,6 +4,7 @@ import asyncio
 from utils.logger import logger
 from tools.sera_tools import generate_store_assets
 from utils.cognition import emit_pre_run, emit_completion
+from services.llm_service import generate_text_sync
 
 async def handle_retry_assets(schema: dict, failed_ids: set, progress_queue: asyncio.Queue):
     """Handles self-correction for failed assets triggered via /retry-assets."""
@@ -77,19 +78,39 @@ async def fallback_asset_generation(schema: dict, session_id: str, action: str, 
     try:
         while True:
             msg = await q.get()
+            if msg is None:
+                continue
             if msg.get("done"):
                 res = msg["res"]
                 break
-            yield json.dumps({
-                "event_id": f"evt_fallback_execution_{int(time.time())}_{len(msg['results'])}",
-                "timestamp": int(time.time()),
-                "session_id": session_id,
-                "type": "execution_state",
-                "state": {
-                    "task_id": f"task_{int(time.time())}",
-                    "results": msg["results"]
-                }
-            }) + "\n"
+            
+            # Handle ReAct retry progress events
+            if msg.get("react_event"):
+                yield json.dumps({
+                    "event_id": f"evt_react_{int(time.time())}_{msg.get('task_id')}_{msg.get('attempt')}",
+                    "timestamp": int(time.time()),
+                    "session_id": session_id,
+                    "type": "cognition",
+                    "title": "Generating",
+                    "agent": "ImageProductAgent",
+                    "message": msg.get("message", "Retrying asset generation..."),
+                    "phase": "asset_generation",
+                    "done": True
+                }) + "\n"
+                continue
+                
+            # Handle standard asset generation progress updates
+            if "results" in msg:
+                yield json.dumps({
+                    "event_id": f"evt_fallback_execution_{int(time.time())}_{len(msg['results'])}",
+                    "timestamp": int(time.time()),
+                    "session_id": session_id,
+                    "type": "execution_state",
+                    "state": {
+                        "task_id": f"task_{int(time.time())}",
+                        "results": msg["results"]
+                    }
+                }) + "\n"
     finally:
         if not gen_task.done():
             gen_task.cancel()
@@ -113,8 +134,6 @@ async def fallback_asset_generation(schema: dict, session_id: str, action: str, 
                 "done": False
             }) + "\n"
             
-            import asyncio
-            from services.llm_service import generate_text_sync
 
             async def rewrite_prompt(p_dict, key):
                 old_prompt = p_dict.get(key) or p_dict.get("name", "")
@@ -191,8 +210,20 @@ async def fallback_asset_generation(schema: dict, session_id: str, action: str, 
                                 break
             attempt += 1
 
-        params["schema"] = res.get("schema")
+        params["schema"] = res.get("schema") or schema
         params["failed_assets"] = [f for f in results if f.get("status") == "failed"]
+        if not res.get("success"):
+            yield json.dumps({
+                "event_id": f"evt_fallback_execution_error_{int(time.time())}",
+                "timestamp": int(time.time()),
+                "session_id": session_id,
+                "type": "cognition",
+                "title": "Error",
+                "agent": "ImageProductAgent",
+                "message": f"Asset generation encountered a critical error: {res.get('error', 'Unknown error')}",
+                "phase": "asset_generation",
+                "done": True
+            }) + "\n"
         if action == "update_philosophy":
             for sec in params["schema"].get("layout", []):
                 if sec.get("type") == "philosophy":

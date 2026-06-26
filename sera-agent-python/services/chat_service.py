@@ -276,7 +276,37 @@ async def run_execution_pipeline(start_time, session_id, agent_type, runner, use
             "done": True
         }) + "\n"
         
-        messages = [{'role': 'user', 'content': [{'text': rich_input}]}]
+        # Detect language from user's input — no external lib needed
+        def detect_user_language(text: str) -> str:
+            """Simple heuristic language detector. Defaults to English for ambiguous short inputs."""
+            t = text.lower().strip()
+            # Check for Mandarin/CJK characters
+            if any('\u4e00' <= c <= '\u9fff' for c in text):
+                return "Mandarin Chinese"
+            # Check for Japanese
+            if any('\u3040' <= c <= '\u30ff' for c in text):
+                return "Japanese"
+            # Check for Korean
+            if any('\uac00' <= c <= '\ud7a3' for c in text):
+                return "Korean"
+            # Indonesian heuristics: common Indonesian words
+            id_markers = ["buat", "bangun", "toko", "saya", "untuk", "yang", "dengan", "ini", "itu", "di", "ke", "dari", "dan", "atau", "tidak", "bisa", "ada", "akan", "sudah", "kamu", "apa", "bagaimana", "sekarang", "hewan", "peliharaan"]
+            words = t.split()
+            id_count = sum(1 for w in words if w in id_markers)
+            if id_count >= 2 or (len(words) > 0 and words[0] in id_markers):
+                return "Indonesian"
+            # Default to English for Latin script
+            return "English"
+
+        detected_lang_name = detect_user_language(request.input)
+
+        plan_lang_instruction = (
+            f"LANGUAGE LOCK — HIGHEST PRIORITY RULE: The user's message is \"{request.input}\". "
+            f"The detected language is: {detected_lang_name}. "
+            f"Your introductory text BEFORE the JSON block MUST be written in {detected_lang_name} only. "
+            f"NEVER switch language. NEVER use Mandarin/Chinese unless detected_lang_name is Mandarin Chinese."
+        )
+        messages = [{'role': 'user', 'content': [{'text': f"{rich_input}\n\n{plan_lang_instruction}"}]}]
         async for chunk in execute_agent_pass(start_time, session_id, "plan_agent", runner, messages, request):
             if isinstance(chunk, str) and chunk.endswith("\n"): yield chunk
             else: final_text = chunk
@@ -408,10 +438,111 @@ async def run_execution_pipeline(start_time, session_id, agent_type, runner, use
             async for chunk in execute_agent_pass(start_time, session_id, "consensus_agent", consensus_runner, consensus_messages, request):
                 if isinstance(chunk, str) and chunk.endswith("\n"): yield chunk
                 else: final_text = chunk
-            
-            # Phase 4: Spokesperson Narration
-            # Removed duplicate spokesperson block to let the bottom block handle it.
+
+            # ── Phase 4: ReAct Schema Verification ────────────────────────────
+            # Observe: Programmatically check if the schema output is complete.
+            # If not, Reason about what's missing → Act: call StoreAgent to fix it.
             consensus_json_str = extract_json_from_text(final_text)
+            
+            def check_schema_integrity(json_str: str) -> list:
+                """Returns a list of missing required sections, or empty list if complete."""
+                missing = []
+                if not json_str:
+                    return ["entire schema (no valid JSON found)"]
+                try:
+                    parsed = json.loads(json_str)
+                    params = parsed.get("params", parsed)
+                    schema = params.get("schema", params)
+                    layout = schema.get("layout", [])
+                    section_types = [s.get("type") for s in layout]
+                    required = ["hero", "featured_products"]
+                    for req in required:
+                        if req not in section_types:
+                            missing.append(req)
+                except Exception:
+                    missing.append("entire schema (JSON parse failed)")
+                return missing
+
+            missing_sections = check_schema_integrity(consensus_json_str)
+            
+            if missing_sections:
+                # Reason: Schema is incomplete. Log and plan correction.
+                logger.warning(f"🔍 [ReAct Verify] Schema incomplete. Missing: {missing_sections}. Triggering correction pass.")
+                yield json.dumps({
+                    "event_id": f"evt_cog_{int(time.time())}_verify",
+                    "timestamp": int(time.time()),
+                    "session_id": session_id,
+                    "type": "cognition",
+                    "title": "Verifying",
+                    "agent": "StoreAgent",
+                    "message": f"Schema integrity check failed. Missing sections: **{', '.join(missing_sections)}**. Triggering autonomous correction pass...",
+                    "phase": "analysis",
+                    "done": True
+                }) + "\n"
+                
+                await asyncio.sleep(0.5)
+
+                # Act: Call StoreAgent with a targeted correction prompt.
+                correction_runner = get_runner("store_agent")
+                correction_prompt = (
+                    f"The ConsensusAgent produced an incomplete store schema for the goal: \"{request.input}\".\n"
+                    f"The following required sections are MISSING: {missing_sections}.\n\n"
+                    f"Current (incomplete) output:\n{final_text}\n\n"
+                    f"Your task: Output a COMPLETE and VALID `update_schema` JSON that includes ALL missing sections. "
+                    f"Do not explain — just produce the corrected JSON immediately.\n\n"
+                    f"{user_lang_instruction}"
+                )
+                correction_messages = [{'role': 'user', 'content': [{'text': correction_prompt}]}]
+                
+                correction_final_text = ""
+                async for chunk in execute_agent_pass(start_time, session_id, "store_agent", correction_runner, correction_messages, request):
+                    if isinstance(chunk, str) and chunk.endswith("\n"): yield chunk
+                    else: correction_final_text = chunk
+
+                # Observe: Use corrected output if it's more complete
+                corrected_json_str = extract_json_from_text(correction_final_text)
+                still_missing = check_schema_integrity(corrected_json_str)
+                
+                if not still_missing:
+                    logger.info("✅ [ReAct Verify] Correction pass succeeded. Using corrected schema.")
+                    final_text = correction_final_text
+                    yield json.dumps({
+                        "event_id": f"evt_cog_{int(time.time())}_fixed",
+                        "timestamp": int(time.time()),
+                        "session_id": session_id,
+                        "type": "cognition",
+                        "title": "Verifying",
+                        "agent": "StoreAgent",
+                        "message": "Schema correction successful. All required sections are now present. ✅",
+                        "phase": "analysis",
+                        "done": True
+                    }) + "\n"
+                else:
+                    logger.error(f"❌ [ReAct Verify] Correction pass still incomplete. Missing: {still_missing}. Proceeding with best available output.")
+                    yield json.dumps({
+                        "event_id": f"evt_cog_{int(time.time())}_partial",
+                        "timestamp": int(time.time()),
+                        "session_id": session_id,
+                        "type": "cognition",
+                        "title": "Verifying",
+                        "agent": "StoreAgent",
+                        "message": f"Correction attempted but sections still incomplete: **{', '.join(still_missing)}**. Proceeding with best available result.",
+                        "phase": "analysis",
+                        "done": True
+                    }) + "\n"
+            else:
+                logger.info("✅ [ReAct Verify] Schema integrity check passed. All required sections present.")
+                yield json.dumps({
+                    "event_id": f"evt_cog_{int(time.time())}_verify_ok",
+                    "timestamp": int(time.time()),
+                    "session_id": session_id,
+                    "type": "cognition",
+                    "title": "Verifying",
+                    "agent": "StoreAgent",
+                    "message": "Schema integrity verified. All required sections confirmed present. ✅",
+                    "phase": "analysis",
+                    "done": True
+                }) + "\n"
 
     # ── BUYER: Direct async streaming path (bypasses qwen-agent) ──────────────
     if request.chatMode == 'buyer':
@@ -567,8 +698,8 @@ async def run_execution_pipeline(start_time, session_id, agent_type, runner, use
             elif st == "philosophy":
                 for item in props.get("items", []):
                     if isinstance(item, dict) and not item.get("verifiedUrl") and (not item.get("imageUrl") or "unsplash.com" in str(item.get("imageUrl", ""))): needs_gen = True
-            elif st in ["video_landscape", "video_vertical"]:
-                if props.get("videoPrompt") and not props.get("videoUrl"): needs_gen = True
+            # Note: video_landscape and video_vertical are EXCLUDED from default generation pipeline.
+            # Videos are only generated on explicit user request via change_landscape_video / change_vertical_video.
                         
         if needs_gen:
             try:
@@ -585,7 +716,27 @@ async def run_execution_pipeline(start_time, session_id, agent_type, runner, use
                     "params": params,
                 }) + "\n"
             except Exception as e:
-                logger.error(f"Asset generation error: {str(e)}")
+                import traceback
+                err_trace = traceback.format_exc()
+                logger.error(f"Asset generation error: {str(e)}\n{err_trace}")
+                yield json.dumps({
+                    "event_id": f"evt_asset_error_{int(time.time())}",
+                    "timestamp": int(time.time()),
+                    "session_id": session_id,
+                    "type": "cognition",
+                    "title": "Error",
+                    "agent": "ImageProductAgent",
+                    "message": f"Asset generation crashed with error: **{str(e)}**. Store layout was saved but some images may be missing. You can retry individual images from the store editor.",
+                    "phase": "asset_generation",
+                    "done": True
+                }) + "\n"
+                # Do NOT overwrite params — keep the schema intact
+                if "failed_assets" not in params:
+                    params["failed_assets"] = [{"itemId": "unknown", "error": str(e)}]
+
+    # ── Compute actual asset generation outcome for Spokesperson ──────────────
+    failed_assets = params.get("failed_assets", [])
+    asset_generation_status = "success" if not failed_assets else f"partial_failure ({len(failed_assets)} images failed)"
 
     # 2. Dual Output System: Async Spokesperson Narration
     # For ALL actions (including idle), use the Spokesperson Agent to report the result consistently
@@ -602,7 +753,15 @@ async def run_execution_pipeline(start_time, session_id, agent_type, runner, use
         "conflict_summary": workspace["objections"] if 'workspace' in locals() else [],
         "agent_agreement_map": agreement_map,
         "backend_agent_message": chat_out if chat_out else None,
-        "failed_assets_after_retries": params.get("failed_assets", [])
+        # CRITICAL: This field is the GROUND TRUTH. Spokesperson MUST reflect this exactly.
+        "asset_generation_status": asset_generation_status,
+        "failed_assets_after_retries": failed_assets,
+        "INSTRUCTION_FOR_SPOKESPERSON": (
+            "CRITICAL HONESTY RULE: You MUST read the `asset_generation_status` field above before writing your report. "
+            "If it contains 'partial_failure', you MUST acknowledge that some images failed to generate. "
+            "NEVER claim 'all visual assets have passed generation protocols' if `asset_generation_status` is not 'success'. "
+            "If there are failed assets, tell the user clearly which ones failed and suggest they retry from the store editor."
+        )
     }
     
     if request.chatMode == "buyer":

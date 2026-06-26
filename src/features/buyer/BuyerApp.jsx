@@ -353,7 +353,7 @@ export const BuyerApp = ({ isDarkMode, setIsDarkMode, t, DynamicRenderer }) => {
             grid-template-columns: 1fr !important;
             gap: 16px !important;
           }
-          div[style*="grid-template-columns: repeat(auto-fill, minmax(280px"] {
+          div[style*="grid-template-columns: repeat(auto-fill, minmax(220px"] {
             grid-template-columns: 1fr 1fr !important;
             gap: 12px !important;
           }
@@ -365,6 +365,10 @@ export const BuyerApp = ({ isDarkMode, setIsDarkMode, t, DynamicRenderer }) => {
           /* Typography inside cards */
           h3 { font-size: 16px !important; }
           h4 { font-size: 13px !important; line-height: 1.2 !important; }
+          
+          .campaign-overlay { bottom: 8px !important; left: 8px !important; right: 8px !important; gap: 8px !important; }
+          .campaign-desc { font-size: 11px !important; line-height: 1.3 !important; }
+          .campaign-btn { font-size: 7px !important; padding: 3px 6px !important; letter-spacing: 0.2px !important; box-shadow: none !important; }
           
           /* Bottom Navigation */
           .buyer-bottom-nav {

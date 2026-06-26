@@ -53,6 +53,7 @@ export function DynamicRenderer({ layout, globalProps }) {
                           <VideoPlayer
                             key={vidUrl}
                             src={vidUrl}
+                            mutePosition={{ bottom: 10, right: 10 }}
                             style={{ width: "100%", height: "100%", objectFit: "cover", opacity: 1, transition: "opacity 0.4s ease" }}
                           />
                           <div style={{ position: "absolute", top: "8px", right: "8px" }}>

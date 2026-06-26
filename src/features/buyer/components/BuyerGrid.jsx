@@ -77,7 +77,7 @@ export const BuyerGrid = () => {
           </div>
           <p style={{ color: t.subtext, fontSize: 13, margin: 0 }}>Discover autonomous AI-powered brands backed by verified reputation and trust indicators.</p>
         </div>
-        <div className="buyer-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 24 }}>
+        <div className="buyer-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 24 }}>
           {filteredStores.map(store => {
             const isFollowing = followedStores instanceof Set ? followedStores.has(store.id) : false;
             return (
@@ -151,7 +151,7 @@ export const BuyerGrid = () => {
                 <span style={{ background: "rgba(239, 68, 68, 0.9)", color: "#fff", fontSize: 10, fontWeight: 800, padding: "4px 10px", borderRadius: 100, textTransform: "uppercase", letterSpacing: 0.5 }}>Flash Sale</span>
               </div>
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 24 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 24 }}>
               {allCampaigns.map(camp => (
                 <div key={camp.id} style={{ width: "100%", cursor: 'pointer' }} onClick={e => { e.stopPropagation(); window.dispatchEvent(new CustomEvent('sera:openStore', { detail: { storeId: camp.store.id || camp.store.store_id || camp.store._id } })); }}>
                   <div style={{ borderRadius: 16, overflow: 'hidden', position: 'relative', aspectRatio: '9/16', background: t.card, border: `1px solid ${t.border}` }}>
@@ -159,9 +159,9 @@ export const BuyerGrid = () => {
                       style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                     />
                     <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: "40%", background: "linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 100%)", pointerEvents: "none" }} />
-                    <div style={{ position: "absolute", bottom: "8px", left: "8px", right: "8px", display: "flex", justifyContent: "space-between", alignItems: "flex-end", gap: 12 }}>
-                      <p style={{ color: "#fff", fontSize: 11, fontWeight: 500, margin: 0, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden", textShadow: "0 1px 2px rgba(0,0,0,0.8)", lineHeight: 1.3 }}>{camp.store?.storeData?.description || "Curated specifically for you. Tap to view the full catalog."}</p>
-                      <span style={{ background: "rgba(239, 68, 68, 0.9)", backdropFilter: "blur(4px)", color: "#fff", fontSize: 8, fontWeight: 800, padding: "3px 8px", borderRadius: 100, textTransform: "uppercase", letterSpacing: 0.5, flexShrink: 0 }}>View Store</span>
+                    <div className="campaign-overlay" style={{ position: "absolute", bottom: "16px", left: "16px", right: "16px", display: "flex", justifyContent: "space-between", alignItems: "flex-end", gap: 12 }}>
+                      <p className="campaign-desc" style={{ color: "#fff", fontSize: 14, fontWeight: 600, margin: 0, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden", textShadow: "0 2px 4px rgba(0,0,0,0.9)", lineHeight: 1.4, letterSpacing: 0.3 }}>{camp.store?.storeData?.description || "Curated specifically for you. Tap to view the full catalog."}</p>
+                      <span className="campaign-btn" style={{ background: "rgba(239, 68, 68, 0.9)", backdropFilter: "blur(4px)", color: "#fff", fontSize: 10, fontWeight: 800, padding: "5px 12px", borderRadius: 100, textTransform: "uppercase", letterSpacing: 0.5, flexShrink: 0, boxShadow: "0 4px 12px rgba(239, 68, 68, 0.3)" }}>View Store</span>
                     </div>
                   </div>
                 </div>

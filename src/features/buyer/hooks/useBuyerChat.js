@@ -10,7 +10,12 @@ export const useBuyerChat = ({
   userStores,
   setSelectedStorefront
 }) => {
-  const [chatOpen, setChatOpen] = useState(false);
+  const [chatOpen, setChatOpen] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return window.innerWidth > 768;
+    }
+    return false;
+  });
   const [abortController, setAbortController] = useState(null);
   const [streamingMessage, setStreamingMessage] = useState(null);
   const [isResizing, setIsResizing] = useState(false);

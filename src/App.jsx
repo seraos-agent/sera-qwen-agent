@@ -24,7 +24,12 @@ class ErrorBoundary extends Component {
 
 const SeraLayoutInner = () => {
   const { state: { appMode, toastMessage }, setAppMode } = useStore();
-  const [isDarkMode, setIsDarkMode] = useState(true);
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return window.innerWidth > 768; // Desktop defaults to Dark, Mobile defaults to Light
+    }
+    return true;
+  });
   const t = isDarkMode ? storeThemeDark : storeThemeLight;
 
   useEffect(() => {

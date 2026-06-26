@@ -61,7 +61,12 @@ export const useSellerChat = ({
   }, [isResizing]);
 
   const [executionLifecycle, setExecutionLifecycle] = useState('idle');
-  const [chatOpen, setChatOpen] = useState(false);
+  const [chatOpen, setChatOpen] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return window.innerWidth > 768;
+    }
+    return false;
+  });
   const [messages, setMessages] = useState(() => {
     try {
       const saved = localStorage.getItem("sera_hackathon_messages");
@@ -452,6 +457,60 @@ export const useSellerChat = ({
                   agentActivityRef.current = next;
                   return next;
                 });
+
+                // ── Live Image Streaming: patch store preview as each asset arrives ──
+                // Each execution_state contains the cumulative list of completed results.
+                // We immediately apply successful ones to storeSchema so images pop in one-by-one.
+                const liveResults = data.state?.results;
+                if (liveResults && liveResults.length > 0) {
+                  setStoreSchema(prev => {
+                    if (!prev?.layout) return prev;
+                    let changed = false;
+                    const updatedLayout = prev.layout.map(section => {
+                      // Hero image
+                      if (section.type === 'hero') {
+                        const match = liveResults.find(r => r.itemId === 'hero_bg' && r.status === 'success');
+                        if (match && !section.props?.heroImage) {
+                          changed = true;
+                          const url = match.proxy_url || match.url;
+                          return { ...section, props: { ...section.props, heroImage: url } };
+                        }
+                      }
+                      // Product images
+                      if (section.type === 'featured_products' && section.props?.products) {
+                        let prodChanged = false;
+                        const nextProds = section.props.products.map((p, idx) => {
+                          const match = liveResults.find(r => r.itemId === `prod_${idx}` && r.status === 'success');
+                          if (match && !p.verifiedUrl) {
+                            prodChanged = true;
+                            changed = true;
+                            const url = match.proxy_url || match.url;
+                            return { ...p, verifiedUrl: url, imageUrl: url, pendingUrl: url, stepId: null };
+                          }
+                          return p;
+                        });
+                        if (prodChanged) return { ...section, props: { ...section.props, products: nextProds } };
+                      }
+                      // Philosophy images
+                      if (section.type === 'philosophy' && section.props?.items) {
+                        let philoChanged = false;
+                        const nextItems = section.props.items.map((item, idx) => {
+                          const match = liveResults.find(r => r.itemId === `philo_${idx}` && r.status === 'success');
+                          if (match && !item.verifiedUrl) {
+                            philoChanged = true;
+                            changed = true;
+                            const url = match.proxy_url || match.url;
+                            return { ...item, verifiedUrl: url, imageUrl: url, pendingUrl: url, stepId: null };
+                          }
+                          return item;
+                        });
+                        if (philoChanged) return { ...section, props: { ...section.props, items: nextItems } };
+                      }
+                      return section;
+                    });
+                    return changed ? { ...prev, layout: updatedLayout } : prev;
+                  });
+                }
               } else if (data.type === "cognition_log") {
                 setAgentActivity(prev => {
                   const next = [...prev];
@@ -549,7 +608,7 @@ export const useSellerChat = ({
             // Actions are now applied instantly during 'schema_preview' for live streaming effect.
             // We do not re-apply here to avoid duplicate side-effects (like double auto-registration).
           }
-          return { ...m, id: undefined, status: "done", action, params };
+          return { ...m, id: undefined, status: "done", action, params, runtime: agentActivityRef.current };
         }
         return m;
       }));

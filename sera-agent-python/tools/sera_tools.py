@@ -26,8 +26,15 @@ def save_base64_image(base64_str: str, asset_id: str) -> str:
         file_path = os.path.join(assets_dir, f"{asset_id}.{ext}")
         with open(file_path, "wb") as f:
             f.write(base64.b64decode(encoded))
+        
+        # Use PUBLIC_URL if explicitly set (production).
+        # In local dev, PUBLIC_URL is NOT set, so fallback to localhost:8000
+        # so the browser can actually load the image from the local FastAPI server.
+        public_url = os.environ.get("PUBLIC_URL", "").strip().rstrip("/")
+        if not public_url:
+            port = os.environ.get("PORT", "8000")
+            public_url = f"http://localhost:{port}"
             
-        public_url = os.environ.get("PUBLIC_URL", "https://ai.setaradapps.com")
         return f"{public_url}/assets/{asset_id}.{ext}"
     except Exception as e:
         logger.error(f"Failed to save image {asset_id}: {e}")
@@ -334,61 +341,120 @@ async def generate_store_assets(schema: dict, progress_queue=None) -> dict:
             prompt = item.get("imagePrompt") or item.get("imgPrompt") or f"ethos representing {item.get('label', '')} cinematic photography"
             tasks.append((f"philo_{idx}", item, prompt, "1:1", "Philosophy Images Phase", "image"))
             
-    # 4. Identify videos
-    for section in layout:
-        if section.get("type") in ["video_landscape", "video_vertical"]:
-            props = section.setdefault("props", {})
-            if props.get("videoUrl") or props.get("verifiedUrl") or props.get("pendingUrl"):
-                continue
-            v_prompt = props.get("videoPrompt")
-            if v_prompt:
-                ratio = "16:9" if section.get("type") == "video_landscape" else "9:16"
-                tasks.append((f"vid_{section['id']}", props, v_prompt, ratio, "Video Generation Phase", "video"))
+    # 4. Videos: SKIPPED by default — only generated on explicit user request.
+    # Use change_landscape_video / change_vertical_video actions instead.
+    # This prevents store creation from blocking on slow/expensive video generation.
+    logger.info("⏭️ [Asset Gen] Skipping video sections (not default for new store). User can add videos explicitly.")
 
-    # Run all generations in parallel
-    async def run_gen(task_id, target_dict, prompt, ratio, media_type):
-        try:
-            logger.info(f"Generating {media_type} for {task_id}: '{prompt}'")
-            if media_type == "video":
-                base64_url = await generate_video_with_happyhorse_t2v(prompt, ratio, duration=4)
-            else:
-                base64_url = await generate_image_with_imagen(prompt, ratio)
-                
-            asset_id = f"asset_{int(time.time()*1000)}_{hash(prompt)%10000}"
-            final_url = save_base64_image(base64_url, asset_id)
-            
-            if task_id == "hero_bg":
-                target_dict["props"]["heroImage"] = final_url
-            elif media_type == "video":
-                target_dict["videoUrl"] = final_url
-            else:
-                target_dict["imageUrl"] = final_url
-                target_dict["verifiedUrl"] = final_url
-            return {"itemId": task_id, "status": "success", "url": final_url, "proxy_url": final_url}
-        except Exception as err:
-            logger.error(f"Failed generation for {task_id}: {str(err)}")
-            if task_id == "hero_bg":
-                target_dict["props"]["heroImage"] = "error"
-            elif media_type == "video":
-                target_dict["videoUrl"] = "error"
-            else:
-                target_dict["imageUrl"] = "error"
-                target_dict["verifiedUrl"] = "error"
-            return {"itemId": task_id, "status": "failed", "error": str(err)}
-            
+    # ── ReAct Self-Correcting Asset Generator ────────────────────────────────────
+    # Reason → Act → Observe loop with max 2 retries per asset.
+    MAX_RETRIES = 2
+
+    def simplify_prompt(original_prompt: str, attempt: int, error_str: str) -> str:
+        """Reason step: Analyze failure and generate a safer fallback prompt."""
+        error_lower = error_str.lower()
+        
+        # If content was blocked by safety filter → strip specifics, use abstract version
+        if any(kw in error_lower for kw in ["content", "safety", "policy", "inappropriate", "rejected", "blocked"]):
+            # Remove potentially triggering descriptors
+            safe_words_to_remove = ["sexy", "nude", "violent", "blood", "weapon", "explicit", "human", "face", "person", "people"]
+            cleaned = original_prompt
+            for word in safe_words_to_remove:
+                cleaned = cleaned.replace(word, "")
+            return f"{cleaned.strip()}, elegant abstract aesthetic, minimal, clean, safe for work, no people, soft lighting"
+        
+        # If timeout or API error → use a much shorter, simpler prompt
+        if any(kw in error_lower for kw in ["timeout", "timed out", "connection", "network", "500", "503"]):
+            # Take only the first 8 words of the original prompt
+            short = " ".join(original_prompt.split()[:8])
+            return f"{short}, minimal, clean composition, professional photography"
+        
+        # Generic fallback: progressively shorten and neutralize
+        words = original_prompt.split()
+        shortened = " ".join(words[:max(5, len(words) - (attempt * 4))])
+        return f"{shortened}, clean elegant simple product photo, studio lighting, white background"
+
+    async def run_gen_with_react(task_id, target_dict, prompt, ratio, media_type):
+        """
+        ReAct loop: Reason (analyze error) → Act (retry with new prompt) → Observe (check result).
+        Retries up to MAX_RETRIES times before declaring failure.
+        """
+        current_prompt = prompt
+        last_error = None
+
+        for attempt in range(MAX_RETRIES + 1):
+            try:
+                if attempt > 0:
+                    logger.info(f"🔄 [ReAct] Retry {attempt}/{MAX_RETRIES} for '{task_id}' with simplified prompt: '{current_prompt}'")
+                    # Wait before retry — back-off to avoid rate limiting
+                    await asyncio.sleep(2 * attempt)
+                    # Emit retry progress so the UI audit log shows this step
+                    if progress_queue:
+                        await progress_queue.put({
+                            "react_event": True,
+                            "task_id": task_id,
+                            "attempt": attempt,
+                            "message": f"Retrying asset '{task_id}' (attempt {attempt + 1}/{MAX_RETRIES + 1}) with adjusted prompt..."
+                        })
+                else:
+                    logger.info(f"🎨 [ReAct] Generating {media_type} for '{task_id}': '{current_prompt}'")
+
+                # ── Act: Call the actual generation API ──────────────────────
+                if media_type == "video":
+                    base64_url = await generate_video_with_happyhorse_t2v(current_prompt, ratio, duration=4)
+                else:
+                    base64_url = await generate_image_with_imagen(current_prompt, ratio)
+
+                # ── Observe: Generation succeeded ────────────────────────────
+                asset_id = f"asset_{int(time.time()*1000)}_{hash(current_prompt)%10000}"
+                final_url = save_base64_image(base64_url, asset_id)
+
+                if task_id == "hero_bg":
+                    target_dict["props"]["heroImage"] = final_url
+                elif media_type == "video":
+                    target_dict["videoUrl"] = final_url
+                else:
+                    target_dict["imageUrl"] = final_url
+                    target_dict["verifiedUrl"] = final_url
+
+                if attempt > 0:
+                    logger.info(f"✅ [ReAct] '{task_id}' succeeded on retry {attempt}")
+                return {"itemId": task_id, "status": "success", "url": final_url, "proxy_url": final_url, "retries": attempt}
+
+            except Exception as err:
+                last_error = err
+                error_str = str(err)
+                logger.warning(f"⚠️ [ReAct] Attempt {attempt + 1} failed for '{task_id}': {error_str}")
+
+                if attempt < MAX_RETRIES:
+                    # ── Reason: Analyze why it failed and adapt ───────────────
+                    current_prompt = simplify_prompt(current_prompt, attempt + 1, error_str)
+                    logger.info(f"🧠 [ReAct] Diagnosed failure. New strategy for '{task_id}': '{current_prompt}'")
+                # else: all retries exhausted, fall through to failure handling
+
+        # ── All retries exhausted: report failure ──────────────────────────
+        logger.error(f"❌ [ReAct] All {MAX_RETRIES + 1} attempts failed for '{task_id}'. Last error: {last_error}")
+        if task_id == "hero_bg":
+            target_dict["props"]["heroImage"] = "error"
+        elif media_type == "video":
+            target_dict["videoUrl"] = "error"
+        else:
+            target_dict["imageUrl"] = "error"
+            target_dict["verifiedUrl"] = "error"
+        return {"itemId": task_id, "status": "failed", "error": str(last_error), "retries": MAX_RETRIES}
+
     results = []
-    
+
     # Sort tasks to enforce phased execution order
     order_map = {"Header Background Phase": 0, "Product Images Phase": 1, "Philosophy Images Phase": 2, "Video Generation Phase": 3}
     tasks.sort(key=lambda t: order_map.get(t[4], 99))
-    
+
     for t_id, tgt, pr, rat, phase, m_type in tasks:
-        # Optional: could emit a cognition event here if we wanted to announce phase changes
-        res = await run_gen(t_id, tgt, pr, rat, m_type)
+        res = await run_gen_with_react(t_id, tgt, pr, rat, m_type)
         results.append(res)
         if progress_queue:
             await progress_queue.put({"results": list(results)})
-    
+
     return {
         "success": True,
         "schema": schema,

@@ -459,10 +459,10 @@ export function SeraAgentMessage({ message, onAction }) {
         style={{ padding: "10px 14px", cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "center", transition: "background 0.2s" }}
       >
         <div style={{ flex: 1, fontSize: 13, color: '#f0f0f4', fontFamily: C.sans }}>
-          Completed â€” {groupIntoPhases(activeEvents).length} steps {finalDurStr && `(${finalDurStr})`}
+          Completed · {groupIntoPhases(activeEvents).length} steps {finalDurStr && `(${finalDurStr})`}
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 6, color: '#9090a0' }}>
-          <span className="chevron-sm" style={{ padding: 4, transform: logsOpen ? 'rotate(-90deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }}>âŒ„</span>
+          <span className="chevron-sm" style={{ padding: 4, display: 'flex', alignItems: 'center', transform: logsOpen ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }}><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 4L6 8L10 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg></span>
         </div>
       </div>
       {logsOpen && (
