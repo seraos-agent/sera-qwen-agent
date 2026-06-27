@@ -4,8 +4,6 @@ import asyncio
 from utils.logger import logger
 from tools.sera_tools import generate_store_assets
 from utils.cognition import emit_pre_run, emit_completion
-from services.llm_service import generate_text_sync
-
 async def handle_retry_assets(schema: dict, failed_ids: set, progress_queue: asyncio.Queue):
     """Handles self-correction for failed assets triggered via /retry-assets."""
     for section in schema.get("layout", []):
@@ -135,40 +133,46 @@ async def fallback_asset_generation(schema: dict, session_id: str, action: str, 
             }) + "\n"
             
 
-            async def rewrite_prompt(p_dict, key):
-                old_prompt = p_dict.get(key) or p_dict.get("name", "")
-                sys_msg = f"The following image generation prompt failed safety filters or encountered an error: '{old_prompt}'. Please rewrite it to be completely safe, generic, and remove any potentially sensitive, violent, explicit, or political words. Focus only on describing the visual e-commerce product aesthetics. Output ONLY the new prompt text without quotes."
-                new_prompt = await asyncio.to_thread(generate_text_sync, sys_msg)
-                if new_prompt and new_prompt.strip():
-                    p_dict[key] = new_prompt.strip()
-
-            rewrite_tasks = []
+            def simplify_prompt(original_prompt: str, attempt_num: int, error_str: str) -> str:
+                error_lower = error_str.lower()
+                if any(kw in error_lower for kw in ["content", "safety", "policy", "inappropriate", "rejected", "blocked"]):
+                    safe_words_to_remove = ["sexy", "nude", "violent", "blood", "weapon", "explicit", "human", "face", "person", "people"]
+                    cleaned = original_prompt
+                    for word in safe_words_to_remove:
+                        cleaned = cleaned.replace(word, "")
+                    return f"{cleaned.strip()}, elegant abstract aesthetic, minimal, clean, safe for work, no people, soft lighting"
+                if any(kw in error_lower for kw in ["timeout", "timed out", "connection", "network", "500", "503"]):
+                    short = " ".join(original_prompt.split()[:8])
+                    return f"{short}, minimal, clean composition, professional photography"
+                words = original_prompt.split()
+                shortened = " ".join(words[:max(5, len(words) - (attempt_num * 4))])
+                return f"{shortened}, clean elegant simple product photo, studio lighting, white background"
 
             for sec in schema.get("layout", []):
                 st = sec.get("type")
                 props = sec.get("props", {})
                 
                 if st == "hero":
-                    if any(f.get("itemId") == "hero_bg" for f in failed_items):
-                        props["heroImage"] = ""
-                        rewrite_tasks.append(rewrite_prompt(props, "heroImagePrompt"))
-                        
+                    for f in failed_items:
+                        if f.get("itemId") == "hero_bg":
+                            props["heroImage"] = ""
+                            props["heroImagePrompt"] = simplify_prompt(props.get("heroImagePrompt", ""), attempt + 1, f.get("error", ""))
+                            
                 elif st == "featured_products":
                     for idx, p in enumerate(props.get("products", [])):
-                        if any(f.get("itemId") == f"prod_{idx}" for f in failed_items):
-                            p["verifiedUrl"] = ""
-                            p["imageUrl"] = ""
-                            rewrite_tasks.append(rewrite_prompt(p, "imagePrompt"))
-                            
+                        for f in failed_items:
+                            if f.get("itemId") == f"prod_{idx}":
+                                p["verifiedUrl"] = ""
+                                p["imageUrl"] = ""
+                                p["imagePrompt"] = simplify_prompt(p.get("imagePrompt") or p.get("name", ""), attempt + 1, f.get("error", ""))
+                                
                 elif st == "philosophy":
                     for idx, item in enumerate(props.get("items", [])):
-                        if any(f.get("itemId") == f"philo_{idx}" for f in failed_items):
-                            item["verifiedUrl"] = ""
-                            item["imageUrl"] = ""
-                            rewrite_tasks.append(rewrite_prompt(item, "imagePrompt"))
-            
-            if rewrite_tasks:
-                await asyncio.gather(*rewrite_tasks)
+                        for f in failed_items:
+                            if f.get("itemId") == f"philo_{idx}":
+                                item["verifiedUrl"] = ""
+                                item["imageUrl"] = ""
+                                item["imagePrompt"] = simplify_prompt(item.get("imagePrompt") or item.get("label", ""), attempt + 1, f.get("error", ""))
                             
             q_retry = asyncio.Queue()
             async def run_retry_task():

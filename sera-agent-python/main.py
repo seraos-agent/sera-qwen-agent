@@ -64,7 +64,6 @@ async def startup_event():
     logger.info("🔌 MCP Server: sera-commerce tools available via mcp_server.py")
     logger.info("🧠 Thinking Mode: ENABLED for store, analytics, orchestrator")
     logger.info("⚡ Fast Mode: ENABLED for buyer, marketing, vision, video")
-    http_manager.init_client()
 
 @app.on_event("shutdown")
 async def shutdown_event():

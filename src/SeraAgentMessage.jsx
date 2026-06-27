@@ -384,7 +384,9 @@ export function SeraAgentMessage({ message, onAction }) {
   } = message;
 
   const activeEvents = runtime || events || cognition || [];
-  const hasActualWork = activeEvents.some(e => e.type === 'execution' || e.type === 'cognition' || e.type === 'thinking');
+  const hasActualWork = activeEvents.length > 0 && activeEvents.some(
+    e => e.type === 'execution' || e.type === 'cognition' || e.type === 'thinking' || e.title || e.message
+  );
   const hasRuntime = hasActualWork;
 
   let currentText = "thinking";

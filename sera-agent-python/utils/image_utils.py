@@ -79,10 +79,12 @@ async def generate_image_with_imagen(prompt: str, aspect_ratio: str = "1:1") -> 
         except Exception as e:
             err_str = str(e)
             if "invalid_api_key" in err_str.lower() or "401" in err_str or "InvalidApiKey" in err_str:
-                logger.error(f"❌ [Qwen Image Fatal] {err_str}. Using fallback placeholder immediately.")
-                return PLACEHOLDER_IMAGES["default"]
+                # Fatal auth error — no point retrying, raise immediately so ReAct marks it failed
+                logger.error(f"❌ [Qwen Image Fatal] {err_str}. Raising exception for ReAct to handle.")
+                raise Exception(f"InvalidApiKey: {err_str}")
                 
             logger.error(f"❌ [Qwen Image Error] Attempt {attempt+1} failed: {err_str}")
             if attempt == max_retries:
-                return PLACEHOLDER_IMAGES["default"]
+                # All retries exhausted — raise so ReAct loop marks this asset as failed
+                raise Exception(f"Image generation failed after {max_retries + 1} attempts. Last error: {err_str}")
             await asyncio.sleep(2)

@@ -62,7 +62,14 @@ async def execute_agent_pass(start_time, session_id, agent_type, runner, message
 
         iterator = iter(runner.run(messages))
         while True:
-            response_msgs = await asyncio.to_thread(next, iterator, None)
+            try:
+                response_msgs = await asyncio.wait_for(
+                    asyncio.to_thread(next, iterator, None),
+                    timeout=120.0  # 2-min hard cap per agent step — prevents server hang on API drop
+                )
+            except asyncio.TimeoutError:
+                logger.error(f"⏰ Agent '{agent_type}' timed out after 120s. Breaking loop.")
+                break
             if response_msgs is None:
                 break
             if not response_msgs: continue
@@ -356,12 +363,19 @@ async def run_execution_pipeline(start_time, session_id, agent_type, runner, use
                     "done": True
                 }) + "\n"
                 
-                # Wait a small delay to make it feel natural
-                await asyncio.sleep(1)
-                
                 sub_runner = get_runner(sub_agent)
-                lang_lock = f"CRITICAL LANGUAGE LOCK: The user's message is in this language — detect it from: \"{request.input}\". Your `opinion` field and all narrative MUST be in that exact language. NEVER use Mandarin/Chinese unless the user wrote in Mandarin."
-                sub_messages = [{'role': 'user', 'content': [{'text': f"WORKSPACE GOAL:\n{rich_input}\n\nYOUR OBJECTIVE: {objective}\n\n{lang_lock}\n\nYou are {sub_agent}. Provide your expert opinion based on your specialization. Review current workspace state (if any): {json.dumps(workspace)}\n\nOutput your opinion in JSON format exactly with action: 'opinion'.\nInclude fields: 'opinion' (string), 'confidence' (float 0.0-1.0), 'findings' (list of strings), 'recommendations' (list of strings), and 'objections' (list of objects with keys {{from, against, reason}} if you disagree with previous agents)."}]}]
+                lang_lock = f"CRITICAL LANGUAGE LOCK: The user's message is in this language — detect it from: \"{request.input}\". All narrative MUST be in that exact language. NEVER use Mandarin/Chinese unless the user wrote in Mandarin."
+                
+                active_members_count = len([m for m in sub_agents_team if m.get("agent") and m.get("agent") != "analytics_agent"])
+                
+                if active_members_count == 1:
+                    # Fast Path: Only one agent, so it should output the final schema directly
+                    prompt_text = f"WORKSPACE GOAL:\n{rich_input}\n\nYOUR OBJECTIVE: {objective}\n\n{lang_lock}\n\nYou are {sub_agent}. Provide your expert execution based on your specialization.\n\nOutput your response in JSON format exactly with action: 'update_schema'. Include the full store schema and a conversational 'chat' field explaining your choices to the user."
+                else:
+                    # Collaborative Path: Multiple agents, output an opinion for ConsensusAgent to merge
+                    prompt_text = f"WORKSPACE GOAL:\n{rich_input}\n\nYOUR OBJECTIVE: {objective}\n\n{lang_lock}\n\nYou are {sub_agent}. Provide your expert opinion based on your specialization. Review current workspace state (if any): {json.dumps(workspace)}\n\nOutput your opinion in JSON format exactly with action: 'opinion'.\nInclude fields: 'opinion' (string), 'confidence' (float 0.0-1.0), 'findings' (list of strings), 'recommendations' (list of strings), and 'objections' (list of objects with keys {{from, against, reason}} if you disagree with previous agents)."
+                
+                sub_messages = [{'role': 'user', 'content': [{'text': prompt_text}]}]
                 
                 sub_final_text = ""
                 async for chunk in execute_agent_pass(start_time, f"{session_id}_opinion", sub_agent, sub_runner, sub_messages, request):
@@ -395,49 +409,40 @@ async def run_execution_pipeline(start_time, session_id, agent_type, runner, use
                     opinion_text = sub_final_text
                     workspace["opinions"].append({"agent": sub_agent, "opinion": sub_final_text})
 
-                # Now, Team Leader reports the agent's progress/conclusions in a very human, communicative report format!
-                objections_summary = ""
+                # Log objections internally but don't emit a verbose Reviewing step to UI
+                # (keeps audit log clean and avoids redundant LLM-output display)
                 if objections:
-                    objections_summary = "\n\n⚠️ **Objections raised:**\n" + "\n".join([f"- *Against {obj.get('against')}:* {obj.get('reason')}" for obj in objections])
+                    logger.info(f"[ReAct] {sub_agent} raised {len(objections)} objection(s): {objections}")
                 
+            # Tiny flush after sub-agent phase
+                await asyncio.sleep(0.1)
+                
+            # Phase 3: Consensus — FAST PATH if only 1 agent in team
+            # Skips a full LLM call when there's nothing to "merge".
+            user_lang_instruction = f"LANGUAGE LOCK: The user's original request was: \"{request.input}\". Detect the language of this request. All `chat` fields in your JSON and any agent narrative MUST be written in that exact language. NEVER use Mandarin/Chinese unless the user wrote in Mandarin."
+            active_members = [m for m in sub_agents_team if m.get("agent") and m.get("agent") != "analytics_agent"]
+            if len(active_members) <= 1 and sub_final_text:
+                # Single agent — use its output directly, no need for consensus LLM
+                logger.info("⚡ [FastPath] Single agent team — skipping ConsensusAgent, using sub-agent output directly.")
+                final_text = sub_final_text
+            else:
+                yield emit_lifecycle("consensus", session_id)
                 yield json.dumps({
-                    "event_id": f"evt_cog_{int(time.time())}_summary_{sub_agent}",
+                    "event_id": f"evt_cog_{int(time.time())}",
                     "timestamp": int(time.time()),
                     "session_id": session_id,
                     "type": "cognition",
-                    "title": "Reviewing",
-                    "agent": "PlanAgent",
-                    "message": f"**{sub_agent.replace('_', ' ').title()}** has completed their assessment (Confidence: **{int(confidence * 100)}%**).\n\n**Their Proposal:**\n{opinion_text}{objections_summary}\n\nUpdating the team workspace...",
-                    "phase": "analysis",
+                    "title": "Merging",
+                    "agent": "ConsensusAgent",
+                    "message": "Multiple agents have contributed. Passing consolidated workspace to **ConsensusAgent** to merge proposals and compile final store structure.",
+                    "phase": "layout_design",
                     "done": True
                 }) + "\n"
-                
-                # Wait a small delay to make it feel natural
-                await asyncio.sleep(1.5)
-                
-            # Phase 3: Consensus
-            yield emit_lifecycle("consensus", session_id)
-            yield json.dumps({
-                "event_id": f"evt_cog_{int(time.time())}",
-                "timestamp": int(time.time()),
-                "session_id": session_id,
-                "type": "cognition",
-                "title": "Merging",
-                "agent": "ConsensusAgent",
-                "message": "All agents have contributed their assessments. I am now passing the consolidated workspace to the **ConsensusAgent** to merge proposals, resolve any objections, and compile the final store structure.",
-                "phase": "layout_design",
-                "done": True
-            }) + "\n"
-            
-            await asyncio.sleep(1)
-            
-            consensus_runner = get_runner("consensus_agent")
-            # Detect user language and pass as explicit instruction to prevent Mandarin leakage
-            user_lang_instruction = f"LANGUAGE LOCK: The user's original request was: \"{request.input}\". Detect the language of this request. All `chat` fields in your JSON and any agent narrative MUST be written in that exact language. NEVER use Mandarin/Chinese unless the user wrote in Mandarin."
-            consensus_messages = [{'role': 'user', 'content': [{'text': f"WORKSPACE DATA:\n{json.dumps(workspace, indent=2)}\n\n{user_lang_instruction}\n\nReview the opinions and output the final update_schema JSON for the store."}]}]
-            async for chunk in execute_agent_pass(start_time, session_id, "consensus_agent", consensus_runner, consensus_messages, request):
-                if isinstance(chunk, str) and chunk.endswith("\n"): yield chunk
-                else: final_text = chunk
+                consensus_runner = get_runner("consensus_agent")
+                consensus_messages = [{'role': 'user', 'content': [{'text': f"WORKSPACE DATA:\n{json.dumps(workspace, indent=2)}\n\n{user_lang_instruction}\n\nReview the opinions and output the final update_schema JSON for the store."}]}]
+                async for chunk in execute_agent_pass(start_time, session_id, "consensus_agent", consensus_runner, consensus_messages, request):
+                    if isinstance(chunk, str) and chunk.endswith("\n"): yield chunk
+                    else: final_text = chunk
 
             # ── Phase 4: ReAct Schema Verification ────────────────────────────
             # Observe: Programmatically check if the schema output is complete.
@@ -615,7 +620,11 @@ async def run_execution_pipeline(start_time, session_id, agent_type, runner, use
             logger.error(f"JSON Decode Error in final output: {e}\nRaw JSON was: {raw_json}\nFull text was: {final_text}")
     else:
         logger.error(f"Failed to extract JSON from final output! Full text was: {final_text}")
-        chat_out = final_text
+        
+    # If chat_out is still empty (because the agent didn't include a 'chat' field in JSON and had no text preamble),
+    # fallback to the text_out or a default message so SpokespersonAgent has something to work with.
+    if not chat_out:
+        chat_out = text_out if text_out != "Execution completed." else "I have completed building the requested store structure."
 
     if action in ["batch_create", "update_schema", "update_philosophy"]:
         schema = params.get("schema")

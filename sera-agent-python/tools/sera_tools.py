@@ -282,185 +282,108 @@ async def generate_video_from_image_asset(prompt: str, image_url: str, aspect_ra
 
 async def generate_store_assets(schema: dict, progress_queue=None) -> dict:
     """
-    Generates high-fidelity image assets for all storefront components in the schema (hero, products, philosophy)
-    using Tongyi Wanxiang in a phased sequential order.
-    Replaces all image prompts in the schema with the generated base64 image data URLs.
+    Pure executor: generates image assets for all storefront components (hero, products, philosophy).
+    Each asset is attempted ONCE. Returns results with status 'success' or 'failed'.
+    All retry logic is delegated to asset_service.fallback_asset_generation.
     """
-    logger.info("🎨 Running parallel storefront asset generation tool...")
-    
+    logger.info("🎨 [AssetGen] Running storefront asset generation...")
+
     layout = schema.get("layout", [])
     tasks = []
-    
-    # 1. Identify hero prompt
-    hero_sec = None
+
+    # 1. Hero
     for section in layout:
         if section.get("type") == "hero":
-            hero_sec = section
+            props = section.setdefault("props", {})
+            hero_prompt = props.get("heroImagePrompt")
+            if not hero_prompt and props.get("title"):
+                hero_prompt = f"{props.get('title')} luxury lifestyle photography, cinematic lighting"
+            if hero_prompt and not props.get("heroImage"):
+                safe_prompt = f"{hero_prompt}, elegant abstract aesthetic, safe, empty, no people, no faces, clean architectural design"
+                tasks.append(("hero_bg", section, safe_prompt, "16:9", "Header Background Phase", "image"))
             break
-            
-    if hero_sec:
-        props = hero_sec.setdefault("props", {})
-        hero_prompt = props.get("heroImagePrompt")
-        if not hero_prompt and props.get("title"):
-            hero_prompt = f"{props.get('title')} luxury lifestyle photography, cinematic lighting"
-        # Skip if heroImage already exists
-        if hero_prompt and not props.get("heroImage"):
-            # Force safety suffix to ensure header image passes filters
-            safe_hero_prompt = f"{hero_prompt}, elegant abstract aesthetic, safe, empty, no people, no faces, clean architectural design"
-            tasks.append(("hero_bg", hero_sec, safe_hero_prompt, "16:9", "Header Background Phase", "image"))
-            
-    # 2. Identify products
-    prod_sec = None
+
+    # 2. Products
     for section in layout:
         if section.get("type") == "featured_products":
-            prod_sec = section
+            products = section.setdefault("props", {}).setdefault("products", [])
+            for idx, prod in enumerate(products):
+                if prod.get("imageUrl") or prod.get("verifiedUrl") or prod.get("pendingUrl"):
+                    continue
+                prompt = prod.get("imagePrompt") or prod.get("name")
+                tasks.append((f"prod_{idx}", prod, prompt, "1:1", "Product Images Phase", "image"))
             break
-            
-    if prod_sec:
-        products = prod_sec.setdefault("props", {}).setdefault("products", [])
-        for idx, prod in enumerate(products):
-            # Skip if image already exists
-            if prod.get("imageUrl") or prod.get("verifiedUrl") or prod.get("pendingUrl"):
-                continue
-            prompt = prod.get("imagePrompt") or prod.get("name")
-            tasks.append((f"prod_{idx}", prod, prompt, "1:1", "Product Images Phase", "image"))
-            
-    # 3. Identify philosophy
-    philo_sec = None
+
+    # 3. Philosophy
     for section in layout:
         if section.get("type") == "philosophy":
-            philo_sec = section
+            items = section.setdefault("props", {}).setdefault("items", [])
+            for idx, item in enumerate(items):
+                if item.get("imageUrl") or item.get("verifiedUrl") or item.get("pendingUrl"):
+                    continue
+                prompt = item.get("imagePrompt") or item.get("imgPrompt") or f"ethos representing {item.get('label', '')} cinematic photography"
+                tasks.append((f"philo_{idx}", item, prompt, "1:1", "Philosophy Images Phase", "image"))
             break
-            
-    if philo_sec:
-        items = philo_sec.setdefault("props", {}).setdefault("items", [])
-        for idx, item in enumerate(items):
-            # Skip if image already exists
-            if item.get("imageUrl") or item.get("verifiedUrl") or item.get("pendingUrl"):
-                continue
-            prompt = item.get("imagePrompt") or item.get("imgPrompt") or f"ethos representing {item.get('label', '')} cinematic photography"
-            tasks.append((f"philo_{idx}", item, prompt, "1:1", "Philosophy Images Phase", "image"))
-            
-    # 4. Videos: SKIPPED by default — only generated on explicit user request.
-    # Use change_landscape_video / change_vertical_video actions instead.
-    # This prevents store creation from blocking on slow/expensive video generation.
-    logger.info("⏭️ [Asset Gen] Skipping video sections (not default for new store). User can add videos explicitly.")
 
-    # ── ReAct Self-Correcting Asset Generator ────────────────────────────────────
-    # Reason → Act → Observe loop with max 2 retries per asset.
-    MAX_RETRIES = 2
-
-    def simplify_prompt(original_prompt: str, attempt: int, error_str: str) -> str:
-        """Reason step: Analyze failure and generate a safer fallback prompt."""
-        error_lower = error_str.lower()
-        
-        # If content was blocked by safety filter → strip specifics, use abstract version
-        if any(kw in error_lower for kw in ["content", "safety", "policy", "inappropriate", "rejected", "blocked"]):
-            # Remove potentially triggering descriptors
-            safe_words_to_remove = ["sexy", "nude", "violent", "blood", "weapon", "explicit", "human", "face", "person", "people"]
-            cleaned = original_prompt
-            for word in safe_words_to_remove:
-                cleaned = cleaned.replace(word, "")
-            return f"{cleaned.strip()}, elegant abstract aesthetic, minimal, clean, safe for work, no people, soft lighting"
-        
-        # If timeout or API error → use a much shorter, simpler prompt
-        if any(kw in error_lower for kw in ["timeout", "timed out", "connection", "network", "500", "503"]):
-            # Take only the first 8 words of the original prompt
-            short = " ".join(original_prompt.split()[:8])
-            return f"{short}, minimal, clean composition, professional photography"
-        
-        # Generic fallback: progressively shorten and neutralize
-        words = original_prompt.split()
-        shortened = " ".join(words[:max(5, len(words) - (attempt * 4))])
-        return f"{shortened}, clean elegant simple product photo, studio lighting, white background"
-
-    async def run_gen_with_react(task_id, target_dict, prompt, ratio, media_type):
-        """
-        ReAct loop: Reason (analyze error) → Act (retry with new prompt) → Observe (check result).
-        Retries up to MAX_RETRIES times before declaring failure.
-        """
-        current_prompt = prompt
-        last_error = None
-
-        for attempt in range(MAX_RETRIES + 1):
-            try:
-                if attempt > 0:
-                    logger.info(f"🔄 [ReAct] Retry {attempt}/{MAX_RETRIES} for '{task_id}' with simplified prompt: '{current_prompt}'")
-                    # Wait before retry — back-off to avoid rate limiting
-                    await asyncio.sleep(2 * attempt)
-                    # Emit retry progress so the UI audit log shows this step
-                    if progress_queue:
-                        await progress_queue.put({
-                            "react_event": True,
-                            "task_id": task_id,
-                            "attempt": attempt,
-                            "message": f"Retrying asset '{task_id}' (attempt {attempt + 1}/{MAX_RETRIES + 1}) with adjusted prompt..."
-                        })
-                else:
-                    logger.info(f"🎨 [ReAct] Generating {media_type} for '{task_id}': '{current_prompt}'")
-
-                # ── Act: Call the actual generation API ──────────────────────
-                if media_type == "video":
-                    base64_url = await generate_video_with_happyhorse_t2v(current_prompt, ratio, duration=4)
-                else:
-                    base64_url = await generate_image_with_imagen(current_prompt, ratio)
-
-                # ── Observe: Generation succeeded ────────────────────────────
-                asset_id = f"asset_{int(time.time()*1000)}_{hash(current_prompt)%10000}"
-                final_url = save_base64_image(base64_url, asset_id)
-
-                if task_id == "hero_bg":
-                    target_dict["props"]["heroImage"] = final_url
-                elif media_type == "video":
-                    target_dict["videoUrl"] = final_url
-                else:
-                    target_dict["imageUrl"] = final_url
-                    target_dict["verifiedUrl"] = final_url
-
-                if attempt > 0:
-                    logger.info(f"✅ [ReAct] '{task_id}' succeeded on retry {attempt}")
-                return {"itemId": task_id, "status": "success", "url": final_url, "proxy_url": final_url, "retries": attempt}
-
-            except Exception as err:
-                last_error = err
-                error_str = str(err)
-                logger.warning(f"⚠️ [ReAct] Attempt {attempt + 1} failed for '{task_id}': {error_str}")
-
-                if attempt < MAX_RETRIES:
-                    # ── Reason: Analyze why it failed and adapt ───────────────
-                    current_prompt = simplify_prompt(current_prompt, attempt + 1, error_str)
-                    logger.info(f"🧠 [ReAct] Diagnosed failure. New strategy for '{task_id}': '{current_prompt}'")
-                # else: all retries exhausted, fall through to failure handling
-
-        # ── All retries exhausted: report failure ──────────────────────────
-        logger.error(f"❌ [ReAct] All {MAX_RETRIES + 1} attempts failed for '{task_id}'. Last error: {last_error}")
-        if task_id == "hero_bg":
-            target_dict["props"]["heroImage"] = "error"
-        elif media_type == "video":
-            target_dict["videoUrl"] = "error"
-        else:
-            target_dict["imageUrl"] = "error"
-            target_dict["verifiedUrl"] = "error"
-        return {"itemId": task_id, "status": "failed", "error": str(last_error), "retries": MAX_RETRIES}
+    # 4. Videos skipped by default — only on explicit user request
+    logger.info("⏭️ [AssetGen] Skipping video sections (not default for new store).")
 
     results = []
+    results_lock = asyncio.Lock()
 
-    # Sort tasks to enforce phased execution order
-    order_map = {"Header Background Phase": 0, "Product Images Phase": 1, "Philosophy Images Phase": 2, "Video Generation Phase": 3}
-    tasks.sort(key=lambda t: order_map.get(t[4], 99))
+    async def run_single(task_id, target_dict, prompt, ratio, media_type):
+        """Execute one asset generation call. Return success or failure — no retry here."""
+        try:
+            logger.info(f"🎨 [AssetGen] Generating {media_type} for '{task_id}'")
+            base64_url = await generate_image_with_imagen(prompt, ratio)
+            asset_id = f"asset_{int(time.time()*1000)}_{abs(hash(prompt))%10000}"
+            final_url = save_base64_image(base64_url, asset_id)
 
-    for t_id, tgt, pr, rat, phase, m_type in tasks:
-        res = await run_gen_with_react(t_id, tgt, pr, rat, m_type)
-        results.append(res)
+            if task_id == "hero_bg":
+                target_dict["props"]["heroImage"] = final_url
+            else:
+                target_dict["imageUrl"] = final_url
+                target_dict["verifiedUrl"] = final_url
+
+            return {"itemId": task_id, "status": "success", "url": final_url, "prompt": prompt}
+
+        except Exception as err:
+            logger.warning(f"⚠️ [AssetGen] '{task_id}' failed: {err}")
+            # Mark target so asset_service knows to retry this item
+            if task_id == "hero_bg":
+                target_dict["props"]["heroImage"] = "error"
+            else:
+                target_dict["imageUrl"] = "error"
+                target_dict["verifiedUrl"] = "error"
+            return {"itemId": task_id, "status": "failed", "error": str(err), "prompt": prompt}
+
+    # ── Phase 0: Hero first (must complete before products appear) ────────────
+    hero_tasks = [t for t in tasks if t[4] == "Header Background Phase"]
+    other_tasks = [t for t in tasks if t[4] != "Header Background Phase"]
+
+    if hero_tasks:
+        t_id, tgt, pr, rat, phase, m_type = hero_tasks[0]
+        hero_result = await run_single(t_id, tgt, pr, rat, m_type)
+        results.append(hero_result)
         if progress_queue:
             await progress_queue.put({"results": list(results)})
 
-    return {
-        "success": True,
-        "schema": schema,
-        "results": results
-    }
+    # ── Phase 1+2: Products & Philosophy concurrently, each emits on completion ─
+    async def run_and_emit(t_id, tgt, pr, rat, m_type):
+        res = await run_single(t_id, tgt, pr, rat, m_type)
+        async with results_lock:
+            results.append(res)
+            if progress_queue:
+                await progress_queue.put({"results": list(results)})
+        return res
 
+    if other_tasks:
+        await asyncio.gather(
+            *[run_and_emit(t_id, tgt, pr, rat, m_type) for t_id, tgt, pr, rat, phase, m_type in other_tasks],
+            return_exceptions=True
+        )
+
+    return {"success": True, "schema": schema, "results": results}
 
 async def get_promotions(store_id: str = None) -> dict:
     """
