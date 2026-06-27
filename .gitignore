@@ -39,6 +39,8 @@ logs*.txt
 add-lazy-loading.js
 add_categories.py
 check-vercel.cjs
+deploy-backend-patch.cjs
+deploy-backend.js
 fix-db-urls.cjs
 fix-mongo-sera.cjs
 fix-mongo-urls.cjs
@@ -52,3 +54,27 @@ rewrite_products.py
 test-mongo.cjs
 test-mongo.js
 test-upload.js
+
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Testing
+coverage/
+
+# Production / Build
+dist/
+build/
+out/
+
+# Editor / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Python Env
+venv/
+.venv/
+env/
